@@ -1,0 +1,206 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { SearchableCombobox } from '@/components/ui/searchable-combobox'
+import { DocumentMetadata } from '@/lib/types'
+import { toast } from 'sonner'
+import { notifyDataChanged } from '@/lib/data-events'
+
+interface EditDocumentDialogProps {
+  document: DocumentMetadata
+  open: boolean
+  onClose: () => void
+  onUpdate: (doc: DocumentMetadata) => void
+}
+
+export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDocumentDialogProps) {
+  const [form, setForm] = useState({
+    company: document.company,
+    documentType: document.documentType,
+    lotStart: document.lotStart,
+    lotEnd: document.lotEnd || '',
+    product: document.product,
+    material: document.material,
+    specification: document.specification || '',
+    quantity: document.quantity?.toString() || '',
+    issueDate: document.issueDate,
+    note: document.note || '',
+  })
+
+  const [companies, setCompanies] = useState<string[]>([])
+  const [docTypes, setDocTypes] = useState<string[]>([])
+  const [materials, setMaterials] = useState<string[]>([])
+  const [specifications, setSpecifications] = useState<string[]>([])
+  const [products, setProducts] = useState<string[]>([])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    Promise.all([
+      fetch('/api/config?name=companies').then(r => r.json()),
+      fetch('/api/config?name=document-types').then(r => r.json()),
+      fetch('/api/config?name=materials').then(r => r.json()),
+      fetch('/api/config?name=specifications').then(r => r.json()),
+      fetch('/api/config?name=products').then(r => r.json()),
+    ]).then(([c, dt, m, s, p]) => {
+      setCompanies(c.data || [])
+      setDocTypes(dt.data || [])
+      setMaterials(m.data || [])
+      setSpecifications(s.data || [])
+      setProducts(p.data || [])
+    })
+  }, [open])
+
+  const set = (key: keyof typeof form) => (val: string) =>
+    setForm(prev => ({ ...prev, [key]: val }))
+
+  const handleSave = async () => {
+    if (!form.company || !form.documentType) {
+      toast.error('업체명과 문서유형은 필수입니다.')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch('/api/documents', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: document.id,
+          ...form,
+          quantity: form.quantity ? Number(form.quantity) : undefined,
+          lotEnd: form.lotEnd,
+          specification: form.specification,
+          note: form.note,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success('문서 정보가 수정되었습니다.')
+      onUpdate({ ...document, ...form, quantity: form.quantity ? Number(form.quantity) : undefined })
+      notifyDataChanged('documents')
+      onClose()
+    } catch {
+      toast.error('수정에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>문서 정보 수정</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-2">
+          {/* 필수 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm">업체명 <span className="text-destructive">*</span></Label>
+              <SearchableCombobox
+                configName="companies"
+                options={companies}
+                value={form.company}
+                onChange={set('company')}
+                onOptionsChange={setCompanies}
+                placeholder="업체 선택..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">문서유형 <span className="text-destructive">*</span></Label>
+              <SearchableCombobox
+                configName="document-types"
+                options={docTypes}
+                value={form.documentType}
+                onChange={set('documentType')}
+                onOptionsChange={setDocTypes}
+                placeholder="문서유형 선택..."
+              />
+            </div>
+          </div>
+
+          {/* LOT */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm">LOT 시작번호</Label>
+              <Input value={form.lotStart} onChange={e => set('lotStart')(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">LOT 종료번호</Label>
+              <Input value={form.lotEnd} onChange={e => set('lotEnd')(e.target.value)} />
+            </div>
+          </div>
+
+          {/* 품목 / 재질 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm">품목</Label>
+              <SearchableCombobox
+                configName="products"
+                options={products}
+                value={form.product}
+                onChange={set('product')}
+                onOptionsChange={setProducts}
+                placeholder="품목 선택..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">재질</Label>
+              <SearchableCombobox
+                configName="materials"
+                options={materials}
+                value={form.material}
+                onChange={set('material')}
+                onOptionsChange={setMaterials}
+                placeholder="재질 선택..."
+              />
+            </div>
+          </div>
+
+          {/* 사양 / 수량 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm">도금사양</Label>
+              <SearchableCombobox
+                configName="specifications"
+                options={specifications}
+                value={form.specification}
+                onChange={set('specification')}
+                onOptionsChange={setSpecifications}
+                placeholder="사양 선택..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">수량</Label>
+              <Input type="number" value={form.quantity} onChange={e => set('quantity')(e.target.value)} />
+            </div>
+          </div>
+
+          {/* 발행일 */}
+          <div className="space-y-1.5">
+            <Label className="text-sm">발행일</Label>
+            <Input value={form.issueDate} onChange={e => set('issueDate')(e.target.value)} placeholder="예: 2025-07-07 또는 25.07.07" />
+          </div>
+
+          {/* 비고 */}
+          <div className="space-y-1.5">
+            <Label className="text-sm">비고</Label>
+            <Textarea value={form.note} onChange={e => set('note')(e.target.value)} rows={2} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>취소</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? '저장 중...' : '저장'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
