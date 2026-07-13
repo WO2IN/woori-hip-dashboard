@@ -58,7 +58,21 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
   useEffect(() => { loadSidebarData() }, [loadSidebarData])
 
   useDataChanged(() => { loadSidebarData() }, [loadSidebarData])
-
+  
+  useEffect(() => { 
+    loadSidebarData() 
+  }, [loadSidebarData])
+  
+  // 문서 탐색기 페이지 진입 시 사이드바 자동 접기
+  useEffect(() => {
+    if (pathname.startsWith('/explorer')) {
+      setCollapsed(true)
+    }
+  }, [pathname, setCollapsed])
+  
+  useDataChanged(() => { 
+    loadSidebarData() 
+  }, [loadSidebarData])
   const toggleCompany = (name: string) => {
     setExpandedCompanies(prev => {
       const next = new Set(prev)

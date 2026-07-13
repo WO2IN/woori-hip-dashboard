@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Eye, Download, Trash2, MoreVertical, Calendar, Hash, Package } from 'lucide-react'
+import { Eye, Download, Trash2, MoreVertical, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -34,15 +34,54 @@ interface FileCardProps {
   viewMode?: 'grid' | 'list'
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+function formatBytes(bytes?: number) {
+  if (!bytes || bytes === 0) return '0 Bytes'
+
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+
+  return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`
 }
+
+function getDocumentTypeStyle(type: string) {
+  switch (type) {
+    case '성적서':
+      return {
+        badge: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+        icon: 'bg-blue-50 text-blue-500 dark:bg-blue-950/30',
+      }
+
+    case '도면':
+      return {
+        badge: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
+        icon: 'bg-green-50 text-green-500 dark:bg-green-950/30',
+      }
+
+    case '검사성적서':
+      return {
+        badge: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+        icon: 'bg-purple-50 text-purple-500 dark:bg-purple-950/30',
+      }
+
+    case '견적서':
+      return {
+        badge: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
+        icon: 'bg-orange-50 text-orange-500 dark:bg-orange-950/30',
+      }
+
+    default:
+      return {
+        badge: 'bg-gray-100 text-gray-700',
+        icon: 'bg-gray-50 text-gray-500',
+      }
+  }
+} 
 
 export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: FileCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const typeStyle = getDocumentTypeStyle(document.documentType)
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -65,9 +104,11 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
       <>
         <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors border-b border-border/50 group cursor-pointer"
           onClick={() => onPreview(document)}>
-          <div className="w-9 h-9 bg-red-50 dark:bg-red-950/30 rounded-lg flex items-center justify-center flex-shrink-0">
-            <FileText className="w-4.5 h-4.5 text-red-500" />
-          </div>
+            <div 
+              className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeStyle.icon}`}
+            >
+              <FileText className="w-4.5 h-4.5" />
+            </div>
           <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1fr_0.7fr] gap-4">
             <div className="md:col-span-1">
               <p className="text-sm font-medium text-foreground truncate">{document.filename}</p>
@@ -130,106 +171,210 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
 
   return (
     <>
-      <div className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-primary/30 animate-fade-in-up">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-primary/30 animate-fade-in-up">
+  
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
-          <div
-            className="w-12 h-12 bg-red-50 dark:bg-red-950/30 rounded-xl flex items-center justify-center"
+          <div 
+            className="flex-1 min-w-0"
             onClick={() => onPreview(document)}
           >
-            <FileText className="w-6 h-6 text-red-500" />
+            <p 
+              className="text-base font-semibold truncate"
+              title={document.company}
+            >
+              {document.company}
+            </p>
+
+            <Badge 
+              className={`text-sm mt-2 border-0 px-3 py-1 ${typeStyle.badge}`}
+            >
+              {document.documentType}
+            </Badge>
           </div>
+  
+  
           <DropdownMenu>
-          <DropdownMenuTrigger
-            className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md hover:bg-accent"
-          >
-            <MoreVertical className="w-3.5 h-3.5" />
-          </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuTrigger className="w-7 h-7 opacity-0 group-hover:opacity-100 inline-flex items-center justify-center rounded-md hover:bg-accent">
+              <MoreVertical className="w-3.5 h-3.5" />
+            </DropdownMenuTrigger>
+  
+            <DropdownMenuContent align="end">
+  
               <DropdownMenuItem onClick={() => onPreview(document)}>
-                <Eye className="w-3.5 h-3.5 mr-2" /> 미리보기
+                <Eye className="w-3.5 h-3.5 mr-2"/>
+                미리보기
               </DropdownMenuItem>
+  
+  
               <DropdownMenuItem
                 onClick={() => {
-                  window.location.href = `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
+                  window.location.href =
+                  `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
                 }}
               >
-                <Download className="w-3.5 h-3.5 mr-2" />
+                <Download className="w-3.5 h-3.5 mr-2"/>
                 다운로드
               </DropdownMenuItem>
+  
+  
               <DropdownMenuSeparator />
+  
+  
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className="text-destructive"
                 onClick={() => setDeleteOpen(true)}
               >
-                <Trash2 className="w-3.5 h-3.5 mr-2" /> 삭제
+                <Trash2 className="w-3.5 h-3.5 mr-2"/>
+                삭제
               </DropdownMenuItem>
+  
             </DropdownMenuContent>
           </DropdownMenu>
+  
         </div>
+  
+  
+        {/* 정보 */}
+        <div
+          onClick={() => onPreview(document)}
+          className="mt-3 space-y-3"
+        >
 
-        {/* File name */}
-        <div onClick={() => onPreview(document)}>
-          <p className="text-sm font-semibold text-foreground truncate mb-1" title={document.filename}>
-            {document.filename}
-          </p>
-          <Badge variant="secondary" className="text-xs mb-3">{document.documentType}</Badge>
-
-          <div className="space-y-1.5 mt-2">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Package className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{document.product}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Hash className="w-3 h-3 flex-shrink-0" />
-              <span className="font-mono truncate">
-                {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
-              </span>
-            </div>
-
-            {/* 비고 */}
-            {document.note && (
-              <div className="text-xs">
-                <span className="font-medium text-amber-600 mr-1">비고</span>
-                <span className="text-muted-foreground break-all">
-                  {document.note}
-                </span>
-              </div>
-            )}
-
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Calendar className="w-3 h-3 flex-shrink-0" />
-              <span>{format(new Date(document.issueDate), 'yyyy.MM.dd', { locale: ko })}</span>
-              <span className="ml-auto">{formatBytes(document.fileSize)}</span>
-            </div>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              업체
+            </p>
+            <p 
+              className="text-sm font-bold truncate"
+              title={document.company}
+            >
+              {document.company}
+            </p>
           </div>
-        </div>
 
-        {/* Action row */}
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <div>
+              <p className="text-xs text-muted-foreground">
+                제품
+              </p>
+              <p className="text-sm truncate">
+                {document.product || '-'}
+              </p>
+            </div>
+
+
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">
+                수량
+              </p>
+              <p className="text-sm font-medium">
+                {document.quantity
+                  ? `${document.quantity}개`
+                  : '-'}
+              </p>
+            </div>
+
+          </div>
+
+
+          <div>
+            <p className="text-xs text-muted-foreground">
+              LOT
+            </p>
+            <p className="text-xs font-mono">
+              {document.lotStart}
+              {document.lotEnd &&
+                ` ~ ${document.lotEnd}`}
+            </p>
+          </div>
+
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
+
+            <div>
+              <p className="text-xs text-muted-foreground">
+                발행일
+              </p>
+              <p className="text-xs">
+                {format(
+                  new Date(document.issueDate),
+                  'yyyy.MM.dd'
+                )}
+              </p>
+            </div>
+
+
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">
+                용량
+              </p>
+              <p className="text-xs">
+                {formatBytes(document.fileSize)}
+              </p>
+            </div>
+
+          </div>
+
+
+          {document.note && (
+            <div className="border-t pt-2">
+              <p className="text-[11px] text-amber-600">
+                비고
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {document.note}
+              </p>
+            </div>
+          )}
+
+        </div>
+  
+  
+        {/* 버튼 */}
         <div className="flex gap-1.5 mt-3 pt-3 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="outline" size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => onPreview(document)}>
-            <Eye className="w-3 h-3" /> 미리보기
-          </Button>
-          <a
-            href={`/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`}
-            download
+  
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-8 text-sm"
+            onClick={() => onPreview(document)}
           >
-            <Button variant="outline" size="icon" className="h-7 w-7">
-              <Download className="w-3 h-3" />
-            </Button>
-          </a>
+            <Eye className="w-3 h-3 mr-1"/>
+            미리보기
+          </Button>
+  
+  
           <Button
             variant="outline"
             size="icon"
-            className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="h-7 w-7"
+            onClick={() => {
+              window.location.href =
+              `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
+            }}
+          >
+            <Download className="w-3 h-3"/>
+          </Button>
+  
+  
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7 text-destructive"
             onClick={() => setDeleteOpen(true)}
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3 h-3"/>
           </Button>
+  
         </div>
+  
+  
       </div>
-
+  
+  
       <DeleteDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -237,6 +382,7 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
         deleting={deleting}
         filename={document.filename}
       />
+  
     </>
   )
 }

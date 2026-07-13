@@ -12,22 +12,20 @@ import { DocumentMetadata } from '@/lib/types'
 import { FileCard } from '@/components/explorer/file-card'
 import { FilePreviewDrawer } from '@/components/explorer/file-preview-drawer'
 import { useDataChanged } from '@/lib/data-events'
+import { MultiSelect } from '@/components/ui/multi-select'
 
 interface SearchViewProps {
   initialQuery?: string
 }
-
-const CURRENT_YEAR = new Date().getFullYear()
-const YEARS = Array.from({ length: 10 }, (_, i) => String(CURRENT_YEAR - i))
-
 export function SearchView({ initialQuery }: SearchViewProps) {
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
+  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
+  const [selectedSpecifications, setSelectedSpecifications] = useState<string[]>([])
   const [query, setQuery] = useState(initialQuery || '')
-  const [company, setCompany] = useState('전체')
-  const [docType, setDocType] = useState('전체')
-  const [year, setYear] = useState('전체')
-  const [product, setProduct] = useState('전체')
-  const [material, setMaterial] = useState('전체')
-  const [specification, setSpecification] = useState('전체')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [lotNumber, setLotNumber] = useState('')
 
   const [companies, setCompanies] = useState<string[]>([])
@@ -64,18 +62,42 @@ export function SearchView({ initialQuery }: SearchViewProps) {
     setSearched(true)
     const params = new URLSearchParams()
     if (query) params.set('query', query)
-    if (company && company !== '전체') params.set('company', company)
-    if (docType && docType !== '전체') params.set('documentType', docType)
-    if (year && year !== '전체') params.set('year', year)
-    if (product && product !== '전체') params.set('product', product)
-    if (material && material !== '전체') params.set('material', material)
-    if (specification && specification !== '전체') params.set('specification', specification)
+      selectedCompanies.forEach(company => {
+        params.append('company', company)
+      })
+      selectedDocTypes.forEach(value => {
+        params.append('documentType', value)
+      })
+      
+      selectedProducts.forEach(value => {
+        params.append('product', value)
+      })
+      
+      selectedMaterials.forEach(value => {
+        params.append('material', value)
+      })
+      
+      selectedSpecifications.forEach(value => {
+        params.append('specification', value)
+      })
+    if (startDate) params.set('startDate', startDate)
+    if (endDate) params.set('endDate', endDate)
     if (lotNumber) params.set('lotNumber', lotNumber)
     const res = await fetch(`/api/documents?${params.toString()}`, { cache: 'no-store' })
     const data = await res.json()
     setResults(data.data || [])
     setLoading(false)
-  }, [query, company, docType, year, product, material, specification, lotNumber])
+  }, [
+    query,
+    selectedCompanies,
+    selectedDocTypes,
+    startDate,
+    endDate,
+    selectedProducts,
+    selectedMaterials,
+    selectedSpecifications,
+    lotNumber,
+  ])
 
   useDataChanged((scope) => {
     if (scope === 'all' || scope === 'config') loadConfig()
@@ -87,27 +109,77 @@ export function SearchView({ initialQuery }: SearchViewProps) {
   }, []) // eslint-disable-line
 
   const handleReset = () => {
+    setSelectedCompanies([])
     setQuery('')
-    setCompany('전체')
-    setDocType('전체')
-    setYear('전체')
-    setProduct('전체')
-    setMaterial('전체')
-    setSpecification('전체')
+    setStartDate('')
+    setEndDate('')
+    setSelectedMaterials([])
+    setSelectedDocTypes([])
+    setSelectedProducts([])
+    setSelectedSpecifications([])
     setLotNumber('')
     setResults([])
     setSearched(false)
   }
 
   const activeFilters = [
-    company !== '전체' && company,
-    docType !== '전체' && docType,
-    year !== '전체' && year,
-    product !== '전체' && product,
-    material !== '전체' && material,
-    specification !== '전체' && specification,
-    lotNumber,
-  ].filter(Boolean) as string[]
+    ...selectedCompanies.map(value => ({
+      key: `company-${value}`,
+      label: value,
+      type: 'company',
+      onRemove: () =>
+        setSelectedCompanies(prev => prev.filter(v => v !== value)),
+    })),
+  
+    ...selectedDocTypes.map(value => ({
+      key: `documentType-${value}`,
+      label: value,
+      type: 'documentType',
+      onRemove: () =>
+        setSelectedDocTypes(prev => prev.filter(v => v !== value)),
+    })),
+  
+    ...selectedProducts.map(value => ({
+      key: `product-${value}`,
+      label: value,
+      type: 'product',
+      onRemove: () =>
+        setSelectedProducts(prev => prev.filter(v => v !== value)),
+    })),
+  
+    ...selectedMaterials.map(value => ({
+      key: `material-${value}`,
+      label: value,
+      type: 'material',
+      onRemove: () =>
+        setSelectedMaterials(prev => prev.filter(v => v !== value)),
+    })),
+  
+    ...selectedSpecifications.map(value => ({
+      key: `specification-${value}`,
+      label: value,
+      type: 'specification',
+      onRemove: () =>
+        setSelectedSpecifications(prev => prev.filter(v => v !== value)),
+    })),
+  ]
+
+  const filterColors: Record<string, string> = {
+    company:
+      'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950 dark:text-blue-300',
+  
+    documentType:
+      'bg-violet-100 text-violet-700 hover:bg-violet-200 dark:bg-violet-950 dark:text-violet-300',
+  
+    product:
+      'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950 dark:text-green-300',
+  
+    material:
+      'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-950 dark:text-orange-300',
+  
+    specification:
+      'bg-pink-100 text-pink-700 hover:bg-pink-200 dark:bg-pink-950 dark:text-pink-300',
+  }
 
   const handleDeleteDoc = (id: string) => {
     setResults(prev => prev.filter(d => d.id !== id))
@@ -152,87 +224,93 @@ export function SearchView({ initialQuery }: SearchViewProps) {
         {/* Filters */}
         {filtersOpen && (
           <div className="space-y-4 animate-fade-in-up">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">업체명</Label>
-                <Select value={company} onValueChange={setCompany}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">문서유형</Label>
-                <Select value={docType} onValueChange={setDocType}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {docTypes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">연도</Label>
-                <Select value={year} onValueChange={setYear}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {YEARS.map(y => <SelectItem key={y} value={y}>{y}년</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">품목</Label>
-                <Select value={product} onValueChange={setProduct}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {products.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">재질</Label>
-                <Select value={material} onValueChange={setMaterial}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {materials.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">도금사양</Label>
-                <Select value={specification} onValueChange={setSpecification}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="전체" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="전체">전체</SelectItem>
-                    {specifications.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">LOT 번호</Label>
-                <Input
-                  value={lotNumber}
-                  onChange={e => setLotNumber(e.target.value)}
-                  placeholder="LOT 번호 입력"
-                  className="h-9"
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSearch()
-                  }}
-                />
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* 1행: 업체명 / 문서유형 / 품목 / LOT 번호 */}
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">업체명</Label>
+              <MultiSelect
+                options={companies}
+                value={selectedCompanies}
+                onChange={setSelectedCompanies}
+              />
             </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">문서유형</Label>
+              <MultiSelect
+                options={docTypes}
+                value={selectedDocTypes}
+                onChange={setSelectedDocTypes}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">품목</Label>
+              <MultiSelect
+                options={products}
+                value={selectedProducts}
+                onChange={setSelectedProducts}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">재질</Label>
+              <MultiSelect
+                options={materials}
+                value={selectedMaterials}
+                onChange={setSelectedMaterials}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">도금사양</Label>
+              <MultiSelect
+                options={specifications}
+                value={selectedSpecifications}
+                onChange={setSelectedSpecifications}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">발행 시작일</Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                className="h-9 w-full"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">발행 종료일</Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                className="h-9 w-full"
+              />
+            </div>
+          </div>
 
             {/* Active filters */}
             {activeFilters.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {[...new Set(activeFilters)].map(f => (
-                  <Badge key={f} variant="secondary" className="text-xs gap-1">
-                    {f}
+                {activeFilters.map(filter => (
+                  <Badge
+                    key={filter.key}
+                    className={`text-xs gap-1 border-0 ${filterColors[filter.type]}`}
+                  >
+                    {filter.label}
+
+                    <button
+                      type="button"
+                      onClick={filter.onRemove}
+                      className="ml-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                      aria-label={`${filter.label} 필터 제거`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>

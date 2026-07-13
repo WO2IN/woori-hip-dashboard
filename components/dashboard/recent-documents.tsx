@@ -50,7 +50,16 @@ export function RecentDocuments({ documents }: RecentDocumentsProps) {
             </thead>
             <tbody className="divide-y divide-border">
               {documents.map(doc => (
-                <tr key={doc.id} className="hover:bg-muted/30 transition-colors group">
+                <tr
+                key={doc.id}
+                className="
+                  hover:bg-muted/30
+                  transition-colors
+                  group
+                  cursor-pointer
+                "
+                onClick={() => setPreview(doc)}
+              >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 bg-red-50 dark:bg-red-950/30 rounded-lg flex items-center justify-center flex-shrink-0">

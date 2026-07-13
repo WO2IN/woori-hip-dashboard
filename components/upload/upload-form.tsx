@@ -174,10 +174,30 @@ export function UploadForm() {
           onChange={e => handleFileDrop(e.target.files)}
         />
         {file ? (
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-              <FileText className="w-7 h-7 text-green-600" />
-            </div>
+  <div className="flex flex-col items-center gap-3">
+
+    {/* PDF 미리보기 */}
+    <div className="
+        w-[380px]
+        h-[450]
+        border
+        rounded-xl
+        overflow-hidden
+        bg-white
+        shadow-md
+      ">
+      <iframe
+        src={URL.createObjectURL(file)}
+        className="w-full h-full"
+        title="PDF 미리보기"
+      />
+    </div>
+
+    <div>
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {formatBytes(file.size)}
+      </p>
+    </div>
             <div>
               <p className="font-semibold text-foreground text-sm">{file.name}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{formatBytes(file.size)}</p>

@@ -5,23 +5,47 @@ import { SearchFilters } from '@/lib/types'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const company = searchParams.get('company') || ''
-  const documentType = searchParams.get('documentType') || ''
-  const year = searchParams.get('year') || ''
-  const product = searchParams.get('product') || ''
-  const material = searchParams.get('material') || ''
-  const specification = searchParams.get('specification') || ''
+  const companies = searchParams.getAll('company')
+  const documentTypes = searchParams.getAll('documentType')
+  const products = searchParams.getAll('product')
+  const materials = searchParams.getAll('material')
+  const specifications = searchParams.getAll('specification')
+  
+  const startDate = searchParams.get('startDate') || ''
+  const endDate = searchParams.get('endDate') || ''
   const lotNumber = searchParams.get('lotNumber') || ''
   const query = searchParams.get('query') || ''
 
   let docs = readMetadata()
 
-  if (company) docs = docs.filter(d => d.company === company)
-  if (documentType) docs = docs.filter(d => d.documentType === documentType)
-  if (year) docs = docs.filter(d => d.year === year)
-  if (product) docs = docs.filter(d => d.product === product)
-  if (material) docs = docs.filter(d => d.material === material)
-  if (specification) docs = docs.filter(d => d.specification === specification)
+  if (companies.length > 0) {
+    docs = docs.filter(d => d.company && companies.includes(d.company))
+  }
+  
+  if (documentTypes.length > 0) {
+    docs = docs.filter(d =>
+      d.documentType && documentTypes.includes(d.documentType)
+    )
+  }
+  
+  if (products.length > 0) {
+    docs = docs.filter(d =>
+      d.product && products.includes(d.product)
+    )
+  }
+  
+  if (materials.length > 0) {
+    docs = docs.filter(d =>
+      d.material && materials.includes(d.material)
+    )
+  }
+  
+  if (specifications.length > 0) {
+    docs = docs.filter(d =>
+      d.specification && specifications.includes(d.specification)
+    )
+  }
+
   if (lotNumber) {
     docs = docs.filter(d =>
       d.lotStart?.includes(lotNumber) || d.lotEnd?.includes(lotNumber)
