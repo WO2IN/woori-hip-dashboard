@@ -105,8 +105,8 @@ export function SearchView({ initialQuery }: SearchViewProps) {
   }, [loadConfig, searched, handleSearch])
 
   useEffect(() => {
-    if (initialQuery) handleSearch()
-  }, []) // eslint-disable-line
+    handleSearch()
+  }, [handleSearch])
 
   const handleReset = () => {
     setSelectedCompanies([])

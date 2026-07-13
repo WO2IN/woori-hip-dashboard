@@ -1,7 +1,6 @@
 'use client'
 
 import { Check, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -38,14 +37,11 @@ export function MultiSelect({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="h-9 w-full justify-between font-normal"
-        >
-          <span className="truncate">{displayText}</span>
-          <ChevronDown className="w-4 h-4 opacity-50" />
-        </Button>
+      <PopoverTrigger
+        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal"
+      >
+        <span className="truncate">{displayText}</span>
+        <ChevronDown className="w-4 h-4 opacity-50" />
       </PopoverTrigger>
 
       <PopoverContent
