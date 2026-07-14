@@ -19,6 +19,34 @@ type Level = 'docType' | 'year' | 'files'
 type SortField = 'issueDate'
 type SortDir = 'asc' | 'desc'
 
+function getInitialConsonant(name: string) {
+  const firstChar = name.charCodeAt(0)
+
+  if (firstChar < 0xac00 || firstChar > 0xd7a3) {
+    return '#'
+  }
+
+  const index = Math.floor((firstChar - 0xac00) / 588)
+
+  const initials = [
+    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ',
+    'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ',
+    'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+  ]
+
+  const initial = initials[index]
+
+  const normalize: Record<string, string> = {
+    'ㄲ': 'ㄱ',
+    'ㄸ': 'ㄷ',
+    'ㅃ': 'ㅂ',
+    'ㅆ': 'ㅅ',
+    'ㅉ': 'ㅈ',
+  }
+
+  return normalize[initial] || initial
+}
+
 interface ExplorerViewProps {
   initialCompany?: string
   initialDocType?: string
@@ -33,6 +61,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   // Sidebar state
   const [companySearch, setCompanySearch] = useState('')
   const [consonant, setConsonant] = useState<string | null>(null)
+  const [selectedInitial, setSelectedInitial] = useState<string | null>(null)
   const companySearchRef = useRef<HTMLInputElement>(null)
 
   // Navigation — 세 상태를 하나의 객체로 관리하여 항상 원자적으로 업데이트
@@ -95,6 +124,17 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
       return passConsonant && passSearch
     })
   }, [companies, consonant, companySearch])
+
+  const companiesByInitial = useMemo(() => {
+    return FILTER_CONSONANTS
+      .map(initial => ({
+        initial,
+        companies: companies.filter(
+          company => getInitialConsonant(company) === initial
+        ),
+      }))
+      .filter(group => group.companies.length > 0)
+  }, [companies])
 
   // --- Content level ---
   const level: Level | null = selectedCompany
@@ -327,13 +367,80 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-5">
-          {!selectedCompany ? (
-            // No selection
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-3">
-              <Folder className="w-16 h-16 opacity-20" />
-              <p className="text-sm">왼쪽에서 업체를 선택하세요</p>
-            </div>
-          ) : loading ? (
+        {!selectedCompany ? (
+          selectedInitial ? (
+            <>
+              {/* 선택한 초성에 해당하는 업체 목록 */}
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  onClick={() => setSelectedInitial(null)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  초성
+                </button>
+
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+
+                <span className="text-sm font-semibold">
+                  {selectedInitial}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {companies
+                  .filter(company => getInitialConsonant(company) === selectedInitial)
+                  .map(company => (
+                    <button
+                      key={company}
+                      onClick={() => handleSelectCompany(company)}
+                      className="bg-card border border-border rounded-2xl p-6 text-left hover:border-primary/40 hover:shadow-md transition-all"
+                    >
+                      <div className="w-14 h-14 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex items-center justify-center mb-4">
+                        <FolderOpen className="w-7 h-7 text-amber-500" />
+                      </div>
+
+                      <p className="font-semibold text-base text-foreground truncate">
+                        {company}
+                      </p>
+
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {docCount[company] || 0}개 문서
+                      </p>
+                    </button>
+                  ))}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* 초성 폴더 목록 */}
+              <p className="text-xs text-muted-foreground mb-4">
+                {companiesByInitial.length}개 초성
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {companiesByInitial.map(group => (
+                  <button
+                    key={group.initial}
+                    onClick={() => setSelectedInitial(group.initial)}
+                    className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/40 hover:shadow-sm transition-all"
+                  >
+                    <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/30 rounded-lg flex items-center justify-center mb-2.5">
+                      <Folder className="w-5 h-5 text-blue-500" />
+                    </div>
+
+                    <p className="font-bold text-lg text-foreground">
+                      {group.initial}
+                    </p>
+
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {group.companies.length}개 업체
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </>
+          )
+        ) : loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
             </div>

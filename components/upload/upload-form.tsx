@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Upload, X, FileText, CheckCircle, CloudUpload, FolderOpen } from 'lucide-react'
+import { Upload, X, CheckCircle, CloudUpload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,10 +18,32 @@ function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
+function normalizeDate(date: string) {
+  if (!date) return ''
+
+  // 2026-1-29, 2026-01-29
+  if (date.includes('-')) {
+    const [year, month, day] = date.split('-')
+    if (year && month && day) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+    }
+  }
+
+  // 25.07.07 같은 형식 대응
+  if (date.includes('.')) {
+    const [y, m, d] = date.split('.')
+    const year = y.length === 2 ? `20${y}` : y
+    return `${year}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
+  }
+
+  return date
+}
+
 export function UploadForm() {
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [previewUrl, setPreviewUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
 
@@ -63,6 +85,20 @@ export function UploadForm() {
 
   useEffect(() => { loadConfig() }, [loadConfig])
 
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl('')
+      return
+    }
+
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+
+    return () => {
+      URL.revokeObjectURL(url)
+    }
+  }, [file])
+
   useDataChanged((scope) => {
     if (scope === 'all' || scope === 'config') loadConfig()
   }, [loadConfig])
@@ -90,10 +126,6 @@ export function UploadForm() {
     handleFileDrop(e.dataTransfer.files)
   }
 
-  // 저장 위치 미리보기
-  const year = issueDate ? issueDate.split('-')[0] : null
-  const showPathPreview = company || documentType
-
   const handleSubmit = async () => {
     if (!file) { toast.error('파일을 선택해주세요.'); return }
     if (!company) { toast.error('업체명을 입력해주세요.'); return }
@@ -119,7 +151,9 @@ export function UploadForm() {
       if (material) formData.append('material', material)
       if (specification) formData.append('specification', specification)
       if (quantity) formData.append('quantity', quantity)
-      if (issueDate) formData.append('issueDate', issueDate)
+      if (issueDate) {
+        formData.append('issueDate', normalizeDate(issueDate))
+      }
       if (note) formData.append('note', note)
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -178,20 +212,22 @@ export function UploadForm() {
 
     {/* PDF 미리보기 */}
     <div className="
-        w-[380px]
-        h-[450]
-        border
-        rounded-xl
-        overflow-hidden
-        bg-white
-        shadow-md
-      ">
+      w-[380px]
+      h-[450px]
+      border
+      rounded-xl
+      overflow-hidden
+      bg-white
+      shadow-md
+  ">
+    {previewUrl && (
       <iframe
-        src={URL.createObjectURL(file)}
+        src={previewUrl}
         className="w-full h-full"
         title="PDF 미리보기"
       />
-    </div>
+    )}
+  </div>
 
     <div>
       <p className="text-xs text-muted-foreground mt-0.5">
@@ -354,42 +390,6 @@ export function UploadForm() {
             </div>
           </div>
         </div>
-
-        {/* 저장 위치 미리보기 */}
-        {showPathPreview && (
-          <div className="px-5 py-3 border-t border-border bg-muted/20">
-            <div className="flex items-start gap-2">
-              <FolderOpen className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground mb-1">저장 위치</p>
-                <p className="text-xs text-foreground font-mono leading-relaxed">
-                  <span className="text-muted-foreground">storage</span>
-                  {company && (
-                    <>
-                      <span className="text-muted-foreground"> / </span>
-                      <span className="text-foreground font-semibold">{company}</span>
-                    </>
-                  )}
-                  {documentType && (
-                    <>
-                      <span className="text-muted-foreground"> / </span>
-                      <span className="text-foreground font-semibold">{documentType}</span>
-                    </>
-                  )}
-                  {year && (
-                    <>
-                      <span className="text-muted-foreground"> / </span>
-                      <span className="text-foreground font-semibold">{year}</span>
-                    </>
-                  )}
-                  {!year && issueDate === '' && (
-                    <span className="text-muted-foreground"> / {new Date().getFullYear()}</span>
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 액션 */}
         <div className="px-5 py-4 border-t border-border flex gap-3 bg-muted/10">

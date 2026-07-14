@@ -37,22 +37,6 @@
     "createdAt": "2026-07-08T07:18:56.420Z"
   },
   {
-    "id": "c9e9a1c6-1181-49e5-9bd3-2dd91029c081",
-    "filename": "2026129_WR-0456.pdf",
-    "originalName": "20260129_268-60도면.pdf",
-    "company": "캠텍",
-    "documentType": "도면",
-    "lotStart": "WR-0456",
-    "product": "268-60",
-    "material": "",
-    "specification": "Au 0.254㎛ min",
-    "issueDate": "2026-1-29",
-    "fileSize": 533912,
-    "year": "2026",
-    "storagePath": "캠텍/도면/2026/2026129_WR-0456.pdf",
-    "createdAt": "2026-07-08T08:17:14.345Z"
-  },
-  {
     "id": "5d01f124-dc17-4479-b810-9e0c54d0a0ee",
     "filename": "20260611_20260611-1_20260611-32.pdf",
     "originalName": "260611_우리하이피_캠텍 0.1778 19.05 1.566.pdf",
@@ -172,5 +156,21 @@
     "year": "2024",
     "storagePath": "피티씨/성적서/2024/20241122_20241122-1_20241122-2.pdf",
     "createdAt": "2026-07-09T08:19:15.333Z"
+  },
+  {
+    "id": "605d3ebc-167f-45c0-8262-cde7b398e4de",
+    "filename": "20260129_WR-0456.pdf",
+    "originalName": "20260129_268-60도면.pdf",
+    "company": "캠텍",
+    "documentType": "도면",
+    "lotStart": "WR-0456",
+    "product": "268-60",
+    "material": "STS305 BA",
+    "specification": "Au 0.254㎛ min",
+    "issueDate": "2026-01-29",
+    "fileSize": 533912,
+    "year": "2026",
+    "storagePath": "캠텍/도면/2026/20260129_WR-0456.pdf",
+    "createdAt": "2026-07-13T05:09:02.798Z"
   }
 ]

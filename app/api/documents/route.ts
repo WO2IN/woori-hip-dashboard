@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readMetadata, updateMetadata } from '@/lib/storage'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
-import { SearchFilters } from '@/lib/types'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -17,6 +16,21 @@ export async function GET(req: NextRequest) {
   const query = searchParams.get('query') || ''
 
   let docs = readMetadata()
+
+  // 발행일 범위 필터
+  if (startDate || endDate) {
+    docs = docs.filter(d => {
+      if (!d.issueDate) return false
+
+      // 2024.11.22 → 2024-11-22
+      const issueDate = d.issueDate.replace(/\./g, '-')
+
+      if (startDate && issueDate < startDate) return false
+      if (endDate && issueDate > endDate) return false
+
+      return true
+    })
+  }
 
   if (companies.length > 0) {
     docs = docs.filter(d => d.company && companies.includes(d.company))

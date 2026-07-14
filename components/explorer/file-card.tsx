@@ -1,7 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, Download, Trash2, MoreVertical, FileText } from 'lucide-react'
+import { toast } from 'sonner'
+import {
+  Eye,
+  Download,
+  Trash2,
+  MoreVertical,
+  FileText,
+  CheckSquare,
+  Square
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -24,7 +33,6 @@ import {
 import { DocumentMetadata } from '@/lib/types'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
 
 interface FileCardProps {
@@ -32,6 +40,8 @@ interface FileCardProps {
   onPreview: (doc: DocumentMetadata) => void
   onDelete: (id: string) => void
   viewMode?: 'grid' | 'list'
+  selected?: boolean
+  onSelect?: () => void
 }
 
 function formatBytes(bytes?: number) {
@@ -78,7 +88,14 @@ function getDocumentTypeStyle(type: string) {
   }
 } 
 
-export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: FileCardProps) {
+export function FileCard({
+  document,
+  onPreview,
+  onDelete,
+  viewMode = 'grid',
+  selected = false,
+  onSelect,
+}: FileCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const typeStyle = getDocumentTypeStyle(document.documentType)
@@ -171,69 +188,85 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
 
   return (
     <>
-      <div className="bg-card border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-all group cursor-pointer hover:border-primary/30 animate-fade-in-up">
+      <div
+        className={`
+          bg-card rounded-xl p-5 shadow-sm hover:shadow-md transition-all group cursor-pointer animate-fade-in-up
+          ${selected
+            ? 'border-2 border-primary ring-2 ring-primary/20'
+            : 'border border-border hover:border-primary/30'
+          }
+        `}
+      >
   
         {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div 
-            className="flex-1 min-w-0"
-            onClick={() => onPreview(document)}
-          >
-            <p 
-              className="text-base font-semibold truncate"
-              title={document.company}
-            >
-              {document.company}
-            </p>
+        <div className="flex items-start justify-between">
 
-            <Badge 
-              className={`text-sm mt-2 border-0 px-3 py-1 ${typeStyle.badge}`}
+        {/* 체크박스 */}
+        <button
+          type="button"
+          className="
+            flex
+            items-center
+            justify-center
+            w-5
+            h-5
+            mt-1
+            shrink-0
+            rounded-md
+            hover:bg-muted
+          "
+          onClick={(e) => {
+            e.stopPropagation()
+            onSelect?.()
+          }}
+        >
+          {selected ? (
+            <CheckSquare className="w-5 h-5 text-primary" />
+          ) : (
+            <Square className="w-5 h-5 text-muted-foreground" />
+          )}
+        </button>
+
+
+        {/* 메뉴 */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="w-7 h-7 opacity-0 group-hover:opacity-100 inline-flex items-center justify-center rounded-md hover:bg-accent">
+            <MoreVertical className="w-3.5 h-3.5" />
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onPreview(document)}>
+              <Eye className="w-3.5 h-3.5 mr-2"/>
+              미리보기
+            </DropdownMenuItem>
+
+
+            <DropdownMenuItem
+              onClick={() => {
+                window.location.href =
+                `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
+              }}
             >
-              {document.documentType}
-            </Badge>
-          </div>
-  
-  
-          <DropdownMenu>
-            <DropdownMenuTrigger className="w-7 h-7 opacity-0 group-hover:opacity-100 inline-flex items-center justify-center rounded-md hover:bg-accent">
-              <MoreVertical className="w-3.5 h-3.5" />
-            </DropdownMenuTrigger>
-  
-            <DropdownMenuContent align="end">
-  
-              <DropdownMenuItem onClick={() => onPreview(document)}>
-                <Eye className="w-3.5 h-3.5 mr-2"/>
-                미리보기
-              </DropdownMenuItem>
-  
-  
-              <DropdownMenuItem
-                onClick={() => {
-                  window.location.href =
-                  `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
-                }}
-              >
-                <Download className="w-3.5 h-3.5 mr-2"/>
-                다운로드
-              </DropdownMenuItem>
-  
-  
-              <DropdownMenuSeparator />
-  
-  
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => setDeleteOpen(true)}
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-2"/>
-                삭제
-              </DropdownMenuItem>
-  
-            </DropdownMenuContent>
-          </DropdownMenu>
-  
+              <Download className="w-3.5 h-3.5 mr-2"/>
+              다운로드
+            </DropdownMenuItem>
+
+
+            <DropdownMenuSeparator />
+
+
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-2"/>
+              삭제
+            </DropdownMenuItem>
+
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         </div>
-  
   
         {/* 정보 */}
         <div
@@ -241,17 +274,26 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
           className="mt-3 space-y-3"
         >
 
-          <div>
-            <p className="text-xs text-muted-foreground">
-              업체
-            </p>
+        <div>
+          <p className="text-xs text-muted-foreground">
+            업체 :
+          </p>
+
+          <div className="flex items-center gap-2">
             <p 
-              className="text-sm font-bold truncate"
+              className="text-base font-bold truncate"
               title={document.company}
             >
               {document.company}
             </p>
+
+            <Badge 
+              className={`text-sm border-0 px-3 py-1 ${typeStyle.badge}`}
+            >
+              {document.documentType}
+            </Badge>
           </div>
+        </div>
 
 
           <div className="grid grid-cols-2 gap-3">
@@ -272,7 +314,7 @@ export function FileCard({ document, onPreview, onDelete, viewMode = 'grid' }: F
               </p>
               <p className="text-sm font-medium">
                 {document.quantity
-                  ? `${document.quantity}개`
+                  ? `${document.quantity}Kg`
                   : '-'}
               </p>
             </div>

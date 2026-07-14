@@ -95,25 +95,28 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
           <div className="flex-1 overflow-auto">
             {/* PDF Preview */}
             <div className="p-4">
-              <button
-                type="button"
-                onClick={() => setFullViewOpen(true)}
-                className="relative w-full bg-muted/40 rounded-xl overflow-hidden border border-border group cursor-pointer text-left"
-                style={{ height: '340px' }}
-                title="클릭하여 크게 보기"
+              <div
+              className="group relative w-full bg-muted/40 rounded-xl overflow-hidden border border-border"
+              style={{ height: '340px' }}
               >
                 <iframe
                   src={fileUrl}
-                  className="w-full h-full pointer-events-none"
+                  className="w-full h-full"
                   title={document.filename}
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/25 transition-colors">
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/95 rounded-lg px-3 py-1.5 text-xs font-medium shadow-md flex items-center gap-1.5">
-                    <Maximize2 className="w-3.5 h-3.5" />
-                    크게 보기
-                  </span>
-                </div>
-              </button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="absolute top-15 right-5 z-10
+                            gap-2 px-5 py-2.5 h-auto text-sm
+                            opacity-0 group-hover:opacity-100
+                            transition-opacity duration-200"
+                  onClick={() => setFullViewOpen(true)}
+                >
+                  <Maximize2 className="w-4 h-4" />
+                  크게 보기
+                </Button>
+              </div>
             </div>
 
             {/* Metadata */}
