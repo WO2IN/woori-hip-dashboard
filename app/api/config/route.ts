@@ -17,17 +17,26 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const { name, value } = body
+
   if (!name || !VALID_CONFIGS.includes(name) || !value?.trim()) {
-    return NextResponse.json({ error: '유효하지 않은 요청입니다.' }, { status: 400 })
+    return NextResponse.json(
+      { error: '유효하지 않은 요청입니다.' },
+      { status: 400 }
+    )
   }
+
   const data = readConfig(name)
   const trimmed = value.trim()
-  if (data.includes(trimmed)) {
-    return NextResponse.json({ error: '이미 존재하는 항목입니다.' }, { status: 409 })
-  }
-  data.push(trimmed)
-  writeConfig(name, data)
-  return NextResponse.json({ data })
+
+  // 기존 값 제거 후 맨 앞으로 이동
+  const updated = [
+    trimmed,
+    ...data.filter(v => v !== trimmed),
+  ]
+
+  writeConfig(name, updated)
+
+  return NextResponse.json({ data: updated })
 }
 
 export async function DELETE(req: NextRequest) {

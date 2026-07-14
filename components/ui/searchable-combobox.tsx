@@ -10,27 +10,25 @@ import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
 
 interface SearchableComboboxProps {
-  /** config 이름 (예: 'companies', 'document-types') — 새 값 추가 API 호출에 사용 */
   configName: string
-  /** 현재 목록 */
   options: string[]
-  /** 현재 선택 값 */
+
+  recentOptions?: string[]
+
   value: string
   onChange: (value: string) => void
-  /** 새 값이 추가됐을 때 부모 목록 갱신 */
   onOptionsChange?: (newOptions: string[]) => void
   placeholder?: string
   label?: string
   className?: string
-  /** 필수 여부 — 별표 표시에만 사용 */
   required?: boolean
-  /** clearable */
   clearable?: boolean
 }
 
 export function SearchableCombobox({
   configName,
   options,
+  recentOptions = [],
   value,
   onChange,
   onOptionsChange,
@@ -55,9 +53,16 @@ export function SearchableCombobox({
   }, [open])
 
   const filtered = useMemo(() => {
-    if (!query.trim()) return options
-    return options.filter(o => chosungSearch(o, query.trim()))
-  }, [options, query])
+    // 검색어가 없으면 최근 사용 항목 5개만 표시
+    if (!query.trim()) {
+      return recentOptions.slice(0, 5)
+    }
+  
+    // 검색하면 전체 options에서 검색
+    return options.filter(o =>
+      chosungSearch(o, query.trim())
+    )
+  }, [options, recentOptions, query])
 
   const trimmed = query.trim()
   const exactMatch = options.some(o => o.toLowerCase() === trimmed.toLowerCase())
@@ -74,37 +79,13 @@ export function SearchableCombobox({
     setOpen(false)
   }
 
-  const handleCreate = useCallback(async () => {
-    if (!trimmed || adding) return
-    setAdding(true)
-    try {
-      const res = await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: configName, value: trimmed }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        // 이미 존재하면 그냥 선택
-        if (res.status === 409) {
-          onChange(trimmed)
-          setOpen(false)
-          return
-        }
-        throw new Error(data.error)
-      }
-      onOptionsChange?.(data.data)
-      onChange(trimmed)
-      notifyDataChanged('config')
-      toast.success(`"${trimmed}" 항목이 추가되었습니다.`)
-      setOpen(false)
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : '추가에 실패했습니다.')
-    } finally {
-      setAdding(false)
-    }
-  }, [trimmed, adding, configName, onChange, onOptionsChange])
-
+  const handleCreate = () => {
+    if (!trimmed) return
+  
+    onChange(trimmed)
+    setOpen(false)
+  }
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.nativeEvent.isComposing) return
     if (e.key === 'ArrowDown') {

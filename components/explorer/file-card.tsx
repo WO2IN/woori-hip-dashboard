@@ -31,9 +31,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { DocumentMetadata } from '@/lib/types'
+import { notifyDataChanged } from '@/lib/data-events'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { notifyDataChanged } from '@/lib/data-events'
 
 interface FileCardProps {
   document: DocumentMetadata
@@ -52,6 +52,24 @@ function formatBytes(bytes?: number) {
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
 
   return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`
+}
+
+function normalizeDate(value?: string | null) {
+  if (!value) return null
+
+  const date = value.replace(/\./g, '-')
+
+  // 20260713
+  if (/^\d{8}$/.test(date)) {
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`
+  }
+
+  // 2026-07-13
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date
+  }
+
+  return null
 }
 
 function getDocumentTypeStyle(type: string) {
@@ -98,6 +116,9 @@ export function FileCard({
 }: FileCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const formattedIssueDate = normalizeDate(document.issueDate)
+
   const typeStyle = getDocumentTypeStyle(document.documentType)
 
   const handleDelete = async () => {
@@ -149,9 +170,14 @@ export function FileCard({
             </div>
             <div className="hidden md:flex items-center justify-center">
               <span className="text-xs text-muted-foreground">
-                {format(new Date(document.issueDate), 'yyyy.MM.dd')}
-              </span>
-            </div>
+                {formattedIssueDate
+                  ? format(
+                      new Date(formattedIssueDate),
+                      'yyyy.MM.dd'
+                    )
+                  : '-'}
+                </span>
+              </div>
 
             <div className="hidden md:flex items-center justify-center">
               <span className="text-xs text-muted-foreground">
@@ -341,10 +367,12 @@ export function FileCard({
                 발행일
               </p>
               <p className="text-xs">
-                {format(
-                  new Date(document.issueDate),
-                  'yyyy.MM.dd'
-                )}
+                {formattedIssueDate
+                  ? format(
+                      new Date(formattedIssueDate),
+                      'yyyy.MM.dd'
+                    )
+                  : '-'}
               </p>
             </div>
 

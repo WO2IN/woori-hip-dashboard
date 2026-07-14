@@ -13,6 +13,34 @@ import { notifyDataChanged, useDataChanged } from '@/lib/data-events'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import dynamic from 'next/dynamic'
 
+const saveConfigValue = async (
+  name: string,
+  value: string
+) => {
+  if (!value.trim()) return
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        value,
+      }),
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || '설정 저장 실패')
+    }
+
+  } catch (error) {
+    console.error(`${name} 저장 실패:`, error)
+  }
+}
+
 const PdfDragPreview = dynamic(
   () =>
     import('@/components/upload/pdf-drag-preview').then(
@@ -70,6 +98,8 @@ export function UploadForm() {
   // Optional fields
   const [lotStart, setLotStart] = useState('')
   const [lotEnd, setLotEnd] = useState('')
+  const [lotStartNo, setLotStartNo] = useState('')
+  const [lotEndNo, setLotEndNo] = useState('')
   const [product, setProduct] = useState('')
   const [material, setMaterial] = useState('')
   const [specification, setSpecification] = useState('')
@@ -83,6 +113,13 @@ export function UploadForm() {
   const [materials, setMaterials] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<string[]>([])
   const [products, setProducts] = useState<string[]>([])
+
+  const [recentProducts, setRecentProducts] = useState<string[]>([])
+  const [recentMaterials, setRecentMaterials] = useState<string[]>([])
+  const [recentSpecifications, setRecentSpecifications] = useState<string[]>([])
+  
+  const [recentCompanies, setRecentCompanies] = useState<string[]>([])
+  const [recentDocTypes, setRecentDocTypes] = useState<string[]>([])
 
   const loadConfig = useCallback(async () => {
     const [c, dt, m, s, p] = await Promise.all([
@@ -100,9 +137,65 @@ export function UploadForm() {
     setProducts(p.data || [])
   }, [])
 
+  const loadRecentValues = useCallback(async () => {
+    try {
+      const [
+        productsRes,
+        materialsRes,
+        specificationsRes,
+        companiesRes,
+        docTypesRes,
+      ] = await Promise.all([
+        fetch('/api/config?name=products', {
+          cache: 'no-store',
+        }).then(res => res.json()),
+  
+        fetch('/api/config?name=materials', {
+          cache: 'no-store',
+        }).then(res => res.json()),
+  
+        fetch('/api/config?name=specifications', {
+          cache: 'no-store',
+        }).then(res => res.json()),
+  
+        fetch('/api/config?name=companies', {
+          cache: 'no-store',
+        }).then(res => res.json()),
+  
+        fetch('/api/config?name=document-types', {
+          cache: 'no-store',
+        }).then(res => res.json()),
+      ])
+  
+      setRecentProducts(
+        productsRes.data?.slice(0, 5) || []
+      )
+  
+      setRecentMaterials(
+        materialsRes.data?.slice(0, 5) || []
+      )
+  
+      setRecentSpecifications(
+        specificationsRes.data?.slice(0, 5) || []
+      )
+  
+      setRecentCompanies(
+        companiesRes.data?.slice(0, 5) || []
+      )
+  
+      setRecentDocTypes(
+        docTypesRes.data?.slice(0, 5) || []
+      )
+  
+    } catch (error) {
+      console.error('최근 사용 항목 로드 실패:', error)
+    }
+  }, [])
+
   useEffect(() => {
-    loadConfig()
-  }, [loadConfig])
+  loadConfig()
+  loadRecentValues()
+  }, [loadConfig, loadRecentValues])
 
   useEffect(() => {
     const element = formRef.current
@@ -204,14 +297,20 @@ export function UploadForm() {
       const normalizedLotStart = normalizeLot(lotStart)
 
       if (normalizedLotStart) {
-        formData.append('lotStart', normalizedLotStart)
-      }
+        const startNo = lotStartNo || '1'
+        const endNo = lotEndNo || lotStartNo
 
-      if (lotEnd) {
         formData.append(
-          'lotEnd',
-          buildLotEnd(normalizedLotStart, lotEnd)
+          'lotStart',
+          `${normalizedLotStart}-${startNo}`
         )
+
+        if (endNo) {
+          formData.append(
+            'lotEnd',
+            `${normalizedLotStart}-${endNo}`
+          )
+        }
       }
 
       if (product) formData.append('product', product)
@@ -237,7 +336,19 @@ export function UploadForm() {
       }
 
       toast.success('문서가 성공적으로 등록되었습니다.')
+
+      await saveConfigValue('products', product)
+      await saveConfigValue('materials', material)
+      await saveConfigValue('specifications', specification)
+      await saveConfigValue('companies', company)
+      await saveConfigValue('document-types', documentType)
+
       notifyDataChanged('documents')
+      notifyDataChanged('config')
+
+      await loadConfig()
+      await loadRecentValues()
+
       setSuccess(true)
 
       setFile(null)
@@ -245,6 +356,8 @@ export function UploadForm() {
       setDocumentType('')
       setLotStart('')
       setLotEnd('')
+      setLotStartNo('')
+      setLotEndNo('')
       setProduct('')
       setMaterial('')
       setSpecification('')
@@ -391,6 +504,7 @@ export function UploadForm() {
                 <SearchableCombobox
                   configName="document-types"
                   options={docTypes}
+                  recentOptions={recentDocTypes}
                   value={documentType}
                   onChange={setDocumentType}
                   onOptionsChange={setDocTypes}
@@ -406,6 +520,7 @@ export function UploadForm() {
                 <SearchableCombobox
                   configName="companies"
                   options={companies}
+                  recentOptions={recentCompanies}
                   value={company}
                   onChange={setCompany}
                   onOptionsChange={setCompanies}
@@ -430,19 +545,30 @@ export function UploadForm() {
                 <div className="flex items-stretch">
                   <Input
                     value={lotStart}
-                    onChange={e => setLotStart(e.target.value)}
-                    placeholder="예: 20260708-1"
+                    onChange={e => {
+                      const value = e.target.value
+                        .replace(/-\d+$/, '')
+                        .trim()
+
+                      setLotStart(value)
+                    }}
+                    placeholder="예: 20260713"
                     className="rounded-r-none flex-1 min-w-0"
                   />
 
                   <Input
-                    value={lotEnd}
+                    value={lotStartNo}
                     onChange={e => {
-                      const value = e.target.value
-                        .replace(/\D/g, '')
-                        .slice(0, 2)
+                      setLotStartNo(e.target.value.replace(/\D/g, ''))
+                    }}
+                    placeholder="1"
+                    className="rounded-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
+                  />
 
-                      setLotEnd(value)
+                  <Input
+                    value={lotEndNo}
+                    onChange={e => {
+                      setLotEndNo(e.target.value.replace(/\D/g, ''))
                     }}
                     placeholder="8"
                     className="rounded-l-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
@@ -457,6 +583,7 @@ export function UploadForm() {
                 <SearchableCombobox
                   configName="products"
                   options={products}
+                  recentOptions={recentProducts}
                   value={product}
                   onChange={setProduct}
                   onOptionsChange={setProducts}
@@ -471,6 +598,7 @@ export function UploadForm() {
                 <SearchableCombobox
                   configName="materials"
                   options={materials}
+                  recentOptions={recentMaterials}
                   value={material}
                   onChange={setMaterial}
                   onOptionsChange={setMaterials}
@@ -485,6 +613,7 @@ export function UploadForm() {
                 <SearchableCombobox
                   configName="specifications"
                   options={specifications}
+                  recentOptions={recentSpecifications}
                   value={specification}
                   onChange={setSpecification}
                   onOptionsChange={setSpecifications}
@@ -572,7 +701,7 @@ export function UploadForm() {
       {file && formHeight > 0 && (
         <div
           className="sticky top-5 min-h-0"
-          style={{ height: `${Math.max(0, formHeight)}px` }}
+          style={{ height: `${Math.max(0, formHeight - 1)}px` }}
         >
           <div className="w-full h-full min-h-0 border border-border rounded-xl overflow-hidden bg-background shadow-md">
             <PdfDragPreview file={file} />

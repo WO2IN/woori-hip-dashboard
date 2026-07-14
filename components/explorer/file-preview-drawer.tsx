@@ -32,6 +32,24 @@ interface FilePreviewDrawerProps {
   onUpdate: (doc: DocumentMetadata) => void
 }
 
+function normalizeDate(value?: string | null) {
+  if (!value) return null
+
+  const date = value.replace(/\./g, '-')
+
+  // 20260713
+  if (/^\d{8}$/.test(date)) {
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`
+  }
+
+  // 2026-07-13
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date
+  }
+
+  return null
+}
+
 function MetaRow({ label, value }: { label: string; value?: string | number | null }) {
   if (!value && value !== 0) return null
   return (
@@ -134,7 +152,15 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
                 <MetaRow label="수량" value={document.quantity ? `${document.quantity.toLocaleString()} Kg` : null} />
                 <MetaRow
                   label="발행일"
-                  value={format(new Date(document.issueDate), 'yyyy년 MM월 dd일', { locale: ko })}
+                  value={
+                    normalizeDate(document.issueDate)
+                      ? format(
+                          new Date(normalizeDate(document.issueDate)!),
+                          'yyyy년 MM월 dd일',
+                          { locale: ko }
+                        )
+                      : '-'
+                  }
                 />
                 <MetaRow label="파일크기" value={formatBytes(document.fileSize)} />
                 <MetaRow label="비고" value={document.note} />
