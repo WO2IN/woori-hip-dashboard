@@ -2,18 +2,42 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import {
-  Folder, FolderOpen, ChevronRight, LayoutGrid, List,
-  SortAsc, SortDesc, Search, X, FileText, Download, Eye, Trash2
+  Folder,
+  FolderOpen,
+  ChevronRight,
+  LayoutGrid,
+  List,
+  SortAsc,
+  SortDesc,
+  Search,
+  X,
+  FileText,
+  CheckSquare,
+  Square,
+  Download,
+  Trash2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { DocumentMetadata } from '@/lib/types'
 import { FileCard } from './file-card'
 import { FilePreviewDrawer } from './file-preview-drawer'
 import { cn } from '@/lib/utils'
 import { chosungSearch, FILTER_CONSONANTS, matchesChosung } from '@/lib/korean'
 import { useDataChanged } from '@/lib/data-events'
+
+import { toast } from 'sonner'
 
 type Level = 'docType' | 'year' | 'files'
 type SortField = 'issueDate'
@@ -84,6 +108,10 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   const [sortField] = useState<SortField>('issueDate')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [previewDoc, setPreviewDoc] = useState<DocumentMetadata | null>(null)
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([])
+  const [downloading, setDownloading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -146,7 +174,14 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   // 업체 변경 시 하위 상태를 동일 렌더 사이클에서 원자적으로 초기화
   const handleSelectCompany = (c: string) => {
     if (c === selectedCompany) return
-    setNav({ company: c, docType: null, year: null })
+  
+    setSelectedDocs([])
+  
+    setNav({
+      company: c,
+      docType: null,
+      year: null
+    })
   }
 
   // useCallback → useMemo: 렌더마다 함수를 중복 호출하지 않고 결과값을 메모이제이션
@@ -178,9 +213,166 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     })
   }, [allDocs, selectedCompany, selectedDocType, selectedYear, sortField, sortDir])
 
-  const handleDeleteDoc = (id: string) => setAllDocs(prev => prev.filter(d => d.id !== id))
+  const handleDeleteDoc = (id: string) => {
+
+    setAllDocs(prev =>
+      prev.filter(d => d.id !== id)
+    )
+   
+    setSelectedDocs(prev =>
+      prev.filter(v => v !== id)
+   )
+   
+   }
   const handleUpdateDoc = (updated: DocumentMetadata) =>
     setAllDocs(prev => prev.map(d => d.id === updated.id ? updated : d))
+
+  const downloadSingleDocument = (doc: DocumentMetadata) => {
+    const a = document.createElement('a')
+  
+    a.href =
+      `/api/file?path=${encodeURIComponent(doc.storagePath)}&download=true`
+  
+    a.download = doc.originalName || doc.filename
+  
+    a.click()
+  }
+  
+  
+  const downloadDocuments = async (
+    docs: DocumentMetadata[]
+  ) => {
+  
+    if (docs.length === 0) return
+  
+  
+    if (docs.length === 1) {
+      downloadSingleDocument(docs[0])
+      return
+    }
+  
+  
+    setDownloading(true)
+  
+    try {
+  
+      const res = await fetch('/api/download-zip', {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+          ids:docs.map(doc=>doc.id)
+        })
+      })
+  
+  
+      if(!res.ok){
+        toast.error('다운로드 실패')
+        return
+      }
+  
+  
+      const blob = await res.blob()
+  
+      const url = window.URL.createObjectURL(blob)
+  
+      const a = document.createElement('a')
+  
+      a.href=url
+      a.download='documents.zip'
+  
+      a.click()
+  
+      window.URL.revokeObjectURL(url)
+  
+  
+    } catch {
+  
+      toast.error('다운로드 실패')
+  
+    } finally {
+  
+      setDownloading(false)
+  
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    setDeleting(true)
+  
+    try {
+      const ids = [...selectedDocs]
+  
+      const responses = await Promise.all(
+        ids.map(id =>
+          fetch(`/api/documents/${id}`, {
+            method: 'DELETE'
+          })
+        )
+      )
+  
+      const failedCount =
+        responses.filter(res => !res.ok).length
+  
+      const successCount =
+        ids.length - failedCount
+  
+  
+      if (successCount === 0) {
+        toast.error('삭제에 실패했습니다.')
+        setDeleteOpen(false)
+        return
+      }
+  
+  
+      setAllDocs(prev =>
+        prev.filter(doc => !ids.includes(doc.id))
+      )
+  
+      setSelectedDocs([])
+  
+  
+      if (failedCount > 0) {
+        toast.error(
+          `${successCount}건 삭제, ${failedCount}건 실패`
+        )
+      } else {
+        toast.success(
+          `${successCount}건의 문서가 삭제되었습니다.`
+        )
+      }
+  
+  
+    } catch {
+      toast.error('삭제 실패')
+    } finally {
+      setDeleting(false)
+      setDeleteOpen(false)
+    }
+  }
+
+  const toggleSelectDoc = (id: string) => {
+    setSelectedDocs(prev =>
+      prev.includes(id)
+        ? prev.filter(v => v !== id)
+        : [...prev, id]
+    )
+  }
+  
+  
+  const toggleSelectAll = () => {
+    if (selectedDocs.length === filteredDocs.length) {
+      setSelectedDocs([])
+    } else {
+      setSelectedDocs(filteredDocs.map(doc => doc.id))
+    }
+  }
+  
+  
+  const selectedDocuments = filteredDocs.filter(doc =>
+    selectedDocs.includes(doc.id)
+  )
 
   // Breadcrumb back navigation — setNav으로 원자적 업데이트
   const breadcrumbs = [
@@ -301,69 +493,90 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         <div className="px-3 py-2 border-t border-border">
           <p className="text-[16px] text-muted-foreground">{filteredCompanies.length}개 업체</p>
         </div>
-      </aside>
+        </aside>
+        {/* ──── MAIN CONTENT ──── */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-      {/* ──── MAIN CONTENT ──── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Toolbar / breadcrumb */}
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-card/60 flex-shrink-0">
-          {breadcrumbs.length === 0 ? (
-            <span className="text-sm text-muted-foreground">업체를 선택하세요</span>
-          ) : (
-            <nav className="flex items-center gap-1 flex-1 min-w-0">
-              {breadcrumbs.map((item, i) => (
-                <div key={i} className="flex items-center gap-1">
-                  {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />}
-                  {item.action ? (
-                    <button onClick={item.action} className="text-sm text-primary hover:underline truncate max-w-[140px]">
-                      {item.label}
-                    </button>
-                  ) : (
-                    <span className="text-sm font-semibold text-foreground truncate max-w-[140px]">{item.label}</span>
-                  )}
-                </div>
-              ))}
-            </nav>
-          )}
+        <div className="flex flex-col border-b border-border bg-card/60 flex-shrink-0">
+      {/* 상단줄 : breadcrumb + 최신순 + 보기 */}
+      <div className="flex items-center gap-2 px-4 py-2.5">
 
-          {level === 'files' && (
-            <div className="flex items-center gap-2 ml-auto">
-              <Button
-                variant="ghost"
-                className="h-10 px-4 gap-2 text-base font-medium"
-                onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-              >
-                {sortDir === 'asc' ? (
-                  <>
-                    <SortAsc className="w-5 h-5" />
-                    오래된순
-                  </>
-                ) : (
-                  <>
-                    <SortDesc className="w-5 h-5" />
-                    최신순
-                  </>
+        {breadcrumbs.length === 0 ? (
+          <span className="text-sm text-muted-foreground">
+            업체를 선택하세요
+          </span>
+        ) : (
+          <nav className="flex items-center gap-1 flex-1 min-w-0">
+            {breadcrumbs.map((item, i) => (
+              <div key={i} className="flex items-center gap-1">
+                {i > 0 && (
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                 )}
-              </Button>
-              <div className="flex items-center border border-border rounded overflow-hidden">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="icon" className="h-9 w-9 rounded-none"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="icon" className="h-9 w-9 rounded-none"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="w-3.5 h-3.5" />
-                </Button>
+
+                {item.action ? (
+                  <button
+                    onClick={item.action}
+                    className="text-sm text-primary hover:underline truncate max-w-[140px]"
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <span className="text-sm font-semibold text-foreground truncate max-w-[140px]">
+                    {item.label}
+                  </span>
+                )}
               </div>
+            ))}
+          </nav>
+        )}
+
+        {level === 'files' && (
+          <div className="ml-auto flex items-center gap-2">
+
+            <Button
+              variant="ghost"
+              className="h-10 px-4 gap-2 text-base font-medium"
+              onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+            >
+              {sortDir === 'asc' ? (
+                <>
+                  <SortAsc className="w-5 h-5" />
+                  오래된순
+                </>
+              ) : (
+                <>
+                  <SortDesc className="w-5 h-5" />
+                  최신순
+                </>
+              )}
+            </Button>
+
+            <div className="flex items-center border border-border rounded overflow-hidden">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="icon"
+                className="h-9 w-9 rounded-none"
+                onClick={() => setViewMode('grid')}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </Button>
+
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="icon"
+                className="h-9 w-9 rounded-none"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="w-3.5 h-3.5" />
+              </Button>
             </div>
-          )}
-        </div>
+
+          </div>
+        )}
+
+      </div>
+      </div>
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-5">
@@ -460,7 +673,14 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                   {docTypesForCompany.map(dt => (
                     <button
                       key={dt.name}
-                      onClick={() => setNav(n => ({ ...n, docType: dt.name, year: null }))}
+                      onClick={() => {
+                        setSelectedDocs([])
+                        setNav(n => ({
+                          ...n,
+                          docType: dt.name,
+                          year: null
+                        }))
+                      }}
                       className="bg-card border border-border rounded-2xl p-6 text-left hover:border-primary/40 hover:shadow-md transition-all group"
                     >
                       <div className="w-14 h-14 bg-blue-50 dark:bg-blue-950/30 rounded-xl flex items-center justify-center mb-4">
@@ -489,7 +709,13 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                   {yearsForDocType.map(item => (
                     <button
                       key={item.year}
-                      onClick={() => setNav(n => ({ ...n, year: item.year }))}
+                      onClick={() => {
+                        setSelectedDocs([])
+                        setNav(n => ({
+                          ...n,
+                          year: item.year
+                        }))
+                      }}
                       className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/40 hover:shadow-sm transition-all"
                     >
                       <div className="w-10 h-10 bg-green-50 dark:bg-green-950/30 rounded-lg flex items-center justify-center mb-2.5">
@@ -507,11 +733,51 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
               )}
             </>
           ) : level === 'files' ? (
-            // Files
             <>
-              <p className="text-xs text-muted-foreground mb-4">
-                {filteredDocs.length}개 문서
-              </p>
+              <div className="flex items-center justify-between mb-4">
+
+                <p className="text-xs text-muted-foreground">
+                  {filteredDocs.length}개 문서
+                </p>
+
+
+                <div className="flex items-center gap-2">
+
+                  <Button
+                    variant="outline"
+                    className="h-10 px-4 gap-2"
+                    onClick={toggleSelectAll}
+                  >
+                    {selectedDocs.length === filteredDocs.length && filteredDocs.length > 0
+                      ? <CheckSquare className="w-5 h-5" />
+                      : <Square className="w-5 h-5" />
+                    }
+                    전체 선택
+                  </Button>
+
+
+                  <Button
+                    className="h-10 px-4 gap-2"
+                    disabled={selectedDocs.length === 0 || downloading}
+                    onClick={() => downloadDocuments(selectedDocuments)}
+                  >
+                    <Download className="w-5 h-5" />
+                    다운로드
+                  </Button>
+
+
+                  <Button
+                    variant="destructive"
+                    className="h-10 px-4 gap-2"
+                    disabled={selectedDocs.length === 0 || deleting}
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    삭제
+                  </Button>
+
+                </div>
+              </div>
               {filteredDocs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-3">
                   <FileText className="w-12 h-12 opacity-25" />
@@ -526,6 +792,8 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                       onPreview={setPreviewDoc}
                       onDelete={handleDeleteDoc}
                       viewMode="grid"
+                      selected={selectedDocs.includes(doc.id)}
+                      onSelect={() => toggleSelectDoc(doc.id)}
                     />
                   ))}
                 </div>
@@ -570,6 +838,8 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                       onPreview={setPreviewDoc}
                       onDelete={handleDeleteDoc}
                       viewMode="list"
+                      selected={selectedDocs.includes(doc.id)}
+                      onSelect={() => toggleSelectDoc(doc.id)}
                     />
                   ))}
                 </div>
@@ -578,7 +848,6 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           ) : null}
         </div>
       </div>
-
       <FilePreviewDrawer
         document={previewDoc}
         open={!!previewDoc}
@@ -586,6 +855,42 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         onDelete={handleDeleteDoc}
         onUpdate={handleUpdateDoc}
       />
+
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              문서 삭제
+            </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              선택한 {selectedDocs.length}개의 문서를 삭제하시겠습니까?
+              <br />
+              삭제 후에는 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+
+          <AlertDialogFooter>
+
+            <AlertDialogCancel>
+              취소
+            </AlertDialogCancel>
+
+
+            <AlertDialogAction
+              onClick={handleDeleteSelected}
+              className="bg-red-500/20 text-red-600 hover:bg-red-500/30 dark:text-red-400"
+            >
+              삭제
+            </AlertDialogAction>
+
+          </AlertDialogFooter>
+
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
