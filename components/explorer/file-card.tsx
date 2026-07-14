@@ -140,33 +140,66 @@ export function FileCard({
   if (viewMode === 'list') {
     return (
       <>
-        <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors border-b border-border/50 group cursor-pointer"
-          onClick={() => onPreview(document)}>
+        <div
+          className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors border-b border-border/50 group cursor-pointer"
+          onClick={() => onPreview(document)}
+        >
+
+          {/* 체크박스 */}
+          <button
+            type="button"
+            className="
+              flex items-center justify-center
+              w-5 h-5
+              shrink-0
+              rounded-md
+              hover:bg-muted
+            "
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect?.()
+            }}
+          >
+            {selected ? (
+              <CheckSquare className="w-5 h-5 text-primary" />
+            ) : (
+              <Square className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+
+
+          {/* 파일 아이콘 */}
             <div 
               className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeStyle.icon}`}
             >
-              <FileText className="w-4.5 h-4.5" />
+              <FileText className="w-[18px] h-[18px]" />
             </div>
           <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1fr_0.7fr] gap-4">
-            <div className="md:col-span-1">
-              <p className="text-sm font-medium text-foreground truncate">{document.filename}</p>
-              <p className="text-xs text-muted-foreground">{document.company}</p>
-              {/* 비고 추가 */}
-              {document.note && (
-                <span className="text-[10px] bg-amber-100 text-amber-700 px-1 rounded truncate max-w-[100px]">
-                  {document.note}
-                </span>
-                )}
-            </div>
+          <div className="md:col-span-1">
+            <p className="text-sm font-bold text-foreground truncate">
+              {document.company}
+            </p>
+
+            <p className="text-sm text-muted-foreground truncate">
+              {document.filename}
+            </p>
+
+            {/* 비고 추가 */}
+            {document.note && (
+              <span className="text-[10px] bg-amber-100 text-amber-700 px-1 rounded truncate max-w-[100px]">
+                {document.note}
+              </span>
+            )}
+          </div>
             <div className="hidden md:flex items-center justify-center">
               <Badge variant="secondary" className="text-xs">
                 {document.documentType}
               </Badge>
             </div>
-            <div className="hidden md:flex items-center justify-center">
-            <span className="text-sm text-muted-foreground font-mono text-xs">
-              {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
-            </span>
+            <div className="hidden md:flex items-center justify-start">
+              <span className="text-sm text-muted-foreground font-mono text-xs">
+                {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
+              </span>
             </div>
             <div className="hidden md:flex items-center justify-center">
               <span className="text-xs text-muted-foreground">

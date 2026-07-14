@@ -9,15 +9,19 @@ import {
   List,
   SortAsc,
   SortDesc,
-  Search,
-  X,
   FileText,
   CheckSquare,
   Square,
   Download,
-  Trash2
+  Trash2,
+  Search,
+  X,
+  SlidersHorizontal
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -34,14 +38,31 @@ import { DocumentMetadata } from '@/lib/types'
 import { FileCard } from './file-card'
 import { FilePreviewDrawer } from './file-preview-drawer'
 import { cn } from '@/lib/utils'
-import { chosungSearch, FILTER_CONSONANTS, matchesChosung } from '@/lib/korean'
+import { FILTER_CONSONANTS, matchesChosung } from '@/lib/korean'
 import { useDataChanged } from '@/lib/data-events'
 
 import { toast } from 'sonner'
 
 type Level = 'docType' | 'year' | 'files'
-type SortField = 'issueDate'
+type SortField = 'issueDate' | 'company'
 type SortDir = 'asc' | 'desc'
+
+function FilterField({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <Label className="text-xs text-muted-foreground">
+        {label}
+      </Label>
+      {children}
+    </div>
+  )
+}
 
 function getInitialConsonant(name: string) {
   const firstChar = name.charCodeAt(0)
@@ -80,13 +101,17 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   const [allDocs, setAllDocs] = useState<DocumentMetadata[]>([])
   const [companies, setCompanies] = useState<string[]>([])
   const [docTypes, setDocTypes] = useState<string[]>([])
+  
+  const [products, setProducts] = useState<string[]>([])
+  const [materials, setMaterials] = useState<string[]>([])
+  const [specifications, setSpecifications] = useState<string[]>([])
+  
   const [loading, setLoading] = useState(true)
 
   // Sidebar state
-  const [companySearch, setCompanySearch] = useState('')
   const [consonant, setConsonant] = useState<string | null>(null)
   const [selectedInitial, setSelectedInitial] = useState<string | null>(null)
-  const companySearchRef = useRef<HTMLInputElement>(null)
+
 
   // Navigation — 세 상태를 하나의 객체로 관리하여 항상 원자적으로 업데이트
   const [nav, setNav] = useState<{
@@ -104,10 +129,25 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   const selectedYear = nav.year
 
   // View
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [sortField] = useState<SortField>('issueDate')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [sortField, setSortField] = useState<SortField>('issueDate')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [previewDoc, setPreviewDoc] = useState<DocumentMetadata | null>(null)
+
+  // Search
+  const [query, setQuery] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
+  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
+  const [selectedSpecifications, setSelectedSpecifications] = useState<string[]>([])
+
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [lotNumber, setLotNumber] = useState('')
+  
   const [selectedDocs, setSelectedDocs] = useState<string[]>([])
   const [downloading, setDownloading] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -115,14 +155,46 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    const [docsRes, compRes, dtRes] = await Promise.all([
-      fetch('/api/documents', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/config?name=companies', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/config?name=document-types', { cache: 'no-store' }).then(r => r.json()),
+    const [
+      docsRes,
+      compRes,
+      dtRes,
+      productRes,
+      materialRes,
+      specificationRes
+    ] = await Promise.all([
+    
+      fetch('/api/documents', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
+      fetch('/api/config?name=companies', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
+      fetch('/api/config?name=document-types', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
+      fetch('/api/config?name=products', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
+      fetch('/api/config?name=materials', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
+      fetch('/api/config?name=specifications', {
+        cache:'no-store'
+      }).then(r=>r.json()),
+    
     ])
     setAllDocs(docsRes.data || [])
     setCompanies(compRes.data || [])
     setDocTypes(dtRes.data || [])
+    setProducts(productRes.data || [])
+    setMaterials(materialRes.data || [])
+    setSpecifications(specificationRes.data || [])
     setLoading(false)
   }, [])
 
@@ -146,12 +218,10 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   }, [companies])
 
   const filteredCompanies = useMemo(() => {
-    return companies.filter(c => {
-      const passConsonant = consonant ? matchesChosung(c, consonant) : true
-      const passSearch = companySearch ? chosungSearch(c, companySearch) : true
-      return passConsonant && passSearch
-    })
-  }, [companies, consonant, companySearch])
+    return companies.filter(c =>
+      consonant ? matchesChosung(c, consonant) : true
+    )
+  }, [companies, consonant])
 
   const companiesByInitial = useMemo(() => {
     return FILTER_CONSONANTS
@@ -201,17 +271,127 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   }, [allDocs, selectedCompany, selectedDocType])
 
   const filteredDocs = useMemo(() => {
-    const docs = allDocs.filter(d =>
-      (!selectedCompany || d.company === selectedCompany) &&
-      (!selectedDocType || d.documentType === selectedDocType) &&
-      (!selectedYear || d.year === selectedYear)
-    )
-    return docs.sort((a, b) => {
-      const va = (a[sortField] as string) ?? ''
-      const vb = (b[sortField] as string) ?? ''
-      return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+    const keyword = query.trim().toLowerCase()
+  
+    const docs = allDocs.filter(d => {
+
+      const issueDate = d.issueDate
+        ? d.issueDate.replace(/\./g, '-')
+        : ''
+      return (
+        // 트리 선택
+        (!selectedCompany ||
+          d.company === selectedCompany)
+        &&
+        (!selectedDocType ||
+          d.documentType === selectedDocType)
+        &&
+        (!selectedYear ||
+          d.year === selectedYear)
+        &&
+        // 업체 필터
+        (
+          selectedCompanies.length === 0 ||
+          selectedCompanies.includes(d.company)
+        )
+        &&
+        // 문서유형 필터
+        (
+          selectedDocTypes.length === 0 ||
+          selectedDocTypes.includes(d.documentType)
+        )
+        &&
+        // 품목
+        (
+          selectedProducts.length === 0 ||
+          selectedProducts.includes(d.product)
+        )
+        &&
+        // 재질
+        (
+          selectedMaterials.length === 0 ||
+          selectedMaterials.includes(d.material)
+        )
+        &&
+        // 규격
+        (
+          selectedSpecifications.length === 0 ||
+          selectedSpecifications.includes(d.specification)
+        )
+        &&
+        // 시작일
+        (
+          !startDate ||
+          issueDate >= startDate
+        )
+        &&
+        // 종료일
+        (
+          !endDate ||
+          issueDate <= endDate
+        )
+        &&
+        // LOT
+        (
+          !lotNumber ||
+          d.lotStart?.includes(lotNumber) ||
+          d.lotEnd?.includes(lotNumber)
+        )
+        &&
+        // 통합 검색창
+        (
+          !keyword ||
+          d.filename?.toLowerCase().includes(keyword) ||
+          d.originalName?.toLowerCase().includes(keyword) ||
+          d.company?.toLowerCase().includes(keyword) ||
+          d.documentType?.toLowerCase().includes(keyword) ||
+          d.product?.toLowerCase().includes(keyword) ||
+          d.material?.toLowerCase().includes(keyword) ||
+          d.specification?.toLowerCase().includes(keyword) ||
+          d.lotStart?.toLowerCase().includes(keyword) ||
+          d.lotEnd?.toLowerCase().includes(keyword) ||
+          d.note?.toLowerCase().includes(keyword)
+        )
+      )
     })
-  }, [allDocs, selectedCompany, selectedDocType, selectedYear, sortField, sortDir])
+  
+    return docs.sort((a, b) => {
+      const va =
+        sortField === 'company'
+          ? a.company
+          : a.issueDate || ''
+    
+      const vb =
+        sortField === 'company'
+          ? b.company
+          : b.issueDate || ''
+    
+      return sortDir === 'asc'
+        ? va.localeCompare(vb, 'ko-KR', { numeric: true })
+        : vb.localeCompare(va, 'ko-KR', { numeric: true })
+    })
+  }, [
+    allDocs,
+   
+    selectedCompany,
+    selectedDocType,
+    selectedYear,
+   
+    selectedCompanies,
+    selectedDocTypes,
+    selectedProducts,
+    selectedMaterials,
+    selectedSpecifications,
+   
+    startDate,
+    endDate,
+    lotNumber,
+   
+    sortField,
+    sortDir,
+   
+    query
+   ])
 
   const handleDeleteDoc = (id: string) => {
 
@@ -401,35 +581,29 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
       <aside className="w-64 flex-shrink-0 border-r border-border flex flex-col bg-muted/20">
         <div className="px-3 pt-3 pb-2 border-b border-border space-y-2">
         <p className="text-sm font-semibold text-foreground px-1">업체</p>
-          {/* 검색 */}
-          <div className="flex items-center gap-1.5 bg-background border border-border rounded-md px-2 py-1.5">
-            <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            <input
-              ref={companySearchRef}
-              value={companySearch}
-              onChange={e => setCompanySearch(e.target.value)}
-              placeholder="업체 검색..."
-              className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground min-w-0"
-            />
-            {companySearch && (
-              <button onClick={() => setCompanySearch('')} className="text-muted-foreground hover:text-foreground">
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
           {/* 초성 필터 */}
           <div className="grid grid-cols-8 gap-0.5">
-            <button
-              onClick={() => setConsonant(null)}
-              className={cn(
-                'col-span-2 py-1 rounded text-[11px] font-semibold transition-colors',
-                consonant === null
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
-              )}
-            >
-              전체
-            </button>
+          <button
+            onClick={() => {
+              setConsonant(null)
+
+              setSelectedDocs([])
+
+              setNav({
+                company: null,
+                docType: null,
+                year: null
+              })
+            }}
+            className={cn(
+              'col-span-2 py-1 rounded text-sm font-semibold transition-colors',
+              consonant === null
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
+            )}
+          >
+            전체
+          </button>
             {FILTER_CONSONANTS.map(fc => (
               <button
                 key={fc}
@@ -499,81 +673,244 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
         {/* Toolbar / breadcrumb */}
         <div className="flex flex-col border-b border-border bg-card/60 flex-shrink-0">
-      {/* 상단줄 : breadcrumb + 최신순 + 보기 */}
-      <div className="flex items-center gap-2 px-4 py-2.5">
 
-        {breadcrumbs.length === 0 ? (
-          <span className="text-sm text-muted-foreground">
-            업체를 선택하세요
-          </span>
-        ) : (
-          <nav className="flex items-center gap-1 flex-1 min-w-0">
-            {breadcrumbs.map((item, i) => (
-              <div key={i} className="flex items-center gap-1">
-                {i > 0 && (
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                )}
 
-                {item.action ? (
-                  <button
-                    onClick={item.action}
-                    className="text-sm text-primary hover:underline truncate max-w-[140px]"
-                  >
-                    {item.label}
-                  </button>
-                ) : (
-                  <span className="text-sm font-semibold text-foreground truncate max-w-[140px]">
-                    {item.label}
-                  </span>
-                )}
-              </div>
-            ))}
-          </nav>
-        )}
+        {/* 검색 영역 */}
+        <div className="px-4 pt-3 pb-2">
 
-        {level === 'files' && (
-          <div className="ml-auto flex items-center gap-2">
+        <div className="flex gap-2">
 
-            <Button
-              variant="ghost"
-              className="h-10 px-4 gap-2 text-base font-medium"
-              onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-            >
-              {sortDir === 'asc' ? (
-                <>
-                  <SortAsc className="w-5 h-5" />
-                  오래된순
-                </>
-              ) : (
-                <>
-                  <SortDesc className="w-5 h-5" />
-                  최신순
-                </>
-              )}
-            </Button>
+          <div className="relative flex-1">
 
-            <div className="flex items-center border border-border rounded overflow-hidden">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="icon"
-                className="h-9 w-9 rounded-none"
-                onClick={() => setViewMode('grid')}
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+            />
+
+            <Input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="파일명, 업체명, 품목 등으로 검색..."
+              className="pl-9"
+            />
+
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </Button>
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
 
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="icon"
-                className="h-9 w-9 rounded-none"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="w-3.5 h-3.5" />
-              </Button>
+          </div>
+
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setFiltersOpen(prev => !prev)}
+            title="필터"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </Button>
+
+        </div>
+
+
+        {filtersOpen && (
+          <div className="mt-3 border-t border-border/60 pt-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+              <FilterField label="업체명">
+                <MultiSelect
+                  options={companies}
+                  value={selectedCompanies}
+                  onChange={setSelectedCompanies}
+                />
+              </FilterField>
+
+
+              <FilterField label="문서유형">
+                <MultiSelect
+                  options={docTypes}
+                  value={selectedDocTypes}
+                  onChange={setSelectedDocTypes}
+                />
+              </FilterField>
+
+
+              <FilterField label="품목">
+                <MultiSelect
+                  options={products}
+                  value={selectedProducts}
+                  onChange={setSelectedProducts}
+                />
+              </FilterField>
+
+
+              <FilterField label="재질">
+                <MultiSelect
+                  options={materials}
+                  value={selectedMaterials}
+                  onChange={setSelectedMaterials}
+                />
+              </FilterField>
+
+
+              <FilterField label="규격">
+                <MultiSelect
+                  options={specifications}
+                  value={selectedSpecifications}
+                  onChange={setSelectedSpecifications}
+                />
+              </FilterField>
+              <FilterField label="발행 시작일">
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                />
+              </FilterField>
+
+
+              <FilterField label="발행 종료일">
+                <Input
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                />
+              </FilterField>
+
+
+              <FilterField label="LOT 번호">
+                <Input
+                  placeholder="LOT 검색"
+                  value={lotNumber}
+                  onChange={e => setLotNumber(e.target.value)}
+                />
+              </FilterField>
+
             </div>
 
           </div>
+
         )}
+
+        </div>
+
+        {/* 상단줄 : breadcrumb + 최신순 + 보기 */}
+        <div className="flex items-center gap-2 px-4 py-2.5">
+
+        {breadcrumbs.length === 0 ? (
+          <span className="text-sm text-muted-foreground">
+            전체 문서
+          </span>
+        ) : (
+        <nav className="flex items-center gap-1 flex-1 min-w-0">
+
+          {/* 전체로 이동 */}
+          <button
+            onClick={() => {
+              setSelectedDocs([])
+              setNav({
+                company: null,
+                docType: null,
+                year: null
+              })
+            }}
+            className="text-sm text-primary hover:underline"
+          >
+            전체
+          </button>
+
+          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+
+          {breadcrumbs.map((item, i) => (
+            <div key={i} className="flex items-center gap-1">
+              {i > 0 && (
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+              )}
+
+              {item.action ? (
+                <button
+                  onClick={item.action}
+                  className="text-sm text-primary hover:underline truncate max-w-[140px]"
+                >
+                  {item.label}
+                </button>
+              ) : (
+                <span className="text-sm font-semibold text-foreground truncate max-w-[140px]">
+                  {item.label}
+                </span>
+              )}
+            </div>
+          ))}
+        </nav>
+      )}
+
+        <div className="ml-auto flex items-center gap-2">
+
+        <Button
+          variant="ghost"
+          className="h-10 px-4 gap-2 text-base font-medium"
+          onClick={() => {
+            if (sortField === 'issueDate' && sortDir === 'desc') {
+              setSortDir('asc')
+            } else if (sortField === 'issueDate' && sortDir === 'asc') {
+              setSortField('company')
+              setSortDir('asc')
+            } else if (sortField === 'company') {
+              setSortField('issueDate')
+              setSortDir('desc')
+            } else {
+              setSortField('issueDate')
+              setSortDir('desc')
+            }
+          }}
+        >
+          {sortField === 'issueDate' ? (
+            sortDir === 'desc' ? (
+              <>
+                <SortDesc className="w-5 h-5" />
+                최신순
+              </>
+            ) : (
+              <>
+                <SortAsc className="w-5 h-5" />
+                오래된순
+              </>
+            )
+          ) : (
+              <>
+                <SortAsc className="w-5 h-5" />
+                이름순
+              </>
+          )}
+        </Button>
+        <div className="flex items-center border border-border rounded overflow-hidden">
+
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            size="icon"
+            className="h-9 w-9 rounded-none"
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+          </Button>
+
+
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'ghost'}
+            size="icon"
+            className="h-9 w-9 rounded-none"
+            onClick={() => setViewMode('list')}
+          >
+            <List className="w-3.5 h-3.5" />
+          </Button>
+
+        </div>
+
+        </div>
 
       </div>
       </div>
@@ -581,79 +918,51 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         {/* Content */}
         <div className="flex-1 overflow-auto p-5">
         {!selectedCompany ? (
-          selectedInitial ? (
-            <>
-              {/* 선택한 초성에 해당하는 업체 목록 */}
-              <div className="flex items-center gap-2 mb-4">
-                <button
-                  onClick={() => setSelectedInitial(null)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  초성
-                </button>
+  <>
+    <div className="flex items-center justify-between mb-4">
+      <p className="text-xs text-muted-foreground">
+        전체 문서 {filteredDocs.length}개
+      </p>
+    </div>
 
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-
-                <span className="text-sm font-semibold">
-                  {selectedInitial}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {companies
-                  .filter(company => getInitialConsonant(company) === selectedInitial)
-                  .map(company => (
-                    <button
-                      key={company}
-                      onClick={() => handleSelectCompany(company)}
-                      className="bg-card border border-border rounded-2xl p-6 text-left hover:border-primary/40 hover:shadow-md transition-all"
-                    >
-                      <div className="w-14 h-14 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex items-center justify-center mb-4">
-                        <FolderOpen className="w-7 h-7 text-amber-500" />
-                      </div>
-
-                      <p className="font-semibold text-base text-foreground truncate">
-                        {company}
-                      </p>
-
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {docCount[company] || 0}개 문서
-                      </p>
-                    </button>
-                  ))}
-              </div>
-            </>
-          ) : (
-            <>
-              {/* 초성 폴더 목록 */}
-              <p className="text-xs text-muted-foreground mb-4">
-                {companiesByInitial.length}개 초성
-              </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {companiesByInitial.map(group => (
-                  <button
-                    key={group.initial}
-                    onClick={() => setSelectedInitial(group.initial)}
-                    className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/40 hover:shadow-sm transition-all"
-                  >
-                    <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/30 rounded-lg flex items-center justify-center mb-2.5">
-                      <Folder className="w-5 h-5 text-blue-500" />
-                    </div>
-
-                    <p className="font-bold text-lg text-foreground">
-                      {group.initial}
-                    </p>
-
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {group.companies.length}개 업체
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </>
-          )
-        ) : loading ? (
+    {filteredDocs.length === 0 ? (
+      <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-3">
+        <FileText className="w-12 h-12 opacity-25" />
+        <p className="text-sm">등록된 문서가 없습니다.</p>
+      </div>
+    ) : (
+      viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredDocs.map(doc => (
+            <FileCard
+              key={doc.id}
+              document={doc}
+              onPreview={setPreviewDoc}
+              onDelete={handleDeleteDoc}
+              viewMode="grid"
+              selected={selectedDocs.includes(doc.id)}
+              onSelect={() => toggleSelectDoc(doc.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          {filteredDocs.map(doc => (
+            <FileCard
+              key={doc.id}
+              document={doc}
+              onPreview={setPreviewDoc}
+              onDelete={handleDeleteDoc}
+              viewMode="list"
+              selected={selectedDocs.includes(doc.id)}
+              onSelect={() => toggleSelectDoc(doc.id)}
+            />
+          ))}
+        </div>
+         ) 
+      )}
+  </>
+) : loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
             </div>
@@ -732,7 +1041,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                 </div>
               )}
             </>
-          ) : level === 'files' ? (
+          ) : level === 'files' || !selectedCompany ? (
             <>
               <div className="flex items-center justify-between mb-4">
 

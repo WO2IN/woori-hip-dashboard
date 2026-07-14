@@ -5,8 +5,8 @@ import { useDataChanged } from '@/lib/data-events'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Home, Upload, Search, Settings, FolderOpen, Folder, ChevronRight,
-  ChevronDown, Building2, X, PanelLeftClose, PanelLeft
+  Home, Upload, Settings, FolderOpen, Folder, ChevronRight,
+  ChevronDown, Building2, PanelLeftClose, PanelLeft
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -26,7 +26,6 @@ interface SidebarProps {
 const navItems = [
   { href: '/', label: '대시보드', icon: Home },
   { href: '/explorer', label: '문서 탐색기', icon: FolderOpen },
-  { href: '/search', label: '문서 검색', icon: Search },
   { href: '/upload', label: '문서 등록', icon: Upload },
   { href: '/settings', label: '설정', icon: Settings },
 ]
@@ -36,6 +35,7 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
   const router = useRouter()
   const [companies, setCompanies] = useState<string[]>([])
   const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(new Set())
+  const [companyTreeOpen, setCompanyTreeOpen] = useState(false)
   const [docTypes, setDocTypes] = useState<string[]>([])
   const [docCounts, setDocCounts] = useState<Record<string, Record<string, number>>>({})
 
@@ -55,20 +55,9 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
     setDocCounts(counts)
   }, [])
 
-  useEffect(() => { loadSidebarData() }, [loadSidebarData])
-
-  useDataChanged(() => { loadSidebarData() }, [loadSidebarData])
-  
   useEffect(() => { 
     loadSidebarData() 
   }, [loadSidebarData])
-  
-  // 문서 탐색기 페이지 진입 시 사이드바 자동 접기
-  useEffect(() => {
-    if (pathname.startsWith('/explorer')) {
-      setCollapsed(true)
-    }
-  }, [pathname, setCollapsed])
   
   useDataChanged(() => { 
     loadSidebarData() 
@@ -156,78 +145,116 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
           {/* Company tree */}
           {companies.length > 0 && !collapsed && (
             <div className="px-3">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-                업체
-              </p>
-              <div className="space-y-0.5">
-                {companies.map(company => {
-                  const expanded = expandedCompanies.has(company)
-                  const companyDocs = docCounts[company] || {}
-                  const total = Object.values(companyDocs).reduce((a, b) => a + b, 0)
-                  return (
-                    <div key={company}>
-                      <button
-                        onClick={() => toggleCompany(company)}
-                        className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors group"
-                      >
-                        {expanded
-                          ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                          : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                        }
-                        <Building2 className="w-4 h-4 text-sidebar-primary flex-shrink-0" />
-                        <span className="flex-1 text-left truncate">{company}</span>
-                        {total > 0 && (
-                          <span className="text-[10px] text-muted-foreground bg-muted rounded px-1.5 py-0.5">
-                            {total}
+
+              <button
+                onClick={() => setCompanyTreeOpen(prev => !prev)}
+                className="w-full flex items-center justify-between px-3 py-2 mb-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:bg-sidebar-accent/60 rounded-md"
+              >
+                <span>업체</span>
+
+                {companyTreeOpen ? (
+                  <ChevronDown className="w-3.5 h-3.5" />
+                ) : (
+                  <ChevronRight className="w-3.5 h-3.5" />
+                )}
+              </button>
+
+
+              {companyTreeOpen && (
+                <div className="space-y-0.5">
+
+                  {companies.map(company => {
+                    const expanded = expandedCompanies.has(company)
+                    const companyDocs = docCounts[company] || {}
+                    const total = Object.values(companyDocs)
+                      .reduce((a, b) => a + b, 0)
+
+                    return (
+                      <div key={company}>
+
+                        <button
+                          onClick={() => toggleCompany(company)}
+                          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+                        >
+
+                          {expanded ? (
+                            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                          )}
+
+                          <Building2 className="w-4 h-4 text-sidebar-primary" />
+
+                          <span className="flex-1 text-left truncate">
+                            {company}
                           </span>
-                        )}
-                      </button>
-                      {expanded && (
-                        <div className="ml-6 mt-0.5 space-y-0.5 animate-fade-in-up">
-                          {docTypes.map(dt => {
-                            const count = companyDocs[dt] || 0
-                            return (
-                              <button
-                                key={dt}
-                                onClick={() => {
-                                  if (collapsed) {
-                                    setCollapsed(false)
-                                  }
-                                
-                                  router.push(`/explorer?company=${encodeURIComponent(company)}&docType=${encodeURIComponent(dt)}`)
-                                  onClose()
-                                }}
-                                className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
-                              >
-                                <Folder className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                                <span className="flex-1 text-left truncate">{dt}</span>
-                                {count > 0 && (
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {count}
+
+                          {total > 0 && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {total}
+                            </span>
+                          )}
+
+                        </button>
+
+
+                        {expanded && (
+                          <div className="ml-6 mt-0.5 space-y-0.5">
+
+                            {docTypes.map(dt => {
+                              const count = companyDocs[dt] || 0
+
+                              return (
+                                <button
+                                  key={dt}
+                                  onClick={() => {
+                                    router.push(
+                                      `/explorer?company=${encodeURIComponent(company)}&docType=${encodeURIComponent(dt)}`
+                                    )
+                                    onClose()
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+                                >
+
+                                  <Folder className="w-3.5 h-3.5 text-amber-500" />
+
+                                  <span className="flex-1 text-left truncate">
+                                    {dt}
                                   </span>
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+
+                                  {count > 0 && (
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {count}
+                                    </span>
+                                  )}
+
+                                </button>
+                              )
+                            })}
+
+                          </div>
+                        )}
+
+                      </div>
+                    )
+                  })}
+
+                </div>
+              )}
+
             </div>
           )}
-        </ScrollArea>
+      </ScrollArea>
+      {/* Bottom version info */}
+      <div className="px-4 py-3 border-t border-sidebar-border">
+        {!collapsed && (
+          <p className="text-[11px] text-muted-foreground">
+            문서 관리 시스템 v1.0
+          </p>
+        )}
+      </div>
 
-        {/* Bottom version info */}
-        <div className="px-4 py-3 border-t border-sidebar-border">
-          {!collapsed && (
-            <p className="text-[11px] text-muted-foreground">
-              문서 관리 시스템 v1.0
-            </p>
-          )}
-        </div>
       </aside>
-    </>
-  )
+      </>
+      )
 }

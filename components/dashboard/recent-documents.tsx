@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { FileText, Eye, Download } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { FileText, Eye, Download, ChevronUp, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DocumentMetadata } from '@/lib/types'
@@ -85,6 +85,59 @@ function formatIssueDate(date: string | null | undefined) {
 export function RecentDocuments({ documents }: RecentDocumentsProps) {
   const [preview, setPreview] = useState<DocumentMetadata | null>(null)
 
+  type SortKey =
+  | 'filename'
+  | 'company'
+  | 'documentType'
+  | 'lotStart'
+  | 'issueDate'
+  | 'fileSize'
+
+const [sortKey, setSortKey] = useState<SortKey>('issueDate')
+const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+const handleSort = (key: SortKey) => {
+  if (sortKey === key) {
+    setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+  } else {
+    setSortKey(key)
+    setSortDir('asc')
+  }
+}
+
+const SortIcon = ({ column }: { column: SortKey }) => {
+  if (sortKey !== column) return null
+
+  return sortDir === 'asc'
+    ? <ChevronUp className="w-3.5 h-3.5 ml-1" />
+    : <ChevronDown className="w-3.5 h-3.5 ml-1" />
+}
+
+const sortedDocuments = useMemo(() => {
+  return [...documents].sort((a, b) => {
+
+    let av: any = a[sortKey]
+    let bv: any = b[sortKey]
+
+    if (sortKey === 'fileSize') {
+      av = a.fileSize ?? 0
+      bv = b.fileSize ?? 0
+    }
+
+    if (sortKey === 'issueDate') {
+      av = a.issueDate ?? ''
+      bv = b.issueDate ?? ''
+    }
+
+    const result = String(av ?? '')
+      .localeCompare(String(bv ?? ''), 'ko')
+
+    return sortDir === 'asc'
+      ? result
+      : -result
+  })
+}, [documents, sortKey, sortDir])
+
   if (documents.length === 0) {
     return (
       <div className="bg-card border border-border rounded-xl p-8 text-center">
@@ -102,34 +155,78 @@ export function RecentDocuments({ documents }: RecentDocumentsProps) {
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/40">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <thead>
+            <tr className="border-b border-border bg-muted/40">
+
+              <th
+                onClick={() => handleSort('filename')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >
+                <div className="flex items-center">
                   파일명
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
+                  <SortIcon column="filename" />
+                </div>
+              </th>
+
+              <th
+                onClick={() => handleSort('company')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
+              >
+                <div className="flex items-center">
                   업체
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">
+                  <SortIcon column="company" />
+                </div>
+              </th>
+
+              <th
+                onClick={() => handleSort('documentType')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
+              >
+                <div className="flex items-center">
                   유형
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
+                  <SortIcon column="documentType" />
+                </div>
+              </th>
+
+              <th
+                onClick={() => handleSort('lotStart')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
+              >
+                <div className="flex items-center">
                   LOT
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
+                  <SortIcon column="lotStart" />
+                </div>
+              </th>
+
+              <th
+                onClick={() => handleSort('issueDate')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
+              >
+                <div className="flex items-center">
                   발행일
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell">
+                  <SortIcon column="issueDate" />
+                </div>
+              </th>
+
+              <th
+                onClick={() => handleSort('fileSize')}
+                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell"
+              >
+                <div className="flex items-center">
                   크기
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  작업
-                </th>
-              </tr>
-            </thead>
+                  <SortIcon column="fileSize" />
+                </div>
+              </th>
+
+              <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                작업
+              </th>
+
+            </tr>
+          </thead>
 
             <tbody className="divide-y divide-border">
-              {documents.map(doc => (
+              {sortedDocuments.map(doc => (
                 <tr
                   key={doc.id}
                   className="

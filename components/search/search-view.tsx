@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { Search, X, SlidersHorizontal, FileText, Download, CheckSquare, Square, Trash2 } from 'lucide-react'
+import {
+  Search,
+  X,
+  SlidersHorizontal,
+  FileText,
+  Download,
+  CheckSquare,
+  Square,
+  Trash2,
+  LayoutGrid,
+  List
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -68,6 +79,7 @@ export function SearchView({ initialQuery }: SearchViewProps) {
   const [loading, setLoading] = useState(false)
   const [previewDoc, setPreviewDoc] = useState<DocumentMetadata | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(true)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // 선택된 문서
   const [selectedDocs, setSelectedDocs] = useState<string[]>([])
@@ -140,8 +152,10 @@ export function SearchView({ initialQuery }: SearchViewProps) {
   }, [loadConfig, searched, handleSearch])
 
   useEffect(() => {
-    handleSearch()
-  }, [handleSearch])
+    if (initialQuery) {
+      handleSearch()
+    }
+  }, [])
 
   const handleReset = () => {
     setSelectedCompanies([])
@@ -486,13 +500,36 @@ export function SearchView({ initialQuery }: SearchViewProps) {
               </strong>
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+
+            <div className="flex items-center border border-border rounded overflow-hidden">
 
               <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleSelectAll}
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="icon"
+                className="h-9 w-9 rounded-none"
+                onClick={() => setViewMode('grid')}
               >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="icon"
+                className="h-9 w-9 rounded-none"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+
+            </div>
+
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSelectAll}
+            >
                 {selectedDocs.length === results.length
                   ? <CheckSquare className="w-4 h-4 mr-1" />
                   : <Square className="w-4 h-4 mr-1" />
@@ -524,30 +561,53 @@ export function SearchView({ initialQuery }: SearchViewProps) {
             </div>
 
             </div>
-          {results.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">
-              <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-medium">검색 결과가 없습니다</p>
-              <p className="text-sm mt-1">다른 검색 조건을 시도해보세요.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {results.map(doc => (
-                <FileCard
-                key={doc.id}
-                document={doc}
-                onPreview={setPreviewDoc}
-                onDelete={handleDeleteDoc}
-                viewMode="grid"
-                selected={selectedDocs.includes(doc.id)}
-                onSelect={() => toggleSelectDoc(doc.id)}
-              />
-              ))}
-            </div>
-          )}
+            {results.length === 0 ? (
+              <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-xl">
+                <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium">검색 결과가 없습니다</p>
+                <p className="text-sm mt-1">다른 검색 조건을 시도해보세요.</p>
+              </div>
+            ) : (
+              viewMode === 'grid' ? (
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+                  {results.map(doc => (
+                    <FileCard
+                      key={doc.id}
+                      document={doc}
+                      onPreview={setPreviewDoc}
+                      onDelete={handleDeleteDoc}
+                      viewMode="grid"
+                      selected={selectedDocs.includes(doc.id)}
+                      onSelect={() => toggleSelectDoc(doc.id)}
+                    />
+                  ))}
+
+                </div>
+
+              ) : (
+
+                <div className="bg-card border border-border rounded-xl overflow-hidden">
+
+                  {results.map(doc => (
+                    <FileCard
+                      key={doc.id}
+                      document={doc}
+                      onPreview={setPreviewDoc}
+                      onDelete={handleDeleteDoc}
+                      viewMode="list"
+                      selected={selectedDocs.includes(doc.id)}
+                      onSelect={() => toggleSelectDoc(doc.id)}
+                    />
+                  ))}
+
+                </div>
+
+              )
+            )}
         </div>
       )}
-
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
