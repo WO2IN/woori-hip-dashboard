@@ -37,8 +37,13 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
   const [materials, setMaterials] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<string[]>([])
   const [products, setProducts] = useState<string[]>([])
+  const [recentCompanies, setRecentCompanies] = useState<string[]>([])
+  const [recentDocTypes, setRecentDocTypes] = useState<string[]>([])
+  const [recentMaterials, setRecentMaterials] = useState<string[]>([])
+  const [recentSpecifications, setRecentSpecifications] = useState<string[]>([])
+  const [recentProducts, setRecentProducts] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
-
+  
   useEffect(() => {
     if (!open) return
     Promise.all([
@@ -53,6 +58,13 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
       setMaterials(m.data || [])
       setSpecifications(s.data || [])
       setProducts(p.data || [])
+    
+      // 최근 사용 5개
+      setRecentCompanies((c.data || []).slice(0, 5))
+      setRecentDocTypes((dt.data || []).slice(0, 5))
+      setRecentMaterials((m.data || []).slice(0, 5))
+      setRecentSpecifications((s.data || []).slice(0, 5))
+      setRecentProducts((p.data || []).slice(0, 5))
     })
   }, [open])
 
@@ -105,6 +117,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <SearchableCombobox
                 configName="companies"
                 options={companies}
+                recentOptions={recentCompanies}
                 value={form.company}
                 onChange={set('company')}
                 onOptionsChange={setCompanies}
@@ -116,6 +129,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <SearchableCombobox
                 configName="document-types"
                 options={docTypes}
+                recentOptions={recentDocTypes}
                 value={form.documentType}
                 onChange={set('documentType')}
                 onOptionsChange={setDocTypes}
@@ -143,6 +157,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <SearchableCombobox
                 configName="products"
                 options={products}
+                recentOptions={recentProducts}
                 value={form.product}
                 onChange={set('product')}
                 onOptionsChange={setProducts}
@@ -154,6 +169,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <SearchableCombobox
                 configName="materials"
                 options={materials}
+                recentOptions={recentMaterials}
                 value={form.material}
                 onChange={set('material')}
                 onOptionsChange={setMaterials}
@@ -169,6 +185,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <SearchableCombobox
                 configName="specifications"
                 options={specifications}
+                recentOptions={recentSpecifications}
                 value={form.specification}
                 onChange={set('specification')}
                 onOptionsChange={setSpecifications}

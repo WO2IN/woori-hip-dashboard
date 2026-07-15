@@ -52,10 +52,15 @@ function normalizeDate(value?: string | null) {
 
 function MetaRow({ label, value }: { label: string; value?: string | number | null }) {
   if (!value && value !== 0) return null
+
   return (
-    <div className="flex items-start gap-3 py-2">
-      <span className="text-xs text-muted-foreground w-20 flex-shrink-0 pt-0.5">{label}</span>
-      <span className="text-sm text-foreground flex-1 break-all">{value}</span>
+    <div className="flex items-start gap-4 py-2.5">
+      <span className="text-sm font-medium text-muted-foreground w-24 flex-shrink-0">
+        {label}
+      </span>
+      <span className="text-[15px] text-foreground flex-1 break-all">
+        {value}
+      </span>
     </div>
   )
 }
@@ -139,7 +144,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
 
             {/* Metadata */}
             <div className="px-6 pb-4">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">문서 정보</p>
+              <p className="text-base font-semibold text-muted-foreground uppercase tracking-wider mb-3">문서 정보</p>
               <Separator className="mb-3" />
               <div className="divide-y divide-border/50">
                 <MetaRow label="업체명" value={document.company} />

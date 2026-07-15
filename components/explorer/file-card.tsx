@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { StickyNote } from 'lucide-react'
 import {
   Eye,
   Download,
@@ -174,33 +175,46 @@ export function FileCard({
             >
               <FileText className="w-[18px] h-[18px]" />
             </div>
-          <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1fr_0.7fr] gap-4">
-          <div className="md:col-span-1">
-            <p className="text-sm font-bold text-foreground truncate">
-              {document.company}
-            </p>
+            <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1.8fr_1fr_0.7fr] gap-4">
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-bold text-foreground truncate">
+                  {document.company}
+                </p>
 
-            <p className="text-sm text-muted-foreground truncate">
-              {document.filename}
-            </p>
+                {document.note && (
+                  <span title={document.note}>
+                    <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  </span>
+                )}
+              </div>
 
-            {/* 비고 추가 */}
-            {document.note && (
-              <span className="text-[10px] bg-amber-100 text-amber-700 px-1 rounded truncate max-w-[100px]">
-                {document.note}
-              </span>
-            )}
+              <p className="text-sm text-muted-foreground truncate">
+                {document.filename}
+              </p>
+            </div>
+          <div className="hidden md:flex items-center justify-center">
+            <Badge variant="secondary" className="text-xs">
+              {document.documentType}
+            </Badge>
           </div>
-            <div className="hidden md:flex items-center justify-center">
-              <Badge variant="secondary" className="text-xs">
-                {document.documentType}
-              </Badge>
-            </div>
-            <div className="hidden md:flex items-center justify-start">
-              <span className="text-sm text-muted-foreground font-mono text-xs">
-                {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
-              </span>
-            </div>
+
+          {/* 품목 */}
+          <div className="hidden md:flex items-center justify-center">
+            <span 
+              className="text-sm text-muted-foreground truncate"
+              title={document.product}
+            >
+              {document.product || '-'}
+            </span>
+          </div>
+
+          {/* LOT */}
+          <div className="hidden md:flex items-center justify-start px-2">
+            <span className="text-sm text-muted-foreground font-mono truncate whitespace-nowrap">
+              {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
+            </span>
+          </div>
             <div className="hidden md:flex items-center justify-center">
               <span className="text-xs text-muted-foreground">
                 {formattedIssueDate
@@ -217,27 +231,6 @@ export function FileCard({
                 {formatBytes(document.fileSize)}
               </span>
             </div>
-          </div>
-          <div className="w-[108px] flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" className="w-7 h-7" onClick={() => onPreview(document)}>
-              <Eye className="w-3.5 h-3.5" />
-            </Button>
-            <a
-              href={`/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`}
-              download
-            >
-              <Button variant="ghost" size="icon" className="w-7 h-7">
-                <Download className="w-3.5 h-3.5" />
-              </Button>
-            </a>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-7 h-7 text-destructive hover:text-destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
           </div>
         </div>
         <DeleteDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} deleting={deleting} filename={document.filename} />
@@ -351,6 +344,12 @@ export function FileCard({
             >
               {document.documentType}
             </Badge>
+
+            {document.note && (
+              <span title={document.note}>
+                <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              </span>
+            )}
           </div>
         </div>
 
@@ -420,21 +419,7 @@ export function FileCard({
             </div>
 
           </div>
-
-
-          {document.note && (
-            <div className="border-t pt-2">
-              <p className="text-[11px] text-amber-600">
-                비고
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {document.note}
-              </p>
-            </div>
-          )}
-
         </div>
-  
   
         {/* 버튼 */}
         <div className="flex gap-1.5 mt-3 pt-3 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">

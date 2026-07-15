@@ -16,7 +16,8 @@ import {
   Trash2,
   Search,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,7 +45,14 @@ import { useDataChanged } from '@/lib/data-events'
 import { toast } from 'sonner'
 
 type Level = 'docType' | 'year' | 'files'
-type SortField = 'issueDate' | 'company'
+type SortField =
+  | 'filename'
+  | 'documentType'
+  | 'product'  
+  | 'lot'
+  | 'issueDate'
+  | 'size'
+  | 'company'
 type SortDir = 'asc' | 'desc'
 
 function FilterField({
@@ -60,6 +68,105 @@ function FilterField({
         {label}
       </Label>
       {children}
+    </div>
+  )
+}
+
+function ListHeader({
+  handleListSort,
+  sortField,
+  sortDir,
+}: {
+  handleListSort: (field: SortField) => void
+  sortField: SortField
+  sortDir: SortDir
+}) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-2 border-b border-border bg-muted/40">
+
+      {/* 아이콘 자리 */}
+      <div className="w-[68px] flex-shrink-0" />
+
+      {/* 데이터 컬럼 */}
+      <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1.8fr_1fr_0.7fr] gap-4">
+
+        <button
+          onClick={() => handleListSort('filename')}
+          className="hidden md:flex items-center justify-start justify-self-start gap-1 rounded-md px-1.5 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider transition-colors hover:bg-muted/80 hover:text-foreground"
+        >
+          파일명 / LOT
+          {sortField === 'filename' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+
+
+        <button
+          onClick={() => handleListSort('documentType')}
+          className="hidden md:flex items-center justify-center gap-1 rounded px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
+        >
+          타입
+          {sortField === 'documentType' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+
+
+        <button
+          onClick={() => handleListSort('product')}
+          className="hidden md:flex items-center justify-center gap-1 rounded px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
+        >
+          품목
+          {sortField === 'product' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+
+
+        <button
+          onClick={() => handleListSort('lot')}
+          className="hidden md:flex items-center justify-start gap-1 rounded px-17 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
+        >
+          로트번호
+          {sortField === 'lot' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+
+
+        <button
+          onClick={() => handleListSort('issueDate')}
+          className="hidden md:flex items-center justify-center gap-1 rounded px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
+        >
+          발행일
+          {sortField === 'issueDate' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+
+
+        <button
+          onClick={() => handleListSort('size')}
+          className="hidden md:flex items-center justify-center gap-1 rounded px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
+        >
+          크기
+          {sortField === 'size' && (
+            sortDir === 'asc'
+              ? <SortAsc className="w-3.5 h-3.5" />
+              : <SortDesc className="w-3.5 h-3.5" />
+          )}
+        </button>
+      </div>
     </div>
   )
 }
@@ -107,6 +214,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   const [specifications, setSpecifications] = useState<string[]>([])
   
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   // Sidebar state
   const [consonant, setConsonant] = useState<string | null>(null)
@@ -132,6 +240,15 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [sortField, setSortField] = useState<SortField>('issueDate')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  const handleListSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDir('asc')
+    }
+  }
   const [previewDoc, setPreviewDoc] = useState<DocumentMetadata | null>(null)
 
   // Search
@@ -197,6 +314,19 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     setSpecifications(specificationRes.data || [])
     setLoading(false)
   }, [])
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+  
+    try {
+      await loadData()
+      toast.success('데이터를 새로고침했습니다.')
+    } catch {
+      toast.error('새로고침 실패')
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -316,7 +446,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         // 규격
         (
           selectedSpecifications.length === 0 ||
-          selectedSpecifications.includes(d.specification)
+          selectedSpecifications.includes(d.specification ?? '')
         )
         &&
         // 시작일
@@ -356,19 +486,53 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     })
   
     return docs.sort((a, b) => {
-      const va =
-        sortField === 'company'
-          ? a.company
-          : a.issueDate || ''
+      let va: string | number = ''
+      let vb: string | number = ''
     
-      const vb =
-        sortField === 'company'
-          ? b.company
-          : b.issueDate || ''
+      switch (sortField) {
+        case 'filename':
+          va = a.originalName || a.filename || ''
+          vb = b.originalName || b.filename || ''
+          break
+    
+        case 'documentType':
+          va = a.documentType || ''
+          vb = b.documentType || ''
+          break
+        
+        case 'product':
+          va = a.product || ''
+          vb = b.product || ''
+          break
+        
+        case 'lot':
+          va = a.lotStart || ''
+          vb = b.lotStart || ''
+          break
+    
+        case 'issueDate':
+          va = a.issueDate || ''
+          vb = b.issueDate || ''
+          break
+    
+        case 'size':
+          va = a.fileSize || 0
+          vb = b.fileSize || 0
+          break
+    
+        case 'company':
+          va = a.company || ''
+          vb = b.company || ''
+          break
+      }
+    
+      if (typeof va === 'number' && typeof vb === 'number') {
+        return sortDir === 'asc' ? va - vb : vb - va
+      }
     
       return sortDir === 'asc'
-        ? va.localeCompare(vb, 'ko-KR', { numeric: true })
-        : vb.localeCompare(va, 'ko-KR', { numeric: true })
+        ? String(va).localeCompare(String(vb), 'ko-KR', { numeric: true })
+        : String(vb).localeCompare(String(va), 'ko-KR', { numeric: true })
     })
   }, [
     allDocs,
@@ -552,6 +716,45 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   
   const selectedDocuments = filteredDocs.filter(doc =>
     selectedDocs.includes(doc.id)
+  )
+
+  const SelectionToolbar = () => (
+    <div className="flex items-center gap-2">
+  
+      <Button
+        variant="outline"
+        className="h-10 px-4 gap-2"
+        onClick={toggleSelectAll}
+      >
+        {selectedDocs.length === filteredDocs.length && filteredDocs.length > 0
+          ? <CheckSquare className="w-5 h-5" />
+          : <Square className="w-5 h-5" />
+        }
+        전체 선택
+      </Button>
+  
+  
+      <Button
+        className="h-10 px-4 gap-2"
+        disabled={selectedDocs.length === 0 || downloading}
+        onClick={() => downloadDocuments(selectedDocuments)}
+      >
+        <Download className="w-5 h-5" />
+        다운로드
+      </Button>
+  
+  
+      <Button
+        variant="destructive"
+        className="h-10 px-4 gap-2"
+        disabled={selectedDocs.length === 0 || deleting}
+        onClick={() => setDeleteOpen(true)}
+      >
+        <Trash2 className="w-5 h-5" />
+        삭제
+      </Button>
+  
+    </div>
   )
 
   // Breadcrumb back navigation — setNav으로 원자적 업데이트
@@ -849,44 +1052,62 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
       )}
 
         <div className="ml-auto flex items-center gap-2">
-
-        <Button
-          variant="ghost"
-          className="h-10 px-4 gap-2 text-base font-medium"
-          onClick={() => {
-            if (sortField === 'issueDate' && sortDir === 'desc') {
-              setSortDir('asc')
-            } else if (sortField === 'issueDate' && sortDir === 'asc') {
-              setSortField('company')
-              setSortDir('asc')
-            } else if (sortField === 'company') {
-              setSortField('issueDate')
-              setSortDir('desc')
-            } else {
-              setSortField('issueDate')
-              setSortDir('desc')
-            }
-          }}
-        >
-          {sortField === 'issueDate' ? (
-            sortDir === 'desc' ? (
-              <>
-                <SortDesc className="w-5 h-5" />
-                최신순
-              </>
+        {viewMode === 'grid' && (
+          <Button
+            variant="ghost"
+            className="h-10 px-4 gap-2 text-base font-medium"
+            onClick={() => {
+              if (sortField === 'issueDate' && sortDir === 'desc') {
+                setSortDir('asc')
+              } else if (sortField === 'issueDate' && sortDir === 'asc') {
+                setSortField('company')
+                setSortDir('asc')
+              } else if (sortField === 'company') {
+                setSortField('issueDate')
+                setSortDir('desc')
+              } else {
+                setSortField('issueDate')
+                setSortDir('desc')
+              }
+            }}
+          >
+            {sortField === 'issueDate' ? (
+              sortDir === 'desc' ? (
+                <>
+                  <SortDesc className="w-5 h-5" />
+                  최신순
+                </>
+              ) : (
+                <>
+                  <SortAsc className="w-5 h-5" />
+                  오래된순
+                </>
+              )
             ) : (
-              <>
-                <SortAsc className="w-5 h-5" />
-                오래된순
-              </>
-            )
-          ) : (
               <>
                 <SortAsc className="w-5 h-5" />
                 이름순
               </>
-          )}
-        </Button>
+            )}
+          </Button>
+        )}
+
+        <Button
+            variant="outline"
+            size="icon"
+            className="h-9 w-9"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="데이터 새로고침"
+          >
+            <RefreshCw
+              className={cn(
+                "w-4 h-4",
+                refreshing && "animate-spin"
+              )}
+            />
+          </Button>
+          
         <div className="flex items-center border border-border rounded overflow-hidden">
 
           <Button
@@ -923,8 +1144,9 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
       <p className="text-xs text-muted-foreground">
         전체 문서 {filteredDocs.length}개
       </p>
+      <SelectionToolbar />
     </div>
-
+    
     {filteredDocs.length === 0 ? (
       <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-3">
         <FileText className="w-12 h-12 opacity-25" />
@@ -947,6 +1169,11 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <ListHeader
+            handleListSort={handleListSort}
+            sortField={sortField}
+            sortDir={sortDir}
+          />
           {filteredDocs.map(doc => (
             <FileCard
               key={doc.id}
@@ -1048,44 +1275,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                 <p className="text-xs text-muted-foreground">
                   {filteredDocs.length}개 문서
                 </p>
-
-
-                <div className="flex items-center gap-2">
-
-                  <Button
-                    variant="outline"
-                    className="h-10 px-4 gap-2"
-                    onClick={toggleSelectAll}
-                  >
-                    {selectedDocs.length === filteredDocs.length && filteredDocs.length > 0
-                      ? <CheckSquare className="w-5 h-5" />
-                      : <Square className="w-5 h-5" />
-                    }
-                    전체 선택
-                  </Button>
-
-
-                  <Button
-                    className="h-10 px-4 gap-2"
-                    disabled={selectedDocs.length === 0 || downloading}
-                    onClick={() => downloadDocuments(selectedDocuments)}
-                  >
-                    <Download className="w-5 h-5" />
-                    다운로드
-                  </Button>
-
-
-                  <Button
-                    variant="destructive"
-                    className="h-10 px-4 gap-2"
-                    disabled={selectedDocs.length === 0 || deleting}
-                    onClick={() => setDeleteOpen(true)}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                    삭제
-                  </Button>
-
-                </div>
+                <SelectionToolbar />
               </div>
               {filteredDocs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-3">
@@ -1109,37 +1299,12 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
               ) : (
                 // List view
                 <div className="bg-card border border-border rounded-xl overflow-hidden">
-                  <div className="flex items-center gap-3 px-4 py-2 border-b border-border bg-muted/40">
+                  <ListHeader
+                    handleListSort={handleListSort}
+                    sortField={sortField}
+                    sortDir={sortDir}
+                  />
 
-                    {/* 아이콘 자리 */}
-                    <div className="w-9 flex-shrink-0" />
-
-                    {/* 데이터 컬럼 */}
-                    <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1fr_0.7fr] gap-4">
-
-                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        파일명 / LOT
-                      </span>
-
-                      <span className="hidden md:block text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        타입
-                      </span>
-
-                      <span className="hidden md:block text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        로트번호
-                      </span>
-
-                      <span className="hidden md:block text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        발행일
-                      </span>
-
-                      <span className="hidden md:block text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        크기
-                      </span>
-                    </div>
-                    {/* 버튼 자리 */}
-                    <div className="w-[108px]" />
-                  </div>
                   {filteredDocs.map(doc => (
                     <FileCard
                       key={doc.id}
