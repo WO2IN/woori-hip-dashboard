@@ -256,10 +256,21 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
       </ScrollArea>
       {/* Bottom version info */}
       <div className="px-4 py-3 border-t border-sidebar-border">
-        {!collapsed && (
-          <p className="text-[11px] text-muted-foreground">
-            문서 관리 시스템 v1.0
-          </p>
+        {!collapsed ? (
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
+              <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              WOORI-HIP <span className="opacity-60">v1.0</span>
+            </p>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
+              <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+            </div>
+          </div>
         )}
       </div>
 
