@@ -10,6 +10,7 @@ import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { DocumentMetadata } from '@/lib/types'
 import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 
 interface EditDocumentDialogProps {
   document: DocumentMetadata
@@ -78,9 +79,13 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
     }
     setSaving(true)
     try {
+      const session = getSession()
       const res = await fetch('/api/documents', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? buildAuthHeaders(session) : {}),
+        },
         body: JSON.stringify({
           id: document.id,
           ...form,

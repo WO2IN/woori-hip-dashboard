@@ -41,7 +41,7 @@ import { FilePreviewDrawer } from './file-preview-drawer'
 import { cn } from '@/lib/utils'
 import { FILTER_CONSONANTS, matchesChosung } from '@/lib/korean'
 import { useDataChanged } from '@/lib/data-events'
-
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 import { toast } from 'sonner'
 
 type Level = 'docType' | 'year' | 'files'
@@ -647,11 +647,14 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   
     try {
       const ids = [...selectedDocs]
+      const session = getSession()
+      const authHeaders = session ? buildAuthHeaders(session) : {}
   
       const responses = await Promise.all(
         ids.map(id =>
           fetch(`/api/documents/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: authHeaders,
           })
         )
       )

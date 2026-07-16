@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Download, Edit, Trash2, FileText, Maximize2 } from 'lucide-react'
+import { X, Download, Edit, Trash2, FileText, Maximize2, UserRound, CalendarDays } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,8 @@ import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
+import { useAuth } from '@/components/auth/auth-context'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -72,6 +74,8 @@ function formatBytes(bytes: number) {
 }
 
 export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate }: FilePreviewDrawerProps) {
+  const { user } = useAuth()
+  const canEditDoc = user && ['editor', 'admin'].includes(user.role)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [fullViewOpen, setFullViewOpen] = useState(false)
@@ -81,7 +85,11 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
     if (!document) return
     setDeleting(true)
     try {
-      const res = await fetch(`/api/documents/${document.id}`, { method: 'DELETE' })
+      const session = getSession()
+      const res = await fetch(`/api/documents/${document.id}`, {
+        method: 'DELETE',
+        headers: session ? buildAuthHeaders(session) : {},
+      })
       if (!res.ok) throw new Error()
       toast.success('문서가 삭제되었습니다.')
       onDelete(document.id)
@@ -170,6 +178,60 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
                 <MetaRow label="파일크기" value={formatBytes(document.fileSize)} />
                 <MetaRow label="비고" value={document.note} />
               </div>
+
+              {/* Author info */}
+              {(document.createdBy || document.updatedBy) && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="text-base font-semibold text-muted-foreground uppercase tracking-wider mb-3">작성자 정보</p>
+                  <Separator className="mb-3" />
+                  <div className="divide-y divide-border/50">
+                    {document.createdBy && (
+                      <div className="flex items-center gap-4 py-2.5">
+                        <span className="text-sm font-medium text-muted-foreground w-24 flex-shrink-0 flex items-center gap-1.5">
+                          <UserRound className="w-3.5 h-3.5" />
+                          등록자
+                        </span>
+                        <span className="text-[15px] text-foreground flex-1">
+                          {document.createdBy}
+                        </span>
+                      </div>
+                    )}
+                    {document.createdAt && (
+                      <div className="flex items-center gap-4 py-2.5">
+                        <span className="text-sm font-medium text-muted-foreground w-24 flex-shrink-0 flex items-center gap-1.5">
+                          <CalendarDays className="w-3.5 h-3.5" />
+                          등록일시
+                        </span>
+                        <span className="text-[15px] text-foreground flex-1">
+                          {format(new Date(document.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                        </span>
+                      </div>
+                    )}
+                    {document.updatedBy && (
+                      <div className="flex items-center gap-4 py-2.5">
+                        <span className="text-sm font-medium text-muted-foreground w-24 flex-shrink-0 flex items-center gap-1.5">
+                          <UserRound className="w-3.5 h-3.5" />
+                          최종 수정자
+                        </span>
+                        <span className="text-[15px] text-foreground flex-1">
+                          {document.updatedBy}
+                        </span>
+                      </div>
+                    )}
+                    {document.updatedAt && (
+                      <div className="flex items-center gap-4 py-2.5">
+                        <span className="text-sm font-medium text-muted-foreground w-24 flex-shrink-0 flex items-center gap-1.5">
+                          <CalendarDays className="w-3.5 h-3.5" />
+                          수정일시
+                        </span>
+                        <span className="text-[15px] text-foreground flex-1">
+                          {format(new Date(document.updatedAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -185,18 +247,22 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
               <Download className="w-4 h-4" />
               다운로드
             </Button>
-            <Button variant="outline" size="icon" onClick={() => setEditOpen(true)} title="수정">
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setDeleteOpen(true)}
-              title="삭제"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {canEditDoc && (
+              <>
+                <Button variant="outline" size="icon" onClick={() => setEditOpen(true)} title="수정">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setDeleteOpen(true)}
+                  title="삭제"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { notifyDataChanged, useDataChanged } from '@/lib/data-events'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import dynamic from 'next/dynamic'
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 
 const saveConfigValue = async (
   name: string,
@@ -324,8 +325,10 @@ export function UploadForm() {
 
       if (note) formData.append('note', note)
 
+      const session = getSession()
       const res = await fetch('/api/upload', {
         method: 'POST',
+        headers: session ? buildAuthHeaders(session) : {},
         body: formData,
       })
 
