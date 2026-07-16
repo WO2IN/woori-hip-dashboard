@@ -511,8 +511,8 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           break
     
         case 'issueDate':
-          va = a.issueDate || ''
-          vb = b.issueDate || ''
+          va = Number(a.issueDate || 0)
+          vb = Number(b.issueDate || 0)
           break
     
         case 'size':
@@ -1058,14 +1058,14 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
             className="h-10 px-4 gap-2 text-base font-medium"
             onClick={() => {
               if (sortField === 'issueDate' && sortDir === 'desc') {
+                // 최신순 → 오래된순
                 setSortDir('asc')
               } else if (sortField === 'issueDate' && sortDir === 'asc') {
+                // 오래된순 → 이름순
                 setSortField('company')
                 setSortDir('asc')
               } else if (sortField === 'company') {
-                setSortField('issueDate')
-                setSortDir('desc')
-              } else {
+                // 이름순 → 최신순
                 setSortField('issueDate')
                 setSortDir('desc')
               }

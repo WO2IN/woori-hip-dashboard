@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FolderOpen, Upload, Search, Settings, ArrowRight } from 'lucide-react'
+import { FolderOpen, Upload, Settings, ArrowRight } from 'lucide-react'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { RecentDocuments } from '@/components/dashboard/recent-documents'
 import { Button } from '@/components/ui/button'
@@ -38,14 +38,6 @@ const quickActions = [
     bg: 'bg-green-50 dark:bg-green-950/30',
   },
   {
-    href: '/search',
-    label: '문서 검색',
-    description: '고급 필터로 문서 검색',
-    icon: Search,
-    color: 'text-purple-500',
-    bg: 'bg-purple-50 dark:bg-purple-950/30',
-  },
-  {
     href: '/settings',
     label: '설정',
     description: '기준 정보 관리',
@@ -69,7 +61,7 @@ export default async function DashboardPage() {
             <p className="text-sm opacity-90">
               문서 관리 시스템에 오신 것을 환영합니다.
               <br />
-              기업별 문서 조회 및 등록 현황을 한눈에 확인하세요.
+              업체별 문서 조회 및 등록 현황을 한눈에 확인하세요.
             </p>
           </div>
 
@@ -87,7 +79,7 @@ export default async function DashboardPage() {
       {/* Quick actions */}
       <section>
         <h2 className="text-base font-semibold text-foreground mb-4">빠른 실행</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon
             return (

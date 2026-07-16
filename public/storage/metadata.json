@@ -702,10 +702,28 @@
     "specification": "Au 0.254μm ~ / Ni 0.1μm",
     "quantity": 1815.9,
     "issueDate": "20260714",
-    "note": "38번째 제품 도금 사양 미달로 제외 ",
+    "note": "LOT : 20260714-38 \n/ 도금 사양 미달로 제외 ",
     "fileSize": 532143,
     "year": "2026",
     "storagePath": "캠텍/성적서/2026/20260714_20260714-1_20260714-37.pdf",
     "createdAt": "2026-07-15T06:35:17.158Z"
+  },
+  {
+    "id": "326ba2cb-78f4-4375-821a-a33cb2ad8c54",
+    "filename": "20260129_WR0456-1.pdf",
+    "originalName": "20260129_268-60도면.pdf",
+    "company": "캠텍",
+    "documentType": "도면",
+    "lotStart": "",
+    "product": "268-60",
+    "material": "STS305 BA",
+    "specification": "Au 0.254μm min",
+    "issueDate": "20260129",
+    "fileSize": 411087,
+    "year": "2026",
+    "storagePath": "캠텍/도면/2026/20260129_WR0456-1.pdf",
+    "createdAt": "2026-07-16T00:21:09.602Z",
+    "lotEnd": "",
+    "note": ""
   }
 ]
