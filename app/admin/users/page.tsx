@@ -346,7 +346,7 @@ export default function AdminUsersPage() {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="min-w-[225px]">
                   <SelectItem value="viewer">뷰어 — 조회 및 다운로드만 가능</SelectItem>
                   <SelectItem value="editor">편집자 — 등록, 수정, 삭제 가능</SelectItem>
                   <SelectItem value="admin">관리자 — 전체 권한</SelectItem>

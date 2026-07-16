@@ -14,13 +14,5 @@
     "passwordHash": "92920ae2131ec21becae98d323aac54ade458cbc4c59b574630030c60c3b61ba",
     "role": "editor",
     "createdAt": "2026-07-16T03:57:44.195Z"
-  },
-  {
-    "id": "c01f30ff-1f1e-454f-9206-1734b532a75d",
-    "username": "test",
-    "displayName": "홍길동",
-    "passwordHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-    "role": "viewer",
-    "createdAt": "2026-07-16T06:01:01.070Z"
   }
 ]
