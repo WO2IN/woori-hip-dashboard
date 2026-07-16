@@ -156,7 +156,16 @@ const sortedDocuments = useMemo(() => {
     <>
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-[0_1px_3px_oklch(0_0_0/0.05)] dark:shadow-[0_1px_3px_oklch(0_0_0/0.25)]">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[35%] min-w-[160px]" />
+              <col className="hidden md:table-column w-[18%]" />
+              <col className="hidden md:table-column w-[12%]" />
+              <col className="hidden lg:table-column w-[14%]" />
+              <col className="hidden lg:table-column w-[12%]" />
+              <col className="hidden xl:table-column w-[10%]" />
+              <col className="w-[9%] min-w-[80px]" />
+            </colgroup>
           <thead>
             <tr className="border-b border-border bg-muted/30">
 
@@ -283,8 +292,8 @@ const sortedDocuments = useMemo(() => {
                     </span>
                   </td>
 
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <td className="px-5 py-3.5 text-right">
+                    <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
