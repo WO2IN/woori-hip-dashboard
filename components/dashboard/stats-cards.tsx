@@ -85,16 +85,20 @@ export function StatsCards({ data }: StatsCardsProps) {
               <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', card.iconBg)}>
                 <Icon className={cn('w-5 h-5', card.iconColor)} />
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">
+              <span className="text-sm font-semibold text-muted-foreground">
                 {card.label}
               </span>
             </div>
 
             {/* Value */}
-            <p className="text-3xl font-bold text-foreground tabular-nums leading-none mb-1">
-              {value.toLocaleString()}
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">{card.suffix}</p>
+            <div className="flex items-baseline gap-1 mb-4">
+              <p className="text-3xl font-bold text-foreground tabular-nums leading-none">
+                {value.toLocaleString()}
+              </p>
+              <span className="text-sm text-muted-foreground">
+                {card.suffix}
+              </span>
+            </div>
 
             {/* Progress bar */}
             <div className="h-1 w-full bg-border rounded-full overflow-hidden">
