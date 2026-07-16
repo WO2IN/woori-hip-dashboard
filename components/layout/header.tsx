@@ -6,6 +6,7 @@ import { Sun, Moon, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'  
 import Image from "next/image"
+import { UserMenu } from '@/components/auth/user-menu'
 
 interface HeaderProps {
   currentPage?: string
@@ -78,6 +79,9 @@ export function Header({ currentPage, onMenuToggle }: HeaderProps) {
       >
         {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </Button>
+
+      {/* User menu */}
+      <UserMenu />
     </header>
   )
 }

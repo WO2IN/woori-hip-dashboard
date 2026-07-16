@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readMetadata, updateMetadata } from '@/lib/storage'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
+import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -187,6 +188,10 @@ export async function GET(req: NextRequest) {
 
 
 export async function PATCH(req: NextRequest) {
+  const requestUser = getUserFromHeaders(req.headers)
+  if (!requestUser || !canEdit(requestUser.role)) {
+    return NextResponse.json({ error: '문서 수정 권한이 없습니다.' }, { status: 403 })
+  }
 
   const body = await req.json()
 
@@ -242,6 +247,10 @@ export async function PATCH(req: NextRequest) {
   }
 
 
+
+  updates.updatedAt = new Date().toISOString()
+  updates.updatedBy = requestUser.displayName
+  updates.updatedById = requestUser.id
 
   const success =
     updateMetadata(id, updates)

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "61702a23-8ee0-444d-9a04-430fcd4b5df6",
+    "username": "admin",
+    "displayName": "관리자",
+    "passwordHash": "a2c5209a97f60ab7392331f291e95822c11ca74dc60a537f9b1fb4feae601314",
+    "role": "admin",
+    "createdAt": "2026-07-16T03:35:09.621Z"
+  },
+  {
+    "id": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "username": "woo_1n",
+    "displayName": "나우인",
+    "passwordHash": "92920ae2131ec21becae98d323aac54ade458cbc4c59b574630030c60c3b61ba",
+    "role": "editor",
+    "createdAt": "2026-07-16T03:57:44.195Z"
+  }
+]

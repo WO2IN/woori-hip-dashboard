@@ -6,8 +6,13 @@ import { appendMetadata, STORAGE_DIR } from '@/lib/storage'
 import { DocumentMetadata } from '@/lib/types'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import { format } from 'date-fns'
+import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
+  const requestUser = getUserFromHeaders(req.headers)
+  if (!requestUser || !canEdit(requestUser.role)) {
+    return NextResponse.json({ error: '문서 등록 권한이 없습니다.' }, { status: 403 })
+  }
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: '파일이 없습니다.' }, { status: 400 })
@@ -91,6 +96,8 @@ export async function POST(req: NextRequest) {
     year,
     storagePath: path.join(relDir, generatedName),
     createdAt: new Date().toISOString(),
+    createdBy: requestUser.displayName,
+    createdById: requestUser.id,
   }
 
   appendMetadata(doc)

@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { DocumentMetadata } from '@/lib/types'
 import { notifyDataChanged } from '@/lib/data-events'
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 
@@ -125,7 +126,11 @@ export function FileCard({
   const handleDelete = async () => {
     setDeleting(true)
     try {
-      const res = await fetch(`/api/documents/${document.id}`, { method: 'DELETE' })
+      const session = getSession()
+      const res = await fetch(`/api/documents/${document.id}`, {
+        method: 'DELETE',
+        headers: session ? buildAuthHeaders(session) : {},
+      })
       if (!res.ok) throw new Error()
       toast.success('문서가 삭제되었습니다.')
       onDelete(document.id)

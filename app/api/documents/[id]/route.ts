@@ -7,6 +7,7 @@ import {
   readConfig,
   writeConfig,
 } from '@/lib/storage'
+import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
 const CONFIG_FIELDS = {
   companies: 'company',
@@ -48,6 +49,11 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestUser = getUserFromHeaders(req.headers)
+  if (!requestUser || !canEdit(requestUser.role)) {
+    return NextResponse.json({ error: '문서 삭제 권한이 없습니다.' }, { status: 403 })
+  }
+
   const { id } = await params
 
   const removed = deleteMetadata(id)

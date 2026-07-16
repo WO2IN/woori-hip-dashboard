@@ -6,10 +6,11 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Home, Upload, Settings, FolderOpen, Folder, ChevronRight,
-  ChevronDown, Building2, PanelLeftClose, PanelLeft
+  ChevronDown, Building2, PanelLeftClose, PanelLeft, Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useAuth } from '@/components/auth/auth-context'
 
 interface Company {
   name: string
@@ -23,14 +24,8 @@ interface SidebarProps {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const navItems = [
-  { href: '/', label: '대시보드', icon: Home },
-  { href: '/explorer', label: '문서 탐색기', icon: FolderOpen },
-  { href: '/upload', label: '문서 등록', icon: Upload },
-  { href: '/settings', label: '설정', icon: Settings },
-]
-
 export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps) {
+  const { user } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
   const [companies, setCompanies] = useState<string[]>([])
@@ -109,37 +104,51 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
         <ScrollArea className="flex-1 py-3">
           {/* Main nav */}
           <nav className="px-3 space-y-0.5 mb-4">
-            {navItems.map(item => {
-              const Icon = item.icon
-              const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    'flex items-center h-10 rounded-md text-sm transition-colors',
-                    collapsed ? 'justify-center px-0' : 'px-3',
-                    active
-                      ? 'bg-sidebar-accent text-sidebar-primary font-medium'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
-                  )}
-                >
-                  <Icon className={cn(
-                    'w-4 h-4 flex-shrink-0',
-                    active ? 'text-sidebar-primary' : ''
-                  )} />
-                  <span
+            {(
+              [
+                { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' },
+                { href: '/explorer', label: '문서 탐색기', icon: FolderOpen, minRole: 'viewer' },
+                { href: '/upload', label: '문서 등록', icon: Upload, minRole: 'editor' },
+                { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' },
+                { href: '/admin/users', label: '사용자 관리', icon: Users, minRole: 'admin' },
+              ] as const
+            )
+              .filter(item => {
+                if (!user) return item.minRole === 'viewer'
+                const LEVELS = { viewer: 1, editor: 2, admin: 3 }
+                return LEVELS[user.role] >= LEVELS[item.minRole]
+              })
+              .map(item => {
+                const Icon = item.icon
+                const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
                     className={cn(
-                      "overflow-hidden whitespace-nowrap transition-opacity duration-150",
-                      collapsed ? "opacity-0 w-0" : "opacity-100 ml-2"
+                      'flex items-center h-10 rounded-md text-sm transition-colors',
+                      collapsed ? 'justify-center px-0' : 'px-3',
+                      active
+                        ? 'bg-sidebar-accent text-sidebar-primary font-medium'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
                     )}
                   >
-                    {item.label}
-                  </span>
-                </Link>
-              )
-            })}
+                    <Icon className={cn(
+                      'w-4 h-4 flex-shrink-0',
+                      active ? 'text-sidebar-primary' : ''
+                    )} />
+                    <span
+                      className={cn(
+                        "overflow-hidden whitespace-nowrap transition-opacity duration-150",
+                        collapsed ? "opacity-0 w-0" : "opacity-100 ml-2"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                )
+              })}
           </nav>
 
           {/* Company tree */}
