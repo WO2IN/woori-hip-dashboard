@@ -95,7 +95,7 @@ export function ConfigManager({ configName, label, placeholder }: ConfigManagerP
             등록된 항목이 없습니다.
           </div>
         ) : (
-          <ScrollArea className="max-h-64">
+          <ScrollArea className="h-64">
             <div className="divide-y divide-border">
               {items.map(item => (
                 <div

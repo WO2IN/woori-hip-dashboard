@@ -23,8 +23,8 @@ async function getDashboardData() {
 const quickActions = [
   {
     href: '/explorer',
-    label: '문서 탐색기',
-    description: '폴더 구조로 문서 탐색',
+    label: '문서 탐색기 / 검색',
+    description: '폴더 구조로 문서 탐색 및 검색',
     icon: FolderOpen,
     color: 'text-blue-500',
     bg: 'bg-blue-50 dark:bg-blue-950/30',

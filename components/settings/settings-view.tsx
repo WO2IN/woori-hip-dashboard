@@ -36,7 +36,7 @@ const settingsItems = [
     color: 'text-green-500',
     bg: 'bg-green-50 dark:bg-green-950/30',
     configName: 'materials',
-    placeholder: '새 재질 입력 (예: SUS304)',
+    placeholder: '새 재질 입력',
   },
   {
     key: 'specifications',
@@ -46,7 +46,7 @@ const settingsItems = [
     color: 'text-orange-500',
     bg: 'bg-orange-50 dark:bg-orange-950/30',
     configName: 'specifications',
-    placeholder: '새 도금사양 입력 (예: 니켈도금)',
+    placeholder: '새 도금사양 입력',
   },
   {
     key: 'products',
@@ -56,7 +56,7 @@ const settingsItems = [
     color: 'text-red-500',
     bg: 'bg-red-50 dark:bg-red-950/30',
     configName: 'products',
-    placeholder: '새 품목 입력 (예: 볼트)',
+    placeholder: '새 품목 입력',
   },
 ]
 

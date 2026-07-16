@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Sun, Moon, Search, Bell, Settings, FileText, Menu } from 'lucide-react'
+import { Sun, Moon, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'  
 import Image from "next/image"
 
@@ -16,8 +15,6 @@ interface HeaderProps {
 export function Header({ currentPage, onMenuToggle }: HeaderProps) {
   const router = useRouter()
   const [dark, setDark] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     const stored = localStorage.getItem('theme')
@@ -32,15 +29,6 @@ export function Header({ currentPage, onMenuToggle }: HeaderProps) {
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
     localStorage.setItem('theme', next ? 'dark' : 'light')
-  }
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchOpen(false)
-      setSearchQuery('')
-    }
   }
 
   return (
@@ -80,34 +68,6 @@ export function Header({ currentPage, onMenuToggle }: HeaderProps) {
       )}
 
       <div className="flex-1" />
-
-      {/* Search bar */}
-      {searchOpen ? (
-        <form onSubmit={handleSearch} className="flex items-center gap-2 animate-fade-in-up">
-          <Input
-            autoFocus
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="문서 검색..."
-            className="w-64 h-8 text-sm"
-            onBlur={() => { if (!searchQuery) setSearchOpen(false) }}
-          />
-          <Button type="submit" size="sm" variant="default" className="h-8">
-            <Search className="w-3.5 h-3.5" />
-          </Button>
-        </form>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSearchOpen(true)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Search className="w-4 h-4" />
-          <span className="hidden sm:inline text-sm ml-1.5">검색</span>
-        </Button>
-      )}
-
       {/* Dark mode toggle */}
       <Button
         variant="ghost"
