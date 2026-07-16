@@ -17,7 +17,9 @@ import {
   Search,
   X,
   SlidersHorizontal,
-  RefreshCw
+  RefreshCw,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -215,6 +217,8 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Sidebar state
   const [consonant, setConsonant] = useState<string | null>(null)
@@ -784,11 +788,36 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
   return (
     <div className="flex h-full overflow-hidden">
       {/* ──── LEFT SIDEBAR ──── */}
-      <aside className="w-64 flex-shrink-0 border-r border-border flex flex-col bg-muted/20">
-        <div className="px-3 pt-3 pb-2 border-b border-border space-y-2">
-        <p className="text-sm font-semibold text-foreground px-1">업체</p>
+      <aside
+        className={cn(
+          "flex-shrink-0 border-r border-border flex flex-col bg-muted/20 transition-all duration-300 overflow-hidden",
+          sidebarOpen ? "w-64" : "w-14"
+        )}
+      >
+          <div className="px-3 pt-3 pb-2 border-b border-border space-y-2">
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setSidebarOpen(prev => !prev)}
+              >
+                {sidebarOpen ? (
+                  <PanelLeftClose className="w-4 h-4" />
+                ) : (
+                  <PanelLeftOpen className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+
+            {sidebarOpen && (
+              <p className="text-sm font-semibold text-foreground px-1">
+                업체
+              </p>
+            )}
           {/* 초성 필터 */}
-          <div className="grid grid-cols-8 gap-0.5">
+          {sidebarOpen && (
+            <div className="grid grid-cols-8 gap-0.5">
           <button
             onClick={() => {
               setConsonant(null)
@@ -829,6 +858,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
               </button>
             ))}
           </div>
+          )}
         </div>
 
         {/* Company list */}
@@ -842,7 +872,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           ) : filteredCompanies.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-8 px-3">검색 결과 없음</p>
           ) : (
-            filteredCompanies.map(c => {
+            sidebarOpen && filteredCompanies.map(c => {
               const isSelected = c === selectedCompany
               const count = docCount[c] || 0
               return (
@@ -870,9 +900,13 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           )}
         </div>
 
-        <div className="px-3 py-2 border-t border-border">
-          <p className="text-[16px] text-muted-foreground">{filteredCompanies.length}개 업체</p>
-        </div>
+        {sidebarOpen && (
+          <div className="px-3 py-2 border-t border-border">
+            <p className="text-[16px] text-muted-foreground">
+              {filteredCompanies.length}개 업체
+            </p>
+          </div>
+        )}
         </aside>
         {/* ──── MAIN CONTENT ──── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

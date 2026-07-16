@@ -75,33 +75,61 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
           onClick={onClose}
         />
       )}
+        <aside className={cn(
+          'fixed lg:static top-0 left-0 h-full bg-sidebar border-r border-sidebar-border z-[60]',
+          'flex flex-col overflow-visible transition-[width,transform] duration-300 ease-in-out',
+          collapsed ? 'w-20' : 'w-64',
+          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}>
 
-      <aside className={cn(
-        'fixed lg:static top-0 left-0 h-full bg-sidebar border-r border-sidebar-border z-40',
-        'flex flex-col overflow-hidden transition-[width,transform] duration-300 ease-in-out',
-        collapsed ? 'lg:w-20' : 'lg:w-64',
-        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      )}>
-       <button
-          onClick={() => setCollapsed(prev => !prev)}
-        className={cn(
-          "w-full flex items-center rounded-md text-sm transition-colors mb-2",
-          collapsed
-            ? "justify-center h-10"
-            : "gap-2.5 px-3 h-10 hover:bg-sidebar-accent"
-        )}
-      >
-        {collapsed ? (
-          <PanelLeft className="w-4 h-4" />
-        ) : (
-          <>
+          {/* Mobile close button */}
+          <button
+            onClick={onClose}
+            className="
+              lg:hidden
+              absolute
+              top-4
+              right-4
+              z-[100]
+              h-8
+              w-8
+              flex
+              items-center
+              justify-center
+              rounded-md
+              hover:bg-sidebar-accent
+            "
+          >
+            <PanelLeftClose className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setCollapsed(prev => !prev)}
+          className="
+            hidden
+            lg:flex
+            absolute
+            top-16
+            -right-3
+            z-[100]
+            h-7
+            w-7
+            items-center
+            justify-center
+            rounded-full
+            border
+            bg-background
+            shadow-md
+            hover:bg-accent
+          "
+        >
+          {collapsed ? (
+            <PanelLeft className="w-4 h-4" />
+          ) : (
             <PanelLeftClose className="w-4 h-4" />
-            <span>사이드바 접기</span>
-          </>
-        )}
-      </button>
-
-        <ScrollArea className="flex-1 py-3">
+          )}
+        </button>
+        <ScrollArea className="flex-1 py-3 pt-14 lg:pt-3">
           {/* Main nav */}
           <nav className="px-3 space-y-0.5 mb-4">
             {(
