@@ -902,7 +902,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
         {sidebarOpen && (
           <div className="px-3 py-2 border-t border-border">
-            <p className="text-[16px] text-muted-foreground">
+            <p className="text-[19px] text-muted-foreground">
               {filteredCompanies.length}개 업체
             </p>
           </div>
