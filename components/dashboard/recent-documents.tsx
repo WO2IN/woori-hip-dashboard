@@ -140,10 +140,12 @@ const sortedDocuments = useMemo(() => {
 
   if (documents.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-xl p-8 text-center">
-        <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-        <p className="text-muted-foreground">등록된 문서가 없습니다.</p>
-        <p className="text-sm text-muted-foreground mt-1">
+      <div className="bg-card border border-border rounded-2xl p-12 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-7 h-7 text-muted-foreground" />
+        </div>
+        <p className="font-medium text-foreground mb-1">등록된 문서가 없습니다</p>
+        <p className="text-sm text-muted-foreground">
           문서를 등록하면 여기에 표시됩니다.
         </p>
       </div>
@@ -152,17 +154,17 @@ const sortedDocuments = useMemo(() => {
 
   return (
     <>
-      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-[0_1px_3px_oklch(0_0_0/0.05)] dark:shadow-[0_1px_3px_oklch(0_0_0/0.25)]">
         <div className="overflow-x-auto">
           <table className="w-full">
           <thead>
-            <tr className="border-b border-border bg-muted/40">
+            <tr className="border-b border-border bg-muted/30">
 
               <th
                 onClick={() => handleSort('filename')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   파일명
                   <SortIcon column="filename" />
                 </div>
@@ -170,9 +172,9 @@ const sortedDocuments = useMemo(() => {
 
               <th
                 onClick={() => handleSort('company')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   업체
                   <SortIcon column="company" />
                 </div>
@@ -180,9 +182,9 @@ const sortedDocuments = useMemo(() => {
 
               <th
                 onClick={() => handleSort('documentType')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   유형
                   <SortIcon column="documentType" />
                 </div>
@@ -190,9 +192,9 @@ const sortedDocuments = useMemo(() => {
 
               <th
                 onClick={() => handleSort('lotStart')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   LOT
                   <SortIcon column="lotStart" />
                 </div>
@@ -200,9 +202,9 @@ const sortedDocuments = useMemo(() => {
 
               <th
                 onClick={() => handleSort('issueDate')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   발행일
                   <SortIcon column="issueDate" />
                 </div>
@@ -210,15 +212,15 @@ const sortedDocuments = useMemo(() => {
 
               <th
                 onClick={() => handleSort('fileSize')}
-                className="cursor-pointer text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell"
+                className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell"
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   크기
                   <SortIcon column="fileSize" />
                 </div>
               </th>
 
-              <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <th className="text-right px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 작업
               </th>
 
@@ -229,18 +231,13 @@ const sortedDocuments = useMemo(() => {
               {sortedDocuments.map(doc => (
                 <tr
                   key={doc.id}
-                  className="
-                    hover:bg-muted/30
-                    transition-colors
-                    group
-                    cursor-pointer
-                  "
+                  className="hover:bg-muted/20 transition-colors group cursor-pointer"
                   onClick={() => setPreview(doc)}
                 >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-red-50 dark:bg-red-950/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-4 h-4 text-red-500" />
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[oklch(0.577_0.245_27.325/0.1)] dark:bg-[oklch(0.577_0.245_27.325/0.15)] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-[oklch(0.52_0.22_27)] dark:text-[oklch(0.70_0.20_27)]" />
                       </div>
 
                       <div className="min-w-0">
@@ -248,46 +245,46 @@ const sortedDocuments = useMemo(() => {
                           {doc.filename}
                         </p>
 
-                        <p className="text-xs text-muted-foreground md:hidden">
+                        <p className="text-xs text-muted-foreground md:hidden mt-0.5">
                           {doc.company} · {doc.documentType}
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="px-5 py-3.5 hidden md:table-cell">
                     <span className="text-sm text-foreground">
                       {doc.company}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <Badge variant="secondary" className="text-xs">
+                  <td className="px-5 py-3.5 hidden md:table-cell">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-accent text-accent-foreground border border-border">
                       {doc.documentType}
-                    </Badge>
+                    </span>
                   </td>
 
-                  <td className="px-4 py-3 hidden lg:table-cell">
+                  <td className="px-5 py-3.5 hidden lg:table-cell">
                     <span className="text-sm text-muted-foreground font-mono">
                       {doc.lotStart}
                       {doc.lotEnd ? ` ~ ${doc.lotEnd}` : ''}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 hidden lg:table-cell">
+                  <td className="px-5 py-3.5 hidden lg:table-cell">
                     <span className="text-sm text-muted-foreground">
                       {formatIssueDate(doc.issueDate)}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 hidden xl:table-cell">
+                  <td className="px-5 py-3.5 hidden xl:table-cell">
                     <span className="text-sm text-muted-foreground">
                       {formatBytes(doc.fileSize)}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
