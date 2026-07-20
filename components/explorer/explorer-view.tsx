@@ -421,6 +421,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           d.documentType === selectedDocType)
         &&
         (!selectedYear ||
+          selectedYear === 'ALL' ||
           d.year === selectedYear)
         &&
         // 업체 필터
@@ -1279,11 +1280,45 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {/* 전체 */}
+                  <button
+                    onClick={() => {
+                      setSelectedDocs([])
+
+                      setNav(n => ({
+                        ...n,
+                        year: 'ALL'
+                      }))
+                    }}
+                    className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary/40 hover:shadow-sm transition-all"
+                  >
+                    <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/30 rounded-lg flex items-center justify-center mb-2.5">
+                      <FolderOpen className="w-5 h-5 text-blue-500" />
+                    </div>
+
+                    <p className="font-bold text-lg text-foreground">
+                      전체
+                    </p>
+
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {
+                        allDocs.filter(
+                          d =>
+                            d.company === selectedCompany &&
+                            d.documentType === selectedDocType
+                        ).length
+                      }개 문서
+                    </p>
+                  </button>
+
+
+                  {/* 년도 */}
                   {yearsForDocType.map(item => (
                     <button
                       key={item.year}
                       onClick={() => {
                         setSelectedDocs([])
+
                         setNav(n => ({
                           ...n,
                           year: item.year
@@ -1294,14 +1329,18 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                       <div className="w-10 h-10 bg-green-50 dark:bg-green-950/30 rounded-lg flex items-center justify-center mb-2.5">
                         <Folder className="w-5 h-5 text-green-500" />
                       </div>
+
                       <p className="font-bold text-lg text-foreground">
-                        {selectedDocType}_{item.year}
+                        {item.year}년
                       </p>
+
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {item.count}개 문서
                       </p>
+
                     </button>
                   ))}
+
                 </div>
               )}
             </>
