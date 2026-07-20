@@ -297,22 +297,22 @@ export function UploadForm() {
 
       const normalizedLotStart = normalizeLot(lotStart)
 
-      if (normalizedLotStart) {
-        const startNo = lotStartNo || '1'
-        const endNo = lotEndNo || lotStartNo
+        if (normalizedLotStart) {
+          const startNo = String(parseInt(lotStartNo || '1', 10))
+          const endNo = String(
+            parseInt(lotEndNo || lotStartNo || '1', 10)
+          )
 
-        formData.append(
-          'lotStart',
-          `${normalizedLotStart}-${startNo}`
-        )
+          formData.append(
+            'lotStart',
+            `${normalizedLotStart}-${startNo}`
+          )
 
-        if (endNo) {
           formData.append(
             'lotEnd',
             `${normalizedLotStart}-${endNo}`
           )
         }
-      }
 
       if (product) formData.append('product', product)
       if (material) formData.append('material', material)
