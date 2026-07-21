@@ -644,7 +644,7 @@ export function UploadForm() {
                 <Input
                   value={issueDate}
                   onChange={e => setIssueDate(e.target.value)}
-                  placeholder="예: 2025-07-07 또는 25.07.07"
+                  placeholder="예: 20260721"
                 />
               </div>
 
