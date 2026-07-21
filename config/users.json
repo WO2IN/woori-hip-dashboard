@@ -14,5 +14,13 @@
     "passwordHash": "92920ae2131ec21becae98d323aac54ade458cbc4c59b574630030c60c3b61ba",
     "role": "editor",
     "createdAt": "2026-07-16T03:57:44.195Z"
+  },
+  {
+    "id": "d5f9615f-5153-47ff-8e80-75b67d76e509",
+    "username": "test",
+    "displayName": "나우In게이",
+    "passwordHash": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+    "role": "viewer",
+    "createdAt": "2026-07-21T06:46:57.844Z"
   }
 ]
