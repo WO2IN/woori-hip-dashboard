@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { FolderOpen, Upload, Settings, ArrowRight, FileStack } from 'lucide-react'
+import { ArrowRight, FileStack } from 'lucide-react'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { RecentDocuments } from '@/components/dashboard/recent-documents'
 import { Button } from '@/components/ui/button'
+import { QuickActionCard } from '@/components/dashboard/quick-action-card'
 
 async function getDashboardData() {
   try {
@@ -25,7 +26,7 @@ const quickActions = [
     href: '/explorer',
     label: '문서 탐색기',
     description: '폴더 구조로 문서 탐색 및 검색',
-    icon: FolderOpen,
+    icon: 'folder',
     iconBg: 'bg-[oklch(0.52_0.19_258/0.12)] dark:bg-[oklch(0.62_0.18_258/0.14)]',
     iconColor: 'text-[oklch(0.52_0.19_258)] dark:text-[oklch(0.72_0.16_258)]',
     hoverBorder: 'hover:border-[oklch(0.52_0.19_258/0.4)]',
@@ -34,7 +35,7 @@ const quickActions = [
     href: '/upload',
     label: '문서 등록',
     description: 'PDF 문서 업로드 및 메타데이터 입력',
-    icon: Upload,
+    icon: 'upload',
     iconBg: 'bg-[oklch(0.55_0.17_162/0.12)] dark:bg-[oklch(0.62_0.17_162/0.14)]',
     iconColor: 'text-[oklch(0.45_0.17_162)] dark:text-[oklch(0.68_0.17_162)]',
     hoverBorder: 'hover:border-[oklch(0.55_0.17_162/0.4)]',
@@ -43,7 +44,7 @@ const quickActions = [
     href: '/settings',
     label: '설정',
     description: '업체 및 문서 유형 기준 정보 관리',
-    icon: Settings,
+    icon: 'settings',
     iconBg: 'bg-[oklch(0.68_0.17_55/0.12)] dark:bg-[oklch(0.74_0.16_55/0.14)]',
     iconColor: 'text-[oklch(0.52_0.17_55)] dark:text-[oklch(0.78_0.15_55)]',
     hoverBorder: 'hover:border-[oklch(0.68_0.17_55/0.4)]',
@@ -120,35 +121,18 @@ export default async function DashboardPage() {
       <section>
         <h2 className="text-sm font-semibold text-foreground tracking-wide uppercase mb-4">빠른 실행</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {quickActions.map((action, i) => {
-            const Icon = action.icon
-            return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className={[
-                  'group bg-card border border-border rounded-2xl p-5 flex flex-col gap-3',
-                  'shadow-[0_1px_3px_oklch(0_0_0/0.05)] dark:shadow-[0_1px_3px_oklch(0_0_0/0.25)]',
-                  'hover:shadow-[0_4px_16px_oklch(0_0_0/0.08)] dark:hover:shadow-[0_4px_16px_oklch(0_0_0/0.35)]',
-                  'hover:-translate-y-0.5 transition-all duration-200',
-                  action.hoverBorder,
-                  'animate-fade-in-up',
-                ].join(' ')}
-                style={{ animationDelay: `${(i + 4) * 60}ms` }}
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.iconBg}`}>
-                  <Icon className={`w-5 h-5 ${action.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground text-sm mb-1">{action.label}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{action.description}</p>
-                </div>
-                <div className="flex items-center justify-end">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all duration-150" />
-                </div>
-              </Link>
-            )
-          })}
+          {quickActions.map((action) => (
+            <QuickActionCard
+              key={action.href}
+              href={action.href}
+              label={action.label}
+              description={action.description}
+              icon={action.icon}
+              iconBg={action.iconBg}
+              iconColor={action.iconColor}
+              hoverBorder={action.hoverBorder}
+            />
+          ))}
         </div>
       </section>
 
