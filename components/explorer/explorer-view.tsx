@@ -410,8 +410,11 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     const docs = allDocs.filter(d => {
 
       const issueDate = d.issueDate
-        ? d.issueDate.replace(/\./g, '-')
+        ? d.issueDate.replace(/[^0-9]/g, '')
         : ''
+
+      const start = startDate.replace(/-/g, '')
+      const end = endDate.replace(/-/g, '')
       return (
         // 트리 선택
         (!selectedCompany ||
@@ -456,14 +459,14 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
         &&
         // 시작일
         (
-          !startDate ||
-          issueDate >= startDate
+          !start ||
+          issueDate >= start
         )
         &&
         // 종료일
         (
-          !endDate ||
-          issueDate <= endDate
+          !end ||
+          issueDate <= end
         )
         &&
         // LOT
@@ -1005,7 +1008,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
                   onChange={setSelectedSpecifications}
                 />
               </FilterField>
-              <FilterField label="발행 시작일">
+              <FilterField label="날짜 시작">
                 <Input
                   type="date"
                   value={startDate}
@@ -1014,7 +1017,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
               </FilterField>
 
 
-              <FilterField label="발행 종료일">
+              <FilterField label="날짜 종료">
                 <Input
                   type="date"
                   value={endDate}

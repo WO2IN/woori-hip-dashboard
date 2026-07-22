@@ -16,11 +16,19 @@
     "createdAt": "2026-07-16T03:57:44.195Z"
   },
   {
-    "id": "d5f9615f-5153-47ff-8e80-75b67d76e509",
-    "username": "test",
-    "displayName": "나우In게이",
-    "passwordHash": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+    "id": "995bd7a4-8d81-408f-ab3a-6c84aa4e41ed",
+    "username": "Test",
+    "displayName": "Test",
+    "passwordHash": "532eaabd9574880dbf76b9b8cc00832c20a6ec113d682299550d7a6e0f345e25",
     "role": "viewer",
-    "createdAt": "2026-07-21T06:46:57.844Z"
+    "createdAt": "2026-07-21T07:11:22.384Z"
+  },
+  {
+    "id": "5830fffd-d740-4380-8319-e43a8a8c0926",
+    "username": "woorihipqc",
+    "displayName": "조승현",
+    "passwordHash": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
+    "role": "admin",
+    "createdAt": "2026-07-22T01:45:58.198Z"
   }
 ]
