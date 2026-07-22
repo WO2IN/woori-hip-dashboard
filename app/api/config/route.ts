@@ -15,6 +15,14 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const role = req.headers.get('x-user-role')
+
+  if (role === 'viewer') {
+    return NextResponse.json(
+      { error: '권한이 없습니다.' },
+      { status: 403 }
+    )
+  }
   const body = await req.json()
   const { name, value } = body
 
@@ -40,6 +48,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const role = req.headers.get('x-user-role')
+
+  if (role === 'viewer') {
+    return NextResponse.json(
+      { error: '권한이 없습니다.' },
+      { status: 403 }
+    )
+  }
   const body = await req.json()
   const { name, value } = body
   if (!name || !VALID_CONFIGS.includes(name) || !value?.trim()) {

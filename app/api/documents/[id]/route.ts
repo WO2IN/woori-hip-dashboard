@@ -69,7 +69,11 @@ export async function DELETE(
   const filePath = getDocumentFilePath(removed.storagePath)
 
   if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath)
+    try {
+      fs.unlinkSync(filePath)
+    } catch (err) {
+      console.error('파일 삭제 실패:', err)
+    }
   }
 
   // 사용하지 않는 설정값 자동 제거

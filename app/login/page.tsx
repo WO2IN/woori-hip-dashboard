@@ -72,6 +72,7 @@ export default function LoginPage() {
 
       setSession(data.user as SessionUser)
       router.replace('/')
+      router.refresh()
     } catch {
       setLoginError('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
     } finally {
@@ -112,6 +113,9 @@ export default function LoginPage() {
       }
 
       setRegSuccess('가입이 완료되었습니다. 관리자 승인 후 편집 권한이 부여됩니다.')
+      setTimeout(() => {
+        setTab('login')
+      }, 1500)
       setRegUsername('')
       setRegDisplayName('')
       setRegPassword('')

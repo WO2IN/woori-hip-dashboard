@@ -195,10 +195,13 @@ export async function PATCH(req: NextRequest) {
 
   const body = await req.json()
 
-  const {
-    id,
-    ...updates
-  } = body
+  const { id, ...updates } = body
+
+  Object.keys(updates).forEach(key => {
+    if (typeof updates[key] === 'string') {
+      updates[key] = updates[key].trim()
+    }
+  })
 
 
   if (!id) {

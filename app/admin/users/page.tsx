@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { ShieldAlert } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   Plus, Trash2, Edit, ShieldCheck, Eye, Pencil,
@@ -33,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/auth-context'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
@@ -76,7 +76,6 @@ function RoleBadge({ role }: { role: UserRole }) {
 
 export default function AdminUsersPage() {
   const { user } = useAuth()
-  const router = useRouter()
   const [users, setUsers] = useState<UserRow[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -99,13 +98,6 @@ export default function AdminUsersPage() {
     const session = getSession()
     return session ? buildAuthHeaders(session) : {}
   }, [])
-
-  // Redirect if not admin
-  useEffect(() => {
-    if (user && user.role !== 'admin') {
-      router.replace('/')
-    }
-  }, [user, router])
 
   const loadUsers = useCallback(async () => {
     try {
@@ -210,7 +202,27 @@ export default function AdminUsersPage() {
     }
   }
 
-  if (user && user.role !== 'admin') return null
+  if (user && user.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <div className="text-center">
+  
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+            <ShieldAlert className="w-7 h-7 text-red-500" />
+          </div>
+  
+          <h1 className="text-2xl font-bold mb-2">
+            접근 권한이 없습니다.
+          </h1>
+  
+          <p className="text-muted-foreground">
+            사용자 관리는 관리자만 사용할 수 있습니다.
+          </p>
+  
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
