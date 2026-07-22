@@ -47,12 +47,16 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
   
   useEffect(() => {
     if (!open) return
+  
+    const session = getSession()
+    const headers = session ? buildAuthHeaders(session) : {}
+  
     Promise.all([
-      fetch('/api/config?name=companies').then(r => r.json()),
-      fetch('/api/config?name=document-types').then(r => r.json()),
-      fetch('/api/config?name=materials').then(r => r.json()),
-      fetch('/api/config?name=specifications').then(r => r.json()),
-      fetch('/api/config?name=products').then(r => r.json()),
+      fetch('/api/config?name=companies', { headers }).then(r => r.json()),
+      fetch('/api/config?name=document-types', { headers }).then(r => r.json()),
+      fetch('/api/config?name=materials', { headers }).then(r => r.json()),
+      fetch('/api/config?name=specifications', { headers }).then(r => r.json()),
+      fetch('/api/config?name=products', { headers }).then(r => r.json()),
     ]).then(([c, dt, m, s, p]) => {
       setCompanies(c.data || [])
       setDocTypes(dt.data || [])

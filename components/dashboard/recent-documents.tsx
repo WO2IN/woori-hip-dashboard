@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import { FileText, Eye, Download, ChevronUp, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { DocumentMetadata } from '@/lib/types'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -286,7 +285,7 @@ const sortedDocuments = useMemo(() => {
 
                   <td className="px-5 py-3.5 hidden xl:table-cell">
                     <span className="text-sm text-muted-foreground">
-                      {formatBytes(doc.fileSize)}
+                      {doc.fileSize ? formatBytes(doc.fileSize) : '-'}
                     </span>
                   </td>
 
@@ -306,7 +305,7 @@ const sortedDocuments = useMemo(() => {
                       </Button>
 
                       <a
-                        href={`/api/file?path=${encodeURIComponent(doc.storagePath)}&download=true`}
+                        href={`/api/file?path=${encodeURIComponent(doc.storagePath ?? '')}&download=true`}
                         download
                         title="다운로드"
                         onClick={e => e.stopPropagation()}
