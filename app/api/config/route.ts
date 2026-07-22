@@ -57,7 +57,7 @@ export async function DELETE(req: NextRequest) {
     )
   }
   const body = await req.json()
-  const { name, value } = body
+  const { name, value, force } = body
   if (!name || !VALID_CONFIGS.includes(name) || !value?.trim()) {
     return NextResponse.json({ error: '유효하지 않은 요청입니다.' }, { status: 400 })
   }
@@ -74,9 +74,12 @@ export async function DELETE(req: NextRequest) {
   const field = fieldMap[name] as keyof typeof metadata[0]
   if (field) {
     const inUse = metadata.some(doc => doc[field] === value)
-    if (inUse) {
+    if (inUse && !force) {
       return NextResponse.json(
-        { error: '등록된 문서가 존재하여 삭제할 수 없습니다.' },
+        { 
+          error: '등록된 문서가 존재합니다.',
+          used: true
+        },
         { status: 409 }
       )
     }

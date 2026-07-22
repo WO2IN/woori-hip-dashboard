@@ -58,20 +58,56 @@ export function ConfigManager({ configName, label, placeholder }: ConfigManagerP
 
   const handleDelete = async (value: string) => {
     setDeletingItem(value)
+  
     try {
-      const res = await fetch('/api/config', {
+      let res = await fetch('/api/config', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: configName, value }),
+        body: JSON.stringify({
+          name: configName,
+          value,
+        }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+  
+      let data = await res.json()
+  
+      if (res.status === 409 && data.used === true) {
+        const confirmDelete = window.confirm(
+          '등록된 문서에서 사용 중인 항목입니다.\n그래도 삭제하시겠습니까?'
+        )
+  
+        if (!confirmDelete) {
+          return
+        }
+  
+        res = await fetch('/api/config', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: configName,
+            value,
+            force: true,
+          }),
+        })
+  
+        data = await res.json()
+      }
+  
+      if (!res.ok) {
+        throw new Error(data.error)
+      }
+  
       setItems(data.data)
       notifyDataChanged('config')
       toast.success(`"${value}"이(가) 삭제되었습니다.`)
+  
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '삭제에 실패했습니다.'
+      const msg = err instanceof Error
+        ? err.message
+        : '삭제에 실패했습니다.'
+  
       toast.error(msg)
+  
     } finally {
       setDeletingItem(null)
     }
