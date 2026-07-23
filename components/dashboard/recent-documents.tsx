@@ -12,12 +12,6 @@ interface RecentDocumentsProps {
   documents: DocumentMetadata[]
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-}
-
 function formatIssueDate(date: string | null | undefined) {
   if (!date) return '-'
 
@@ -90,7 +84,7 @@ export function RecentDocuments({ documents }: RecentDocumentsProps) {
   | 'documentType'
   | 'lotStart'
   | 'issueDate'
-  | 'fileSize'
+  | 'quantity'  
 
 const [sortKey, setSortKey] = useState<SortKey>('issueDate')
 const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
@@ -118,9 +112,9 @@ const sortedDocuments = useMemo(() => {
     let av: any = a[sortKey]
     let bv: any = b[sortKey]
 
-    if (sortKey === 'fileSize') {
-      av = a.fileSize ?? 0
-      bv = b.fileSize ?? 0
+    if (sortKey === 'quantity') {
+      av = Number(a.quantity ?? 0)
+      bv = Number(b.quantity ?? 0)
     }
 
     if (sortKey === 'issueDate') {
@@ -128,9 +122,15 @@ const sortedDocuments = useMemo(() => {
       bv = b.issueDate ?? ''
     }
 
-    const result = String(av ?? '')
-      .localeCompare(String(bv ?? ''), 'ko')
+    let result = 0
 
+    if (sortKey === 'quantity') {
+      result = av - bv
+    } else {
+      result = String(av ?? '')
+        .localeCompare(String(bv ?? ''), 'ko')
+    }
+ 
     return sortDir === 'asc'
       ? result
       : -result
@@ -209,12 +209,12 @@ const sortedDocuments = useMemo(() => {
               </th>
 
               <th
-                onClick={() => handleSort('fileSize')}
+                onClick={() => handleSort('quantity')}
                 className="cursor-pointer text-left px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hidden xl:table-cell"
               >
                 <div className="flex items-center gap-1">
-                  크기
-                  <SortIcon column="fileSize" />
+                  수량
+                  <SortIcon column="quantity" />
                 </div>
               </th>
 
@@ -285,7 +285,7 @@ const sortedDocuments = useMemo(() => {
 
                   <td className="px-5 py-3.5 hidden xl:table-cell">
                     <span className="text-sm text-muted-foreground">
-                      {doc.fileSize ? formatBytes(doc.fileSize) : '-'}
+                      {doc.quantity ? `${doc.quantity} Kg` : '-'}
                     </span>
                   </td>
 

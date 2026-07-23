@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
-import { Minus, Plus, RotateCcw } from 'lucide-react'
+import {
+  Minus,
+  Plus,
+  RotateCw,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -19,6 +23,7 @@ export function PdfDragPreview({ file }: PdfDragPreviewProps) {
 
   const [numPages, setNumPages] = useState(0)
   const [scale, setScale] = useState(1)
+  const [rotation, setRotation] = useState(0)
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null)
 
   const draggingRef = useRef(false)
@@ -145,14 +150,9 @@ export function PdfDragPreview({ file }: PdfDragPreviewProps) {
     setScale(prev => Math.max(0.5, prev - 0.2))
   }
 
-  // 초기화
-  const resetView = () => {
-    setScale(1)
-
-    if (containerRef.current) {
-      containerRef.current.scrollLeft = 0
-      containerRef.current.scrollTop = 0
-    }
+  // 회전
+  const rotate = () => {
+    setRotation(prev => (prev + 90) % 360)
   }
 
   return (
@@ -185,9 +185,9 @@ export function PdfDragPreview({ file }: PdfDragPreviewProps) {
           type="button"
           variant="outline"
           size="icon"
-          onClick={resetView}
+          onClick={rotate}
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCw className="w-4 h-4" />
         </Button>
       </div>
 
@@ -228,13 +228,14 @@ export function PdfDragPreview({ file }: PdfDragPreviewProps) {
                   { length: numPages },
                   (_, index) => (
                     <Page
-                      key={index}
-                      pageNumber={index + 1}
-                      scale={scale}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      className="shadow-lg pointer-events-none"
-                    />
+                    key={index}
+                    pageNumber={index + 1}
+                    scale={scale}
+                    rotate={rotation}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="shadow-lg pointer-events-none"
+                  />
                   )
                 )}
               </div>
