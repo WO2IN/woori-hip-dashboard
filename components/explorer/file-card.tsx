@@ -231,11 +231,13 @@ export function FileCard({
                 </span>
               </div>
 
-            <div className="hidden md:flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">
-                {formatBytes(document.fileSize)}
-              </span>
-            </div>
+              <div className="hidden md:flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">
+                  {document.quantity
+                    ? `${document.quantity}Kg`
+                    : '-'}
+                </span>
+              </div>
           </div>
         </div>
         <DeleteDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} deleting={deleting} filename={document.filename} />
@@ -416,7 +418,7 @@ export function FileCard({
 
             <div className="text-right">
               <p className="text-xs text-muted-foreground">
-                용량
+                파일 크기
               </p>
               <p className="text-xs">
                 {formatBytes(document.fileSize)}

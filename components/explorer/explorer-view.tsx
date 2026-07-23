@@ -50,10 +50,10 @@ type Level = 'docType' | 'year' | 'files'
 type SortField =
   | 'filename'
   | 'documentType'
-  | 'product'  
+  | 'product'
   | 'lot'
   | 'issueDate'
-  | 'size'
+  | 'quantity'
   | 'company'
 type SortDir = 'asc' | 'desc'
 
@@ -158,11 +158,11 @@ function ListHeader({
 
 
         <button
-          onClick={() => handleListSort('size')}
+          onClick={() => handleListSort('quantity')}
           className="hidden md:flex items-center justify-center gap-1 rounded px-2 py-1 text-sm font-medium text-muted-foreground uppercase tracking-wider transition-all hover:bg-muted hover:text-foreground hover:font-bold"
         >
-          크기
-          {sortField === 'size' && (
+          수량
+          {sortField === 'quantity' && (
             sortDir === 'asc'
               ? <SortAsc className="w-3.5 h-3.5" />
               : <SortDesc className="w-3.5 h-3.5" />
@@ -523,9 +523,9 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           vb = Number(b.issueDate || 0)
           break
     
-        case 'size':
-          va = a.fileSize || 0
-          vb = b.fileSize || 0
+        case 'quantity':
+          va = a.quantity || 0
+          vb = b.quantity || 0
           break
     
         case 'company':

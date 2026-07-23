@@ -3439,14 +3439,18 @@
     "product": "0.15*159",
     "material": "Cu",
     "specification": "Ni 1.0 ~ 2.0μm",
-    "quantity": 6992,
+    "quantity": 699.2,
     "issueDate": "20260317",
     "fileSize": 803610,
     "year": "2026",
     "storagePath": "세종에이앤에스/성적서/2026/20260317_20260317-1_20260317-2.pdf",
     "createdAt": "2026-07-20T05:25:32.880Z",
     "createdBy": "나우인",
-    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "note": "",
+    "updatedAt": "2026-07-23T01:02:56.412Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "792d6c60-c344-424f-ac20-3465c2b901c1",
@@ -7840,6 +7844,26 @@
     "year": "2025",
     "storagePath": "세종에이앤에스/성적서/2025/20250418_20250418-1_20250418-2.pdf",
     "createdAt": "2026-07-22T01:39:23.284Z",
+    "createdBy": "나우인",
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+  },
+  {
+    "id": "ce27df25-d860-4a33-a9d6-cd2280285592",
+    "filename": "20260722_20260722-1_20260722-2.pdf",
+    "originalName": "260722_우리하이피_풍산 0.15 187 683.6.pdf",
+    "company": "풍산",
+    "documentType": "성적서",
+    "lotStart": "20260722-1",
+    "lotEnd": "20260722-2",
+    "product": "0.15*187",
+    "material": "Cu",
+    "specification": "Ni 1.0 ~ 2.0μm",
+    "quantity": 683.6,
+    "issueDate": "20260722",
+    "fileSize": 940546,
+    "year": "2026",
+    "storagePath": "풍산/성적서/2026/20260722_20260722-1_20260722-2.pdf",
+    "createdAt": "2026-07-23T00:58:00.704Z",
     "createdBy": "나우인",
     "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   }
