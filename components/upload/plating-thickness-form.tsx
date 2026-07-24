@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 interface MeasurementRow {
   id: string
   values: string[]
+  dateTime?: string
 }
 
 interface PlatingRecord {
@@ -188,6 +189,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
         values: r.values.length >= mats.length
           ? r.values.slice(0, mats.length)
           : [...r.values, ...Array(mats.length - r.values.length).fill('')],
+        dateTime: r.dateTime,
       }))
       setRows(newRows)
       changed.push(`측정값 ${newRows.length}행`)
@@ -221,6 +223,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     setRows(prev => prev.map(r =>
       r.id === rowId ? { ...r, values: r.values.map((v, i) => i === colIdx ? val : v) } : r
     ))
+  }
+  const updateDateTime = (rowId: string, val: string) => {
+    setRows(prev => prev.map(r => r.id === rowId ? { ...r, dateTime: val } : r))
   }
 
   // ── 저장 ─────────────────────────────────────────────────────────────────
@@ -278,7 +283,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       <div className="space-y-5">
 
       {/* ── 붙여넣기 영역 ── */}
-      <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2">
+      <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2 flex flex-col items-center">
         <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           <ClipboardPaste className="w-3.5 h-3.5" />
           측정기 데이터 붙여넣기
@@ -296,8 +301,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
         {/* ── 기본 정보 ── */}
         <div className="px-5 py-4 border-b border-border bg-muted/20">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">기본 정보</p>
-          <div className="grid grid-cols-2 gap-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 text-center">기본 정보</p>
+          <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
 
             <div className="space-y-1.5">
               <Label className="text-sm">측정 날짜 <span className="text-destructive">*</span></Label>
@@ -341,11 +346,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             <div className="space-y-1.5">
               <Label className="text-sm">도금사양</Label>
               <Input value={specification} onChange={e => setSpecification(e.target.value)} placeholder="예: Sn 5~9μm / Ni 1~5μm" />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-sm">측정시간</Label>
-              <Input type="time" value={measurementTime} onChange={e => setMeasurementTime(e.target.value)} />
             </div>
 
             <div className="space-y-1.5">
@@ -397,6 +397,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                       </div>
                     </th>
                   ))}
+                  <th className="px-3 py-2 text-center text-xs font-semibold text-muted-foreground min-w-[160px]">
+                    측정시간
+                  </th>
                   <th className="w-8" />
                 </tr>
               </thead>
@@ -416,6 +419,15 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                         />
                       </td>
                     ))}
+                    <td className="px-2 py-1.5">
+                      <Input
+                        type="time"
+                        value={row.dateTime ?? ''}
+                        onChange={e => updateDateTime(row.id, e.target.value)}
+                        placeholder="측정 일시"
+                        className="text-center text-sm h-8 min-w-[150px]"
+                      />
+                    </td>
                     <td className="px-2 py-1.5 text-center">
                       <button
                         type="button"

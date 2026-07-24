@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 interface MeasurementRow {
   id: string
   values: string[]
+  dateTime?: string
 }
 
 interface PlatingRecord {
@@ -124,6 +125,7 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
                       {mat} <span className="text-muted-foreground font-normal">μm</span>
                     </th>
                   ))}
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-muted-foreground">측정 일시</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,6 +137,7 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
                         {parseFloat(val) ? parseFloat(val).toFixed(3) : (val || '—')}
                       </td>
                     ))}
+                    <td className="px-4 py-3 text-center text-sm text-muted-foreground">{row.dateTime ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
