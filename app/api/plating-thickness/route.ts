@@ -21,6 +21,7 @@ interface PlatingRecord {
   rows: MeasurementRow[]
   specification: string
   measurementTime: string
+  note: string
   createdAt: string
 }
 

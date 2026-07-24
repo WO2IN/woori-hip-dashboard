@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Plus, Trash2, ClipboardPaste } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
 
 interface MeasurementRow {
   id: string
-  values: string[]  // 재질별 측정값, materials 배열과 순서 동일
+  values: string[]
   dateTime?: string
 }
 
@@ -20,10 +22,11 @@ interface PlatingRecord {
   lotNumber: string
   productType: 'initial' | 'middle' | 'final'
   company: string
-  materials: string[]       // 헤더: 재질 목록
-  rows: MeasurementRow[]    // 측정 행
+  materials: string[]
+  rows: MeasurementRow[]
   specification: string
   measurementTime: string
+  note: string
   createdAt: string
 }
 
@@ -32,10 +35,23 @@ const PRODUCT_TYPE_OPTIONS = [
   { label: '중물', value: 'middle' },
   { label: '종물', value: 'final' },
 ]
-const COMPANY_OPTIONS = ['넥스플러스', '업체2']
+
+const DEFAULT_MATERIALS = ['Sn', 'Ni']
+const DEFAULT_ROW_COUNT = 6
 const MATERIAL_SUGGESTIONS = ['Sn', 'Ni', 'Cu', 'Au', 'Zn', 'Ag']
 
-// ── 파싱 헬퍼 ──────────────────────────────────────────────
+const saveConfigValue = async (name: string, value: string) => {
+  if (!value.trim()) return
+  try {
+    await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, value }),
+    })
+  } catch {}
+}
+
+// ── 파싱 헬퍼 ──────────────────────────────────────────────────────────────
 function parseClipboardText(text: string) {
   const result: Partial<{
     productName: string
@@ -51,85 +67,63 @@ function parseClipboardText(text: string) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
 
   for (const line of lines) {
-    // 업체명
     const companyMatch = line.match(/업체명\s*[:：]?\s*(.+?)(?:\s{2,}|$)/)
-    if (companyMatch) {
-      result.company = companyMatch[1].trim()
-    }
+    if (companyMatch) result.company = companyMatch[1].trim()
 
-    // 도금사양 (Sn/Ni 같은 재질 및 사양)
-    const specMatch = line.match(/([A-Z][a-z]?\s*:\s*[\d.]+~[\d.]+\s*[μu]m)/)
-    // 재질 헤더 파싱 — "Sn : 5.0~9.0㎛  Ni : 1.0~5.0㎛" 형태에서 재질 추출
     const materialHeaderMatch = line.match(/([A-Z][a-z]?)\s*:\s*[\d.]+\s*[~－]\s*[\d.]+\s*[μu㎛]/g)
     if (materialHeaderMatch && materialHeaderMatch.length > 0) {
       result.materials = materialHeaderMatch.map(m => m.match(/^([A-Z][a-z]?)/)![1])
       result.specification = line.replace(/\s+/g, ' ').trim()
     }
 
-    // 초/중/종물
     if (line.includes('초물')) result.productType = 'initial'
     else if (line.includes('중물')) result.productType = 'middle'
     else if (line.includes('종물')) result.productType = 'final'
 
-    // 품명
     const productMatch = line.match(/품명\s*[:：]\s*(.+?)(?:\s{2,}|$)/)
-    if (productMatch) {
-      result.productName = productMatch[1].trim()
-    }
+    if (productMatch) result.productName = productMatch[1].trim()
 
-    // 로트번호
     const lotMatch = line.match(/로트번호\s*[:：]\s*(.+)/)
-    if (lotMatch && lotMatch[1].trim()) {
-      result.lotNumber = lotMatch[1].trim()
-    }
+    if (lotMatch && lotMatch[1].trim()) result.lotNumber = lotMatch[1].trim()
 
-    // 날짜 (YYYY.MM.DD 또는 YYYY-MM-DD)
     const dateMatch = line.match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/)
     if (dateMatch && !result.date) {
       result.date = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`
     }
   }
 
-  // 측정값 행 파싱 — "숫자\t값1\t값2\t날짜시간\t코멘트" 형태
-  // 또는 "숫자\t값1\t값2" 형태
   const dataRows: { values: string[]; dateTime?: string }[] = []
-  const matCount = result.materials?.length ?? 1
+  const matCount = result.materials?.length ?? DEFAULT_MATERIALS.length
 
   for (const line of lines) {
-    // No 헤더 행은 skip
     if (/^No\s/i.test(line)) continue
-    // 최대값/최소값 등 통계 행은 skip
     if (/최대값|최소값|범위|평균값|표준편차|변동계수/i.test(line)) continue
 
-    // 탭 또는 여러 공백으로 구분된 숫자 행 감지
     const parts = line.split(/\t|\s{2,}/).map(p => p.trim()).filter(Boolean)
-    // 첫 번째 토큰이 정수(번호)이고, 이후에 matCount개 이상의 숫자가 있으면 측정 행
     if (parts.length >= matCount + 1 && /^\d+$/.test(parts[0])) {
       const values = parts.slice(1, 1 + matCount)
       const allNumeric = values.every(v => !isNaN(parseFloat(v)))
       if (allNumeric) {
-        // 날짜/시간이 뒤에 있으면 추출
         const dateTimePart = parts.slice(1 + matCount).join(' ')
         const dtMatch = dateTimePart.match(/(\d{4}-\d{2}-\d{2}\s+\S+\s+\d{1,2}:\d{2}:\d{2})/)
-        dataRows.push({
-          values,
-          dateTime: dtMatch ? dtMatch[1] : undefined,
-        })
+        dataRows.push({ values, dateTime: dtMatch ? dtMatch[1] : undefined })
       }
     }
   }
 
-  if (dataRows.length > 0) {
-    result.rows = dataRows
-  }
-
+  if (dataRows.length > 0) result.rows = dataRows
   return result
 }
 
 function newRow(matCount: number): MeasurementRow {
-  return { id: Date.now().toString() + Math.random(), values: Array(matCount).fill('') }
+  return { id: `${Date.now()}-${Math.random()}`, values: Array(matCount).fill('') }
 }
 
+function makeDefaultRows(matCount: number): MeasurementRow[] {
+  return Array.from({ length: DEFAULT_ROW_COUNT }, () => newRow(matCount))
+}
+
+// ── 컴포넌트 ───────────────────────────────────────────────────────────────
 export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) {
   const [date, setDate] = useState('')
   const [productName, setProductName] = useState('')
@@ -138,15 +132,37 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const [company, setCompany] = useState('')
   const [specification, setSpecification] = useState('')
   const [measurementTime, setMeasurementTime] = useState('')
+  const [note, setNote] = useState('')
 
-  // 새 스키마: 재질 헤더 + 측정 행
-  const [materials, setMaterials] = useState<string[]>(['Sn'])
-  const [rows, setRows] = useState<MeasurementRow[]>([newRow(1)])
+  const [materials, setMaterials] = useState<string[]>(DEFAULT_MATERIALS)
+  const [rows, setRows] = useState<MeasurementRow[]>(makeDefaultRows(DEFAULT_MATERIALS.length))
+
+  // 업체 목록
+  const [companies, setCompanies] = useState<string[]>(['넥스플러스', '한중'])
+  const [recentCompanies, setRecentCompanies] = useState<string[]>([])
 
   const [submitting, setSubmitting] = useState(false)
   const pasteAreaRef = useRef<HTMLTextAreaElement>(null)
 
-  // ── 붙여넣기 파싱 ──────────────────────────────────────
+  const loadCompanies = useCallback(async () => {
+    try {
+      const res = await fetch('/api/config?name=plating-companies', { cache: 'no-store' })
+      const data = await res.json()
+      if (data.data && data.data.length > 0) {
+        setCompanies(data.data)
+      } else {
+        // 기본값 저장
+        await saveConfigValue('plating-companies', '넥스플러스')
+        await saveConfigValue('plating-companies', '한중')
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    loadCompanies()
+  }, [loadCompanies])
+
+  // ── 붙여넣기 ────────────────────────────────────────────────────────────
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const text = e.clipboardData.getData('text')
     if (!text) return
@@ -157,7 +173,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
   const applyParsed = (text: string) => {
     const parsed = parseClipboardText(text)
-    let changed: string[] = []
+    const changed: string[] = []
 
     if (parsed.date) { setDate(parsed.date); changed.push('날짜') }
     if (parsed.productName) { setProductName(parsed.productName); changed.push('품명') }
@@ -191,7 +207,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     }
   }
 
-  // ── 재질(열) 조작 ───────────────────────────────────────
+  // ── 재질(열) 조작 ────────────────────────────────────────────────────────
   const addMaterial = () => {
     setMaterials(prev => [...prev, ''])
     setRows(prev => prev.map(r => ({ ...r, values: [...r.values, ''] })))
@@ -207,7 +223,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     setMaterials(prev => prev.map((m, i) => i === colIdx ? val : m))
   }
 
-  // ── 측정 행 조작 ────────────────────────────────────────
+  // ── 측정 행 조작 ─────────────────────────────────────────────────────────
   const addRow = () => setRows(prev => [...prev, newRow(materials.length)])
 
   const removeRow = (id: string) => {
@@ -221,14 +237,13 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     ))
   }
 
-  // ── 저장 ────────────────────────────────────────────────
+  // ── 저장 ─────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!date) { toast.error('측정 날짜를 입력해주세요.'); return }
     if (!productName) { toast.error('품명을 입력해주세요.'); return }
     if (!productType) { toast.error('초/중/종물을 선택해주세요.'); return }
     if (!company) { toast.error('업체를 선택해주세요.'); return }
     if (materials.some(m => !m.trim())) { toast.error('재질명을 모두 입력해주세요.'); return }
-    if (rows.some(r => r.values.some(v => v === ''))) { toast.error('모든 측정값을 입력해주세요.'); return }
 
     setSubmitting(true)
     try {
@@ -240,9 +255,10 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
         productType: productType as PlatingRecord['productType'],
         company,
         materials,
-        rows,
+        rows: rows.filter(r => r.values.some(v => v !== '')),
         specification,
         measurementTime,
+        note,
         createdAt: new Date().toISOString(),
       }
 
@@ -253,10 +269,14 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       })
       if (!res.ok) throw new Error('저장 실패')
 
+      await saveConfigValue('plating-companies', company)
+
       toast.success('도금두께가 성공적으로 등록되었습니다.')
       setDate(''); setProductName(''); setLotNumber('')
-      setProductType(''); setCompany(''); setSpecification(''); setMeasurementTime('')
-      setMaterials(['Sn']); setRows([newRow(1)])
+      setProductType(''); setCompany(''); setSpecification('')
+      setMeasurementTime(''); setNote('')
+      setMaterials(DEFAULT_MATERIALS)
+      setRows(makeDefaultRows(DEFAULT_MATERIALS.length))
       onSuccess?.()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '등록에 실패했습니다.')
@@ -286,29 +306,43 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+
         {/* ── 기본 정보 ── */}
         <div className="px-5 py-4 border-b border-border bg-muted/20">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">기본 정보</p>
           <div className="grid grid-cols-2 gap-4">
+
             <div className="space-y-1.5">
               <Label className="text-sm">측정 날짜 <span className="text-destructive">*</span></Label>
               <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm">업체 <span className="text-destructive">*</span></Label>
-              <select value={company} onChange={e => setCompany(e.target.value)} className={selectClass}>
-                <option value="">선택해주세요</option>
-                {COMPANY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-              </select>
+              <SearchableCombobox
+                configName="plating-companies"
+                options={companies}
+                recentOptions={recentCompanies}
+                value={company}
+                onChange={val => {
+                  setCompany(val)
+                  setRecentCompanies(prev => [val, ...prev.filter(c => c !== val)].slice(0, 5))
+                }}
+                onOptionsChange={setCompanies}
+                placeholder="업체 선택 또는 입력..."
+              />
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm">품명 <span className="text-destructive">*</span></Label>
               <Input value={productName} onChange={e => setProductName(e.target.value)} placeholder="제품명 입력" />
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm">로트번호</Label>
               <Input value={lotNumber} onChange={e => setLotNumber(e.target.value)} placeholder="LOT 번호" />
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm">초/중/종물 <span className="text-destructive">*</span></Label>
               <select value={productType} onChange={e => setProductType(e.target.value)} className={selectClass}>
@@ -316,14 +350,22 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                 {PRODUCT_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm">도금사양</Label>
               <Input value={specification} onChange={e => setSpecification(e.target.value)} placeholder="예: Sn 5~9μm / Ni 1~5μm" />
             </div>
-            <div className="space-y-1.5 col-span-2 sm:col-span-1">
+
+            <div className="space-y-1.5">
               <Label className="text-sm">측정시간</Label>
               <Input type="time" value={measurementTime} onChange={e => setMeasurementTime(e.target.value)} />
             </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm">비고</Label>
+              <Input value={note} onChange={e => setNote(e.target.value)} placeholder="비고 입력" />
+            </div>
+
           </div>
         </div>
 
@@ -347,7 +389,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                 <tr className="bg-muted/40 border-b border-border">
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground w-10">No</th>
                   {materials.map((mat, colIdx) => (
-                    <th key={colIdx} className="px-2 py-2 text-center text-xs font-semibold min-w-[100px]">
+                    <th key={colIdx} className="px-2 py-2 text-center text-xs font-semibold min-w-[110px]">
                       <div className="flex items-center gap-1 justify-center">
                         <input
                           value={mat}
