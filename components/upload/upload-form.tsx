@@ -14,7 +14,6 @@ import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import dynamic from 'next/dynamic'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 import { PlatingThicknessForm } from './plating-thickness-form'
-import { PlatingThicknessViewer } from './plating-thickness-viewer'
 
 const saveConfigValue = async (
   name: string,
@@ -85,7 +84,7 @@ function normalizeDate(date: string) {
 }
 
 export function UploadForm() {
-  const [activeTab, setActiveTab] = useState<'pdf' | 'plating' | 'viewer'>('pdf')
+  const [activeTab, setActiveTab] = useState<'pdf' | 'plating'>('pdf')
   
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -424,17 +423,6 @@ export function UploadForm() {
         >
           도금두께 등록
         </button>
-        <button
-          onClick={() => setActiveTab('viewer')}
-          className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
-            activeTab === 'viewer'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          도금두께 조회
-        </button>
       </div>
 
       {/* 탭 콘텐츠 */}
@@ -761,18 +749,7 @@ export function UploadForm() {
       {/* 도금두께 등록 탭 */}
       {activeTab === 'plating' && (
         <div className="max-w-3xl">
-          <PlatingThicknessForm
-            onSuccess={() => {
-              setActiveTab('viewer')
-            }}
-          />
-        </div>
-      )}
-
-      {/* 도금두께 조회 탭 */}
-      {activeTab === 'viewer' && (
-        <div className="max-w-6xl">
-          <PlatingThicknessViewer />
+          <PlatingThicknessForm />
         </div>
       )}
     </div>
