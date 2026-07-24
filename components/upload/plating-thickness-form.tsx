@@ -99,15 +99,27 @@ function parseClipboardText(text: string) {
     if (/^No\s/i.test(line)) continue
     if (/최대값|최소값|범위|평균값|표준편차|변동계수/i.test(line)) continue
 
-    const parts = line.split(/\t|\s{2,}/).map(p => p.trim()).filter(Boolean)
+    // 탭으로 구분된 데이터 파싱
+    const parts = line.split('\t').map(p => p.trim()).filter(Boolean)
+    
     if (parts.length >= matCount + 1 && /^\d+$/.test(parts[0])) {
       const values = parts.slice(1, 1 + matCount)
       const allNumeric = values.every(v => !isNaN(parseFloat(v)))
+      
       if (allNumeric) {
-        const rest = parts.slice(1 + matCount).join(' ')
-        // 날짜 시간 포맷: "2026-07-24 오후 12:47:43" 또는 "2026-07-24 12:47:43"
-        const dtMatch = rest.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s+(오전|오후)?\s*\d{1,2}:\d{2}(:\d{2})?/)
-        dataRows.push({ values, dateTime: dtMatch ? dtMatch[0].trim() : undefined })
+        // 남은 부분에서 날짜/시간 추출
+        // 형식: "2026-07-24 오후 12:47:43" 또는 "2026-07-24 12:47:43"
+        let dateTime: string | undefined
+        for (let i = 1 + matCount; i < parts.length; i++) {
+          const part = parts[i]
+          const dtMatch = part.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s+(오전|오후)?\s*\d{1,2}:\d{2}(:\d{2})?/)
+          if (dtMatch) {
+            dateTime = dtMatch[0].trim()
+            break
+          }
+        }
+        
+        dataRows.push({ values, dateTime })
       }
     }
   }
