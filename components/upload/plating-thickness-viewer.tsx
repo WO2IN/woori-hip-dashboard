@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, Loader2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Download, Loader2, ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -39,21 +39,22 @@ const TYPE_BADGE: Record<string, string> = {
   final: 'bg-emerald-500/15 text-emerald-400',
 }
 
-function RecordRow({ record }: { record: PlatingRecord }) {
+function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id: string) => Promise<void> }) {
   const [open, setOpen] = useState(false)
   const hasDateTime = record.rows.some(r => r.dateTime)
 
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-card">
       {/* ── 헤더 (클릭하면 펼쳐짐) ── */}
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
-      >
-        <span className="text-muted-foreground shrink-0">
-          {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        </span>
+      <div className="w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="flex items-center gap-3 flex-1 text-left"
+        >
+          <span className="text-muted-foreground shrink-0">
+            {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </span>
 
         {/* 날짜 */}
         <span className="text-sm text-muted-foreground w-24 shrink-0">{record.date}</span>
@@ -84,9 +85,23 @@ function RecordRow({ record }: { record: PlatingRecord }) {
           {record.materials.join(' / ')}
         </span>
 
-        {/* 측정 행 수 */}
-        <span className="text-xs text-muted-foreground shrink-0">{record.rows.length}건</span>
-      </button>
+          {/* 측정 행 수 */}
+          <span className="text-xs text-muted-foreground shrink-0">{record.rows.length}건</span>
+        </button>
+
+        {/* 삭제 버튼 */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(record.id)
+          }}
+          className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors shrink-0"
+          title="삭제"
+        >
+          <Trash2 className="w-4 h-4 text-destructive hover:text-destructive/80" />
+        </button>
+      </div>
 
       {/* ── 펼쳐지는 상세 ── */}
       {open && (
@@ -160,30 +175,52 @@ export function PlatingThicknessViewer() {
 
   useEffect(() => { loadRecords() }, [])
 
+  const handleDelete = async (recordId: string) => {
+    if (!confirm('정말 이 기록을 삭제하시겠습니까?')) return
+    try {
+      const res = await fetch('/api/plating-thickness', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: recordId }),
+      })
+      if (!res.ok) throw new Error('삭제 실패')
+      toast.success('기록이 삭제되었습니다.')
+      setRecords(records.filter(r => r.id !== recordId))
+    } catch {
+      toast.error('삭제에 실패했습니다.')
+    }
+  }
+
   const handleExportToExcel = async () => {
     if (records.length === 0) { toast.error('내보낼 데이터가 없습니다.'); return }
     setExporting(true)
     try {
       const XLSX = await import('xlsx')
 
-      // 단일 시트에 모든 레코드를 행 단위로 풀어서 나열
-      // 헤더 행: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | No | [재질1] | [재질2] | ... | 측정 일시
-      // 하지만 재질 수가 레코드마다 다를 수 있으므로, 전체 유니크 재질 컬럼을 수집
-      const allMaterials = Array.from(
-        new Set(records.flatMap(r => r.materials))
-      )
+      // 각 레코드를 하나의 행으로 표현 (모든 측정값을 가로로 나열)
+      // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | 1-No | 1-[재질1] | 1-[재질2] | ... | 1-측정일시 | 2-No | 2-[재질1] | ...
+      
+      // 각 레코드의 최대 행 수 구하기
+      const maxRowsPerRecord = Math.max(...records.map(r => r.rows.length), 1)
+      
+      // 전체 유니크 재질 수집
+      const allMaterials = Array.from(new Set(records.flatMap(r => r.materials)))
 
-      const headerRow = [
-        '날짜', '품명', '로트번호', '초/중/종물', '업체', '도금사양', '측정시간', '비고',
-        'No',
-        ...allMaterials.map(m => `${m} (μm)`),
-        '측정 일시',
-      ]
+      // 헤더 구성
+      const headerRow: string[] = ['날짜', '품명', '로트번호', '초/중/종물', '업체', '도금사양', '측정시간', '비고']
+      
+      for (let rowIdx = 1; rowIdx <= maxRowsPerRecord; rowIdx++) {
+        headerRow.push(`${rowIdx}-No`)
+        allMaterials.forEach(mat => {
+          headerRow.push(`${rowIdx}-${mat} (μm)`)
+        })
+        headerRow.push(`${rowIdx}-측정일시`)
+      }
 
       const dataRows: (string | number)[][] = []
 
       records.forEach(record => {
-        const metaPrefix = [
+        const row: (string | number)[] = [
           record.date,
           record.productName,
           record.lotNumber ?? '',
@@ -194,39 +231,62 @@ export function PlatingThicknessViewer() {
           record.note ?? '',
         ]
 
-        record.rows.forEach((row, idx) => {
-          // 재질 값을 allMaterials 순서에 맞게 매핑
-          const matValues = allMaterials.map(mat => {
-            const matIdx = record.materials.indexOf(mat)
-            if (matIdx === -1) return ''
-            const v = row.values[matIdx] ?? ''
-            return parseFloat(v) || v
-          })
+        // 각 측정 행(row)을 가로로 나열
+        for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
+          const measureRow = record.rows[rowIdx]
+          
+          if (measureRow) {
+            row.push(rowIdx + 1) // No
+            
+            // 재질 값 매핑
+            allMaterials.forEach(mat => {
+              const matIdx = record.materials.indexOf(mat)
+              if (matIdx !== -1 && measureRow.values[matIdx]) {
+                const v = parseFloat(measureRow.values[matIdx])
+                row.push(isNaN(v) ? measureRow.values[matIdx] : v)
+              } else {
+                row.push('')
+              }
+            })
+            
+            row.push(measureRow.dateTime ?? '') // 측정 일시
+          } else {
+            // 빈 행
+            row.push('') // No
+            for (let i = 0; i < allMaterials.length; i++) {
+              row.push('')
+            }
+            row.push('') // 측정 일시
+          }
+        }
 
-          dataRows.push([
-            // 첫 행에만 메타 출력, 이후 행은 빈값 (그룹 표현)
-            ...(idx === 0 ? metaPrefix : metaPrefix.map(() => '')),
-            idx + 1,
-            ...matValues,
-            row.dateTime ?? '',
-          ])
-        })
+        dataRows.push(row)
       })
 
       const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows])
-      ws['!cols'] = [
+      
+      // 열 너비 설정
+      const cols: any[] = [
         { wch: 11 }, { wch: 14 }, { wch: 14 }, { wch: 8 }, { wch: 10 },
         { wch: 20 }, { wch: 8 }, { wch: 12 },
-        { wch: 5 },
-        ...allMaterials.map(() => ({ wch: 10 })),
-        { wch: 22 },
       ]
+      
+      for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
+        cols.push({ wch: 5 }) // No
+        for (let i = 0; i < allMaterials.length; i++) {
+          cols.push({ wch: 10 }) // 재질
+        }
+        cols.push({ wch: 18 }) // 측정 일시
+      }
+      
+      ws['!cols'] = cols
 
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, '도금두께')
       XLSX.writeFile(wb, `도금두께_${new Date().toISOString().split('T')[0]}.xlsx`)
       toast.success('엑셀 파일이 다운로드되었습니다.')
-    } catch {
+    } catch (error) {
+      console.error('[v0] Excel export error:', error)
       toast.error('엑셀 내보내기에 실패했습니다.')
     } finally {
       setExporting(false)
@@ -261,7 +321,7 @@ export function PlatingThicknessViewer() {
 
       <div className="space-y-2">
         {records.map(record => (
-          <RecordRow key={record.id} record={record} />
+          <RecordRow key={record.id} record={record} onDelete={handleDelete} />
         ))}
       </div>
     </div>
