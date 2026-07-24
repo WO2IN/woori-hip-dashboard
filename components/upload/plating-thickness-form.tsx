@@ -112,13 +112,16 @@ function parseClipboardText(text: string) {
         let dateTime: string | undefined
         for (let i = 1 + matCount; i < parts.length; i++) {
           const part = parts[i]
+          console.log('[v0] Checking part for datetime:', part)
           const dtMatch = part.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s+(오전|오후)?\s*\d{1,2}:\d{2}(:\d{2})?/)
           if (dtMatch) {
             dateTime = dtMatch[0].trim()
+            console.log('[v0] Found dateTime:', dateTime)
             break
           }
         }
         
+        console.log('[v0] Row data - values:', values, 'dateTime:', dateTime)
         dataRows.push({ values, dateTime })
       }
     }
@@ -197,6 +200,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     }
 
     if (parsed.rows && parsed.rows.length > 0) {
+      console.log('[v0] Parsed rows:', parsed.rows)
       const newRows: MeasurementRow[] = parsed.rows.map((r, i) => ({
         id: `parsed-${i}-${Date.now()}`,
         values: r.values.length >= mats.length
@@ -204,12 +208,14 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
           : [...r.values, ...Array(mats.length - r.values.length).fill('')],
         dateTime: r.dateTime,
       }))
+      console.log('[v0] New rows with dateTime:', newRows)
       setRows(newRows)
       changed.push(`측정값 ${newRows.length}행`)
       
       // 마지막 행의 측정시간을 기본정보 측정시간으로 설정
       const lastRow = newRows[newRows.length - 1]
       if (lastRow?.dateTime) {
+        console.log('[v0] Setting measurement time:', lastRow.dateTime)
         setMeasurementTime(lastRow.dateTime)
         changed.push('측정시간')
       }
@@ -299,7 +305,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const selectClass = 'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-end pr-8">
       <div className="w-full max-w-2xl">
         <div className="space-y-5">
 
