@@ -99,31 +99,20 @@ function parseClipboardText(text: string) {
     if (/^No\s/i.test(line)) continue
     if (/최대값|최소값|범위|평균값|표준편차|변동계수/i.test(line)) continue
 
-    // 탭으로 구분된 데이터 파싱
-    const parts = line.split('\t').map(p => p.trim()).filter(Boolean)
+    // 탭으로 구분된 데이터 파싱 (빈 셀 포함)
+    const parts = line.split('\t').map(p => p.trim())
+    if (parts.length < matCount + 1) continue
+    if (!/^\d+$/.test(parts[0])) continue
+
+    const values = parts.slice(1, 1 + matCount)
+    const allNumeric = values.every(v => !isNaN(parseFloat(v)))
     
-    if (parts.length >= matCount + 1 && /^\d+$/.test(parts[0])) {
-      const values = parts.slice(1, 1 + matCount)
-      const allNumeric = values.every(v => !isNaN(parseFloat(v)))
-      
-      if (allNumeric) {
-        // 남은 부분에서 날짜/시간 추출
-        // 형식: "2026-07-24 오후 12:47:43" 또는 "2026-07-24 12:47:43"
-        let dateTime: string | undefined
-        for (let i = 1 + matCount; i < parts.length; i++) {
-          const part = parts[i]
-          console.log('[v0] Checking part for datetime:', part)
-          const dtMatch = part.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s+(오전|오후)?\s*\d{1,2}:\d{2}(:\d{2})?/)
-          if (dtMatch) {
-            dateTime = dtMatch[0].trim()
-            console.log('[v0] Found dateTime:', dateTime)
-            break
-          }
-        }
-        
-        console.log('[v0] Row data - values:', values, 'dateTime:', dateTime)
-        dataRows.push({ values, dateTime })
-      }
+    if (allNumeric) {
+      // 날짜+시간: 탭 split 후 남은 파트들을 공백으로 합쳐서 한번에 매칭
+      // "2026-07-24 오후 12:47:43" 또는 "2026-07-24 12:47:43"
+      const restStr = parts.slice(1 + matCount).join(' ')
+      const dtMatch = restStr.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s*(?:오전|오후)?\s*\d{1,2}:\d{2}(?::\d{2})?/)
+      dataRows.push({ values, dateTime: dtMatch ? dtMatch[0].trim() : undefined })
     }
   }
 
@@ -200,7 +189,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     }
 
     if (parsed.rows && parsed.rows.length > 0) {
-      console.log('[v0] Parsed rows:', parsed.rows)
       const newRows: MeasurementRow[] = parsed.rows.map((r, i) => ({
         id: `parsed-${i}-${Date.now()}`,
         values: r.values.length >= mats.length
@@ -208,17 +196,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
           : [...r.values, ...Array(mats.length - r.values.length).fill('')],
         dateTime: r.dateTime,
       }))
-      console.log('[v0] New rows with dateTime:', newRows)
       setRows(newRows)
       changed.push(`측정값 ${newRows.length}행`)
-      
-      // 마지막 행의 측정시간을 기본정보 측정시간으로 설정
-      const lastRow = newRows[newRows.length - 1]
-      if (lastRow?.dateTime) {
-        console.log('[v0] Setting measurement time:', lastRow.dateTime)
-        setMeasurementTime(lastRow.dateTime)
-        changed.push('측정시간')
-      }
     }
 
     if (changed.length > 0) toast.success(`자동 입력됨: ${changed.join(', ')}`)
@@ -305,8 +284,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const selectClass = 'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 
   return (
-    <div className="w-full flex justify-end pr-8">
-      <div className="w-full max-w-2xl">
+    <div className="w-full flex justify-center px-8">
+      <div className="w-full max-w-3xl">
         <div className="space-y-5">
 
       {/* ── 붙여넣기 영역 ── */}
@@ -364,7 +343,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm">초/중/종물 <span className="text-destructive">*</span></Label>
+              <Label className="text-sm">초/중/���물 <span className="text-destructive">*</span></Label>
               <select value={productType} onChange={e => setProductType(e.target.value)} className={selectClass}>
                 <option value="">선택해주세요</option>
                 {PRODUCT_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
