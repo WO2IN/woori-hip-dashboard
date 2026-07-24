@@ -368,7 +368,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          WOORI-HIP 문서 관리 시스템 v1.0
+          WOORI-HIP 문서 관리 시스템 v1.1
         </p>
       </div>
     </div>
