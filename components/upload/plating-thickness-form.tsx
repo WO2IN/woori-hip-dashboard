@@ -320,21 +320,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       {/* 왼쪽: 폼 */}
       <div className="space-y-5">
 
-      {/* ── 붙여넣기 영역 ── */}
-      <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          <ClipboardPaste className="w-3.5 h-3.5" />
-          측정기 데이터 붙여넣기
-        </div>
-        <textarea
-          ref={pasteAreaRef}
-          onPaste={handlePaste}
-          placeholder="측정기에서 복사한 텍스트를 여기에 붙여넣으세요 (Ctrl+V)"
-          rows={3}
-          className="w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-        />
-      </div>
-
       {/* ── PDF 첨부 ── */}
       <div
         onDragOver={handleDragOver}
@@ -387,6 +372,21 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             </div>
           </div>
         )}
+      </div>
+
+      {/* ── 붙여넣기 영역 ── */}
+      <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <ClipboardPaste className="w-3.5 h-3.5" />
+          측정기 데이터 붙여넣기
+        </div>
+        <textarea
+          ref={pasteAreaRef}
+          onPaste={handlePaste}
+          placeholder="측정기에서 복사한 텍스트를 여기에 붙여넣으세요 (Ctrl+V)"
+          rows={3}
+          className="w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
