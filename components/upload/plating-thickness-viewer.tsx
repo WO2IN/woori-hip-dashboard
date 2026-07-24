@@ -57,36 +57,36 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
           </span>
 
         {/* 날짜 */}
-        <span className="text-sm text-muted-foreground w-24 shrink-0">{record.date}</span>
+        <span className="text-base text-muted-foreground w-24 shrink-0">{record.date}</span>
 
         {/* 품명 */}
-        <span className="text-sm font-semibold flex-1 truncate">{record.productName}</span>
+        <span className="text-base font-semibold flex-1 truncate">{record.productName}</span>
 
         {/* 로트번호 */}
         {record.lotNumber && (
-          <span className="text-xs text-muted-foreground hidden sm:block truncate max-w-[120px]">
+          <span className="text-sm text-muted-foreground hidden sm:block truncate max-w-[120px]">
             LOT: {record.lotNumber}
           </span>
         )}
 
         {/* 업체 */}
-        <span className="text-xs text-muted-foreground hidden md:block shrink-0">{record.company}</span>
+        <span className="text-sm text-muted-foreground hidden md:block shrink-0">{record.company}</span>
 
         {/* 초/중/종물 뱃지 */}
         <span className={cn(
-          'text-xs font-medium px-2 py-0.5 rounded-full shrink-0',
+          'text-sm font-medium px-2 py-0.5 rounded-full shrink-0',
           TYPE_BADGE[record.productType] ?? 'bg-muted text-muted-foreground'
         )}>
           {PRODUCT_TYPE_LABELS[record.productType] ?? record.productType}
         </span>
 
         {/* 재질 요약 */}
-        <span className="text-xs text-muted-foreground hidden lg:block shrink-0">
+        <span className="text-sm text-muted-foreground hidden lg:block shrink-0">
           {record.materials.join(' / ')}
         </span>
 
           {/* 측정 행 수 */}
-          <span className="text-xs text-muted-foreground shrink-0">{record.rows.length}건</span>
+          <span className="text-sm text-muted-foreground shrink-0">{record.rows.length}건</span>
         </button>
 
         {/* 삭제 버튼 */}
@@ -117,31 +117,31 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
 
           {/* 측정값 테이블 */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
                 <tr className="border-b border-border bg-muted/10">
-                  <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground w-12">No</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground w-12">No</th>
                   {record.materials.map((mat, i) => (
-                    <th key={i} className="px-4 py-2 text-center text-xs font-semibold">
+                    <th key={i} className="px-4 py-3 text-center text-sm font-semibold">
                       {mat} <span className="text-muted-foreground font-normal">μm</span>
                     </th>
                   ))}
                   {hasDateTime && (
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">측정 일시</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">측정 일시</th>
                   )}
                 </tr>
               </thead>
               <tbody>
                 {record.rows.map((row, idx) => (
                   <tr key={row.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-2 text-xs text-muted-foreground font-mono">{idx + 1}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{idx + 1}</td>
                     {row.values.map((val, ci) => (
-                      <td key={ci} className="px-4 py-2 text-center font-mono text-sm">
+                      <td key={ci} className="px-4 py-3 text-center font-mono text-base">
                         {parseFloat(val) ? parseFloat(val).toFixed(3) : (val || '—')}
                       </td>
                     ))}
                     {hasDateTime && (
-                      <td className="px-4 py-2 text-xs text-muted-foreground">{row.dateTime ?? ''}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{row.dateTime ?? ''}</td>
                     )}
                   </tr>
                 ))}
