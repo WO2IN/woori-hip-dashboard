@@ -105,7 +105,8 @@ function parseClipboardText(text: string) {
       const allNumeric = values.every(v => !isNaN(parseFloat(v)))
       if (allNumeric) {
         const rest = parts.slice(1 + matCount).join(' ')
-        const dtMatch = rest.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}[\s\S]*?\d{1,2}:\d{2}(:\d{2})?/)
+        // 날짜 시간 포맷: "2026-07-24 오후 12:47:43" 또는 "2026-07-24 12:47:43"
+        const dtMatch = rest.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}\s+(오전|오후)?\s*\d{1,2}:\d{2}(:\d{2})?/)
         dataRows.push({ values, dateTime: dtMatch ? dtMatch[0].trim() : undefined })
       }
     }
@@ -286,8 +287,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const selectClass = 'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="space-y-5">
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-2xl">
+        <div className="space-y-5">
 
       {/* ── 붙여넣기 영역 ── */}
       <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2 flex flex-col items-center">
@@ -461,8 +463,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             {submitting ? '저장 중...' : '등록하기'}
           </Button>
         </div>
-      </div>
+        </div>
 
+        </div>
       </div>
     </div>
   )
