@@ -298,20 +298,20 @@ export function UploadForm() {
       const normalizedLotStart = normalizeLot(lotStart)
 
         if (normalizedLotStart) {
-          const startNo = String(parseInt(lotStartNo || '1', 10))
-          const endNo = String(
-            parseInt(lotEndNo || lotStartNo || '1', 10)
-          )
+        const startNo = String(parseInt(lotStartNo || '1', 10))
 
-          formData.append(
-            'lotStart',
-            `${normalizedLotStart}-${startNo}`
-          )
+        formData.append(
+          'lotStart',
+          `${normalizedLotStart}-${startNo}`
+        )
 
+        // 끝번호를 입력한 경우에만 저장
+        if (lotEndNo.trim()) {
           formData.append(
             'lotEnd',
-            `${normalizedLotStart}-${endNo}`
+            `${normalizedLotStart}-${parseInt(lotEndNo, 10)}`
           )
+        }
         }
 
       if (product) formData.append('product', product)
