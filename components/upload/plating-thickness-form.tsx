@@ -70,10 +70,11 @@ function parseClipboardText(text: string) {
     const companyMatch = line.match(/업체명\s*[:：]?\s*(.+?)(?:\s{2,}|$)/)
     if (companyMatch) result.company = companyMatch[1].trim()
 
-    const materialHeaderMatch = line.match(/([A-Z][a-z]?)\s*:\s*[\d.]+\s*[~－]\s*[\d.]+\s*[μu㎛]/g)
+    const materialHeaderMatch = line.match(/([A-Z][a-z]?)\s*:\s*[\d.]+\s*[~－\-]\s*[\d.]+\s*[μu㎛㎛]?[μu]?[m]?/g)
     if (materialHeaderMatch && materialHeaderMatch.length > 0) {
       result.materials = materialHeaderMatch.map(m => m.match(/^([A-Z][a-z]?)/)![1])
-      result.specification = line.replace(/\s+/g, ' ').trim()
+      // 재질 범위 패턴만 추출해서 도금사양으로 저장 (업체명, 초/중/종물 등 제외)
+      result.specification = materialHeaderMatch.join(' ').replace(/\s+/g, ' ').trim()
     }
 
     if (line.includes('초물')) result.productType = 'initial'
@@ -203,7 +204,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     if (changed.length > 0) {
       toast.success(`자동 입력됨: ${changed.join(', ')}`)
     } else {
-      toast.error('인식할 수 있는 데이터가 없습니다.')
+      toast.error('인식��� 수 있는 데이터가 없습니다.')
     }
   }
 
