@@ -8,6 +8,15 @@ import { Label } from '@/components/ui/label'
 import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import dynamic from 'next/dynamic'
+
+const PdfDragPreview = dynamic(
+  () =>
+    import('@/components/upload/pdf-drag-preview').then(
+      mod => mod.PdfDragPreview
+    ),
+  { ssr: false }
+)
 
 interface MeasurementRow {
   id: string
@@ -547,42 +556,52 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
       </div>
 
-      {/* 오른쪽: 측정값 테이블 미리보기 */}
-      {hasTable && (
-        <div className="sticky top-5 min-h-0 max-h-[calc(100vh-60px)] overflow-y-auto">
-          <div className="border border-border rounded-xl overflow-hidden bg-card shadow-md">
-            <div className="p-4 border-b border-border bg-muted/20">
-              <p className="text-sm font-semibold">측정값 미리보기</p>
+      {/* 오른쪽: PDF 미리보기 + 측정값 테이블 미리보기 */}
+      {(hasTable || pdfFile) && (
+        <div className="sticky top-5 min-h-0 max-h-[calc(100vh-60px)] overflow-y-auto space-y-4">
+          {/* PDF 미리보기 */}
+          {pdfFile && (
+            <div className="border border-border rounded-xl overflow-hidden bg-card shadow-md min-h-0">
+              <PdfDragPreview file={pdfFile} />
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/10">
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground w-8">No</th>
-                    {materials.map((mat, i) => (
-                      <th key={i} className="px-3 py-2 text-center text-xs font-semibold">
-                        {mat || '—'} <span className="text-muted-foreground font-normal text-xs">μm</span>
-                      </th>
-                    ))}
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">측정 일시</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row, idx) => (
-                    <tr key={row.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                      <td className="px-3 py-2 text-xs text-muted-foreground font-mono">{idx + 1}</td>
-                      {row.values.map((val, ci) => (
-                        <td key={ci} className="px-3 py-2 text-center font-mono text-sm">
-                          {val || '—'}
-                        </td>
+          )}
+
+          {/* 측정값 테이블 미리보기 */}
+          {hasTable && (
+            <div className="border border-border rounded-xl overflow-hidden bg-card shadow-md">
+              <div className="p-4 border-b border-border bg-muted/20">
+                <p className="text-sm font-semibold">측정값 미리보기</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/10">
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground w-8">No</th>
+                      {materials.map((mat, i) => (
+                        <th key={i} className="px-3 py-2 text-center text-xs font-semibold">
+                          {mat || '—'} <span className="text-muted-foreground font-normal text-xs">μm</span>
+                        </th>
                       ))}
-                      <td className="px-3 py-2 text-xs text-muted-foreground">{row.dateTime ?? ''}</td>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">측정 일시</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, idx) => (
+                      <tr key={row.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                        <td className="px-3 py-2 text-xs text-muted-foreground font-mono">{idx + 1}</td>
+                        {row.values.map((val, ci) => (
+                          <td key={ci} className="px-3 py-2 text-center font-mono text-sm">
+                            {val || '—'}
+                          </td>
+                        ))}
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{row.dateTime ?? ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
