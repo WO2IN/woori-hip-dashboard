@@ -1,1 +1,125 @@
-[]
+[
+  {
+    "id": "2026-07-24-001",
+    "date": "2026-07-24",
+    "productName": "PCB 커넥터",
+    "lotNumber": "LOT-2026-0724-001",
+    "productType": "초물",
+    "company": "A업체",
+    "specification": "Sn 3-5μm / Ni 2-4μm",
+    "measurementTime": "09:30",
+    "measurements": [
+      { "material": "Sn", "value": 4.2 },
+      { "material": "Ni", "value": 3.1 }
+    ]
+  },
+  {
+    "id": "2026-07-24-002",
+    "date": "2026-07-24",
+    "productName": "PCB 커넥터",
+    "lotNumber": "LOT-2026-0724-001",
+    "productType": "중물",
+    "company": "A업체",
+    "specification": "Sn 3-5μm / Ni 2-4μm",
+    "measurementTime": "10:15",
+    "measurements": [
+      { "material": "Sn", "value": 4.5 },
+      { "material": "Ni", "value": 3.3 }
+    ]
+  },
+  {
+    "id": "2026-07-24-003",
+    "date": "2026-07-24",
+    "productName": "PCB 커넥터",
+    "lotNumber": "LOT-2026-0724-001",
+    "productType": "종물",
+    "company": "A업체",
+    "specification": "Sn 3-5μm / Ni 2-4μm",
+    "measurementTime": "11:00",
+    "measurements": [
+      { "material": "Sn", "value": 4.1 },
+      { "material": "Ni", "value": 3.2 }
+    ]
+  },
+  {
+    "id": "2026-07-24-004",
+    "date": "2026-07-24",
+    "productName": "금속 부품",
+    "lotNumber": "LOT-2026-0724-002",
+    "productType": "초물",
+    "company": "B업체",
+    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
+    "measurementTime": "13:30",
+    "measurements": [
+      { "material": "Cu", "value": 1.5 },
+      { "material": "Au", "value": 0.2 }
+    ]
+  },
+  {
+    "id": "2026-07-24-005",
+    "date": "2026-07-24",
+    "productName": "금속 부품",
+    "lotNumber": "LOT-2026-0724-002",
+    "productType": "중물",
+    "company": "B업체",
+    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
+    "measurementTime": "14:15",
+    "measurements": [
+      { "material": "Cu", "value": 1.6 },
+      { "material": "Au", "value": 0.25 }
+    ]
+  },
+  {
+    "id": "2026-07-24-006",
+    "date": "2026-07-24",
+    "productName": "금속 부품",
+    "lotNumber": "LOT-2026-0724-002",
+    "productType": "종물",
+    "company": "B업체",
+    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
+    "measurementTime": "15:00",
+    "measurements": [
+      { "material": "Cu", "value": 1.4 },
+      { "material": "Au", "value": 0.22 }
+    ]
+  },
+  {
+    "id": "2026-07-23-001",
+    "date": "2026-07-23",
+    "productName": "IC 핀",
+    "lotNumber": "LOT-2026-0723-001",
+    "productType": "초물",
+    "company": "A업체",
+    "specification": "Ag 2-3μm",
+    "measurementTime": "10:00",
+    "measurements": [
+      { "material": "Ag", "value": 2.5 }
+    ]
+  },
+  {
+    "id": "2026-07-23-002",
+    "date": "2026-07-23",
+    "productName": "IC 핀",
+    "lotNumber": "LOT-2026-0723-001",
+    "productType": "중물",
+    "company": "A업체",
+    "specification": "Ag 2-3μm",
+    "measurementTime": "10:45",
+    "measurements": [
+      { "material": "Ag", "value": 2.7 }
+    ]
+  },
+  {
+    "id": "2026-07-23-003",
+    "date": "2026-07-23",
+    "productName": "IC 핀",
+    "lotNumber": "LOT-2026-0723-001",
+    "productType": "종물",
+    "company": "A업체",
+    "specification": "Ag 2-3μm",
+    "measurementTime": "11:30",
+    "measurements": [
+      { "material": "Ag", "value": 2.6 }
+    ]
+  }
+]
