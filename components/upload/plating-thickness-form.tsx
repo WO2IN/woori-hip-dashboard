@@ -363,7 +363,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             </div>
           </div>
         </div>
-        </div>
 
         {/* ── 측정값 테이블 ── */}
         <div className="px-5 py-4 space-y-3">
