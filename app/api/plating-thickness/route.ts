@@ -6,8 +6,8 @@ const DATA_FILE = join(process.cwd(), 'data', 'plating-thickness.json')
 
 interface MeasurementRow {
   id: string
-  material: string
-  value: string
+  values: string[]
+  dateTime?: string
 }
 
 interface PlatingRecord {
@@ -17,32 +17,25 @@ interface PlatingRecord {
   lotNumber: string
   productType: 'initial' | 'middle' | 'final'
   company: string
-  measurements: MeasurementRow[]
+  materials: string[]
+  rows: MeasurementRow[]
   specification: string
   measurementTime: string
   createdAt: string
 }
 
-async function ensureDataDir() {
+async function readData(): Promise<PlatingRecord[]> {
   try {
-    await readFile(DATA_FILE)
+    const data = await readFile(DATA_FILE, 'utf-8')
+    return JSON.parse(data || '[]')
   } catch {
-    // 파일이 없으면 빈 배열로 초기화
-    const dir = join(process.cwd(), 'data')
-    try {
-      await readFile(dir)
-    } catch {
-      // 디렉토리도 없으면 생성 필요 (실제로는 Next.js 구조에서 이미 존재)
-    }
-    await writeFile(DATA_FILE, JSON.stringify([]))
+    return []
   }
 }
 
 export async function GET() {
   try {
-    await ensureDataDir()
-    const data = await readFile(DATA_FILE, 'utf-8')
-    const records: PlatingRecord[] = JSON.parse(data)
+    const records = await readData()
     return NextResponse.json(records)
   } catch (error) {
     console.error('데이터 읽기 실패:', error)
@@ -52,28 +45,26 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await ensureDataDir()
     const newRecord: PlatingRecord = await request.json()
-
-    // 기존 데이터 읽기
-    const data = await readFile(DATA_FILE, 'utf-8')
-    const records: PlatingRecord[] = JSON.parse(data || '[]')
-
-    // 새 기록 추가
+    const records = await readData()
     records.push(newRecord)
-
-    // 데이터 저장
     await writeFile(DATA_FILE, JSON.stringify(records, null, 2))
-
-    return NextResponse.json(
-      { success: true, message: '저장되었습니다.' },
-      { status: 201 }
-    )
+    return NextResponse.json({ success: true }, { status: 201 })
   } catch (error) {
     console.error('데이터 저장 실패:', error)
-    return NextResponse.json(
-      { error: '저장에 실패했습니다.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '저장에 실패했습니다.' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json()
+    const records = await readData()
+    const filtered = records.filter(r => r.id !== id)
+    await writeFile(DATA_FILE, JSON.stringify(filtered, null, 2))
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('데이터 삭제 실패:', error)
+    return NextResponse.json({ error: '삭제에 실패했습니다.' }, { status: 500 })
   }
 }

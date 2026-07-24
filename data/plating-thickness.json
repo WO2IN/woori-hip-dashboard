@@ -2,124 +2,112 @@
   {
     "id": "2026-07-24-001",
     "date": "2026-07-24",
-    "productName": "PCB 커넥터",
+    "productName": "BUSBAR-NEGATIVE",
     "lotNumber": "LOT-2026-0724-001",
-    "productType": "초물",
-    "company": "A업체",
-    "specification": "Sn 3-5μm / Ni 2-4μm",
+    "productType": "initial",
+    "company": "넥스플러스",
+    "specification": "Sn : 5.0~9.0μm  Ni : 1.0~5.0μm",
     "measurementTime": "09:30",
-    "measurements": [
-      { "material": "Sn", "value": 4.2 },
-      { "material": "Ni", "value": 3.1 }
-    ]
+    "materials": ["Sn", "Ni"],
+    "rows": [
+      { "id": "r1", "values": ["8.678", "2.912"], "dateTime": "2026-07-24 오후 12:47:43" },
+      { "id": "r2", "values": ["8.416", "2.512"], "dateTime": "2026-07-24 오후 12:48:05" },
+      { "id": "r3", "values": ["8.025", "2.600"], "dateTime": "2026-07-24 오후 12:48:29" },
+      { "id": "r4", "values": ["8.253", "2.878"], "dateTime": "2026-07-24 오후 12:56:16" },
+      { "id": "r5", "values": ["8.897", "3.076"], "dateTime": "2026-07-24 오후 12:56:50" },
+      { "id": "r6", "values": ["7.647", "2.133"], "dateTime": "2026-07-24 오후 12:57:22" }
+    ],
+    "createdAt": "2026-07-24T09:30:00.000Z"
   },
   {
     "id": "2026-07-24-002",
     "date": "2026-07-24",
-    "productName": "PCB 커넥터",
+    "productName": "BUSBAR-NEGATIVE",
     "lotNumber": "LOT-2026-0724-001",
-    "productType": "중물",
-    "company": "A업체",
-    "specification": "Sn 3-5μm / Ni 2-4μm",
-    "measurementTime": "10:15",
-    "measurements": [
-      { "material": "Sn", "value": 4.5 },
-      { "material": "Ni", "value": 3.3 }
-    ]
+    "productType": "middle",
+    "company": "넥스플러스",
+    "specification": "Sn : 5.0~9.0μm  Ni : 1.0~5.0μm",
+    "measurementTime": "13:10",
+    "materials": ["Sn", "Ni"],
+    "rows": [
+      { "id": "r1", "values": ["8.541", "2.774"], "dateTime": "2026-07-24 오후 1:10:12" },
+      { "id": "r2", "values": ["8.312", "2.650"], "dateTime": "2026-07-24 오후 1:10:38" },
+      { "id": "r3", "values": ["8.774", "3.001"], "dateTime": "2026-07-24 오후 1:11:05" },
+      { "id": "r4", "values": ["8.099", "2.488"], "dateTime": "2026-07-24 오후 1:11:29" },
+      { "id": "r5", "values": ["8.456", "2.812"], "dateTime": "2026-07-24 오후 1:12:00" },
+      { "id": "r6", "values": ["7.988", "2.301"], "dateTime": "2026-07-24 오후 1:12:33" }
+    ],
+    "createdAt": "2026-07-24T13:10:00.000Z"
   },
   {
     "id": "2026-07-24-003",
     "date": "2026-07-24",
-    "productName": "PCB 커넥터",
+    "productName": "BUSBAR-NEGATIVE",
     "lotNumber": "LOT-2026-0724-001",
-    "productType": "종물",
-    "company": "A업체",
-    "specification": "Sn 3-5μm / Ni 2-4μm",
-    "measurementTime": "11:00",
-    "measurements": [
-      { "material": "Sn", "value": 4.1 },
-      { "material": "Ni", "value": 3.2 }
-    ]
-  },
-  {
-    "id": "2026-07-24-004",
-    "date": "2026-07-24",
-    "productName": "금속 부품",
-    "lotNumber": "LOT-2026-0724-002",
-    "productType": "초물",
-    "company": "B업체",
-    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
-    "measurementTime": "13:30",
-    "measurements": [
-      { "material": "Cu", "value": 1.5 },
-      { "material": "Au", "value": 0.2 }
-    ]
-  },
-  {
-    "id": "2026-07-24-005",
-    "date": "2026-07-24",
-    "productName": "금속 부품",
-    "lotNumber": "LOT-2026-0724-002",
-    "productType": "중물",
-    "company": "B업체",
-    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
-    "measurementTime": "14:15",
-    "measurements": [
-      { "material": "Cu", "value": 1.6 },
-      { "material": "Au", "value": 0.25 }
-    ]
-  },
-  {
-    "id": "2026-07-24-006",
-    "date": "2026-07-24",
-    "productName": "금속 부품",
-    "lotNumber": "LOT-2026-0724-002",
-    "productType": "종물",
-    "company": "B업체",
-    "specification": "Cu 1-2μm / Au 0.1-0.3μm",
-    "measurementTime": "15:00",
-    "measurements": [
-      { "material": "Cu", "value": 1.4 },
-      { "material": "Au", "value": 0.22 }
-    ]
+    "productType": "final",
+    "company": "넥스플러스",
+    "specification": "Sn : 5.0~9.0μm  Ni : 1.0~5.0μm",
+    "measurementTime": "16:45",
+    "materials": ["Sn", "Ni"],
+    "rows": [
+      { "id": "r1", "values": ["8.201", "2.544"], "dateTime": "2026-07-24 오후 4:45:11" },
+      { "id": "r2", "values": ["8.633", "2.988"], "dateTime": "2026-07-24 오후 4:45:44" },
+      { "id": "r3", "values": ["7.912", "2.411"], "dateTime": "2026-07-24 오후 4:46:10" },
+      { "id": "r4", "values": ["8.388", "2.700"], "dateTime": "2026-07-24 오후 4:46:38" },
+      { "id": "r5", "values": ["8.751", "3.122"], "dateTime": "2026-07-24 오후 4:47:05" },
+      { "id": "r6", "values": ["8.044", "2.233"], "dateTime": "2026-07-24 오후 4:47:30" }
+    ],
+    "createdAt": "2026-07-24T16:45:00.000Z"
   },
   {
     "id": "2026-07-23-001",
     "date": "2026-07-23",
-    "productName": "IC 핀",
+    "productName": "PCB 커넥터",
     "lotNumber": "LOT-2026-0723-001",
-    "productType": "초물",
-    "company": "A업체",
-    "specification": "Ag 2-3μm",
+    "productType": "initial",
+    "company": "업체2",
+    "specification": "Cu 1~2μm / Au 0.1~0.3μm",
     "measurementTime": "10:00",
-    "measurements": [
-      { "material": "Ag", "value": 2.5 }
-    ]
+    "materials": ["Cu", "Au"],
+    "rows": [
+      { "id": "r1", "values": ["1.523", "0.198"] },
+      { "id": "r2", "values": ["1.611", "0.224"] },
+      { "id": "r3", "values": ["1.478", "0.187"] }
+    ],
+    "createdAt": "2026-07-23T10:00:00.000Z"
   },
   {
     "id": "2026-07-23-002",
     "date": "2026-07-23",
-    "productName": "IC 핀",
+    "productName": "PCB 커넥터",
     "lotNumber": "LOT-2026-0723-001",
-    "productType": "중물",
-    "company": "A업체",
-    "specification": "Ag 2-3μm",
-    "measurementTime": "10:45",
-    "measurements": [
-      { "material": "Ag", "value": 2.7 }
-    ]
+    "productType": "middle",
+    "company": "업체2",
+    "specification": "Cu 1~2μm / Au 0.1~0.3μm",
+    "measurementTime": "13:30",
+    "materials": ["Cu", "Au"],
+    "rows": [
+      { "id": "r1", "values": ["1.588", "0.211"] },
+      { "id": "r2", "values": ["1.644", "0.235"] },
+      { "id": "r3", "values": ["1.502", "0.193"] }
+    ],
+    "createdAt": "2026-07-23T13:30:00.000Z"
   },
   {
     "id": "2026-07-23-003",
     "date": "2026-07-23",
-    "productName": "IC 핀",
+    "productName": "PCB 커넥터",
     "lotNumber": "LOT-2026-0723-001",
-    "productType": "종물",
-    "company": "A업체",
-    "specification": "Ag 2-3μm",
-    "measurementTime": "11:30",
-    "measurements": [
-      { "material": "Ag", "value": 2.6 }
-    ]
+    "productType": "final",
+    "company": "업체2",
+    "specification": "Cu 1~2μm / Au 0.1~0.3μm",
+    "measurementTime": "17:00",
+    "materials": ["Cu", "Au"],
+    "rows": [
+      { "id": "r1", "values": ["1.499", "0.202"] },
+      { "id": "r2", "values": ["1.567", "0.218"] },
+      { "id": "r3", "values": ["1.445", "0.181"] }
+    ],
+    "createdAt": "2026-07-23T17:00:00.000Z"
   }
 ]
