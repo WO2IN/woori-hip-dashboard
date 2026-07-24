@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Plus, Trash2, ClipboardPaste } from 'lucide-react'
+import { Plus, Trash2, ClipboardPaste, CloudUpload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 interface MeasurementRow {
   id: string
@@ -27,6 +27,7 @@ interface PlatingRecord {
   specification: string
   measurementTime: string
   note: string
+  pdfFile?: string
   createdAt: string
 }
 
@@ -73,7 +74,6 @@ function parseClipboardText(text: string) {
     const materialHeaderMatch = line.match(/([A-Z][a-z]?)\s*:\s*[\d.]+\s*[~－\-]\s*[\d.]+\s*[μu㎛㎛]?[μu]?[m]?/g)
     if (materialHeaderMatch && materialHeaderMatch.length > 0) {
       result.materials = materialHeaderMatch.map(m => m.match(/^([A-Z][a-z]?)/)![1])
-      // 재질 범위 패턴만 추출해서 도금사양으로 저장 (업체명, 초/중/종물 등 제외)
       result.specification = materialHeaderMatch.join(' ').replace(/\s+/g, ' ').trim()
     }
 
@@ -105,9 +105,9 @@ function parseClipboardText(text: string) {
       const values = parts.slice(1, 1 + matCount)
       const allNumeric = values.every(v => !isNaN(parseFloat(v)))
       if (allNumeric) {
-        const dateTimePart = parts.slice(1 + matCount).join(' ')
-        const dtMatch = dateTimePart.match(/(\d{4}-\d{2}-\d{2}\s+\S+\s+\d{1,2}:\d{2}:\d{2})/)
-        dataRows.push({ values, dateTime: dtMatch ? dtMatch[1] : undefined })
+        const rest = parts.slice(1 + matCount).join(' ')
+        const dtMatch = rest.match(/\d{4}[-./]\d{1,2}[-./]\d{1,2}[\s\S]*?\d{1,2}:\d{2}(:\d{2})?/)
+        dataRows.push({ values, dateTime: dtMatch ? dtMatch[0].trim() : undefined })
       }
     }
   }
@@ -138,10 +138,13 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const [materials, setMaterials] = useState<string[]>(DEFAULT_MATERIALS)
   const [rows, setRows] = useState<MeasurementRow[]>(makeDefaultRows(DEFAULT_MATERIALS.length))
 
-  // 업체 목록
+  // PDF
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [companies, setCompanies] = useState<string[]>(['넥스플러스', '한중'])
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
-
   const [submitting, setSubmitting] = useState(false)
   const pasteAreaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -152,16 +155,28 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       if (data.data && data.data.length > 0) {
         setCompanies(data.data)
       } else {
-        // 기본값 저장
         await saveConfigValue('plating-companies', '넥스플러스')
         await saveConfigValue('plating-companies', '한중')
       }
     } catch {}
   }, [])
 
-  useEffect(() => {
-    loadCompanies()
-  }, [loadCompanies])
+  useEffect(() => { loadCompanies() }, [loadCompanies])
+
+  // ── PDF 드래그앤드롭 ─────────────────────────────────────────────────────
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragging(true) }
+  const handleDragLeave = () => setDragging(false)
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragging(false)
+    const f = e.dataTransfer.files[0]
+    if (f && f.type === 'application/pdf') setPdfFile(f)
+    else toast.error('PDF 파일만 업로드 가능합니다.')
+  }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (f) setPdfFile(f)
+  }
 
   // ── 붙여넣기 ────────────────────────────────────────────────────────────
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -201,11 +216,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       changed.push(`측정값 ${newRows.length}행`)
     }
 
-    if (changed.length > 0) {
-      toast.success(`자동 입력됨: ${changed.join(', ')}`)
-    } else {
-      toast.error('인식��� 수 있는 데이터가 없습니다.')
-    }
+    if (changed.length > 0) toast.success(`자동 입력됨: ${changed.join(', ')}`)
+    else toast.error('인식할 수 있는 데이터가 없습니다.')
   }
 
   // ── 재질(열) 조작 ────────────────────────────────────────────────────────
@@ -213,29 +225,28 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     setMaterials(prev => [...prev, ''])
     setRows(prev => prev.map(r => ({ ...r, values: [...r.values, ''] })))
   }
-
   const removeMaterial = (colIdx: number) => {
     if (materials.length <= 1) { toast.error('재질은 최소 1개 필요합니다.'); return }
     setMaterials(prev => prev.filter((_, i) => i !== colIdx))
     setRows(prev => prev.map(r => ({ ...r, values: r.values.filter((_, i) => i !== colIdx) })))
   }
-
   const updateMaterial = (colIdx: number, val: string) => {
     setMaterials(prev => prev.map((m, i) => i === colIdx ? val : m))
   }
 
   // ── 측정 행 조작 ─────────────────────────────────────────────────────────
   const addRow = () => setRows(prev => [...prev, newRow(materials.length)])
-
   const removeRow = (id: string) => {
     if (rows.length <= 1) { toast.error('최소 1행은 필요합니다.'); return }
     setRows(prev => prev.filter(r => r.id !== id))
   }
-
   const updateCell = (rowId: string, colIdx: number, val: string) => {
     setRows(prev => prev.map(r =>
       r.id === rowId ? { ...r, values: r.values.map((v, i) => i === colIdx ? val : v) } : r
     ))
+  }
+  const updateDateTime = (rowId: string, val: string) => {
+    setRows(prev => prev.map(r => r.id === rowId ? { ...r, dateTime: val } : r))
   }
 
   // ── 저장 ─────────────────────────────────────────────────────────────────
@@ -271,11 +282,11 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       if (!res.ok) throw new Error('저장 실패')
 
       await saveConfigValue('plating-companies', company)
-
       toast.success('도금두께가 성공적으로 등록되었습니다.')
+
       setDate(''); setProductName(''); setLotNumber('')
       setProductType(''); setCompany(''); setSpecification('')
-      setMeasurementTime(''); setNote('')
+      setMeasurementTime(''); setNote(''); setPdfFile(null)
       setMaterials(DEFAULT_MATERIALS)
       setRows(makeDefaultRows(DEFAULT_MATERIALS.length))
       onSuccess?.()
@@ -304,6 +315,60 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
           rows={3}
           className="w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
         />
+      </div>
+
+      {/* ── PDF 첨부 ── */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => !pdfFile && fileInputRef.current?.click()}
+        className={cn(
+          'border-2 border-dashed rounded-xl p-5 text-center transition-all',
+          !pdfFile && 'cursor-pointer',
+          dragging
+            ? 'border-primary bg-accent'
+            : pdfFile
+              ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
+              : 'border-border hover:border-primary/60 hover:bg-accent/40'
+        )}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        {pdfFile ? (
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-left">
+              <p className="font-semibold text-foreground text-sm">{pdfFile.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={e => { e.stopPropagation(); setPdfFile(null) }}
+              className="gap-1.5 h-7 text-xs shrink-0"
+            >
+              <X className="w-3 h-3" /> 파일 제거
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <div className={cn(
+              'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
+              dragging ? 'bg-primary text-primary-foreground' : 'bg-muted'
+            )}>
+              <CloudUpload className={cn('w-5 h-5', dragging ? 'text-primary-foreground' : 'text-muted-foreground')} />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground text-sm">PDF 파일 첨부 (선택)</p>
+              <p className="text-xs text-muted-foreground mt-0.5">드래그하거나 클릭하여 선택 · PDF만 지원</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
@@ -411,6 +476,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                       </div>
                     </th>
                   ))}
+                  <th className="px-3 py-2 text-center text-xs font-semibold text-muted-foreground min-w-[160px]">
+                    측정시간
+                  </th>
                   <th className="w-8" />
                 </tr>
               </thead>
@@ -430,6 +498,14 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                         />
                       </td>
                     ))}
+                    <td className="px-2 py-1.5">
+                      <Input
+                        value={row.dateTime ?? ''}
+                        onChange={e => updateDateTime(row.id, e.target.value)}
+                        placeholder="측정 일시"
+                        className="text-sm h-8 min-w-[150px]"
+                      />
+                    </td>
                     <td className="px-2 py-1.5 text-center">
                       <button
                         type="button"
