@@ -193,6 +193,13 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       }))
       setRows(newRows)
       changed.push(`측정값 ${newRows.length}행`)
+      
+      // 마지막 행의 측정시간을 기본정보 측정시간으로 설정
+      const lastRow = newRows[newRows.length - 1]
+      if (lastRow?.dateTime) {
+        setMeasurementTime(lastRow.dateTime)
+        changed.push('측정시간')
+      }
     }
 
     if (changed.length > 0) toast.success(`자동 입력됨: ${changed.join(', ')}`)
@@ -300,9 +307,10 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
 
         {/* ── 기본 정보 ── */}
-        <div className="px-5 py-4 border-b border-border bg-muted/20">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 text-center">기본 정보</p>
-          <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
+        <div className="px-5 py-4 border-b border-border bg-muted/20 flex justify-center">
+          <div className="w-full max-w-2xl">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 text-center">기본 정보</p>
+            <div className="grid grid-cols-2 gap-4">
 
             <div className="space-y-1.5">
               <Label className="text-sm">측정 날짜 <span className="text-destructive">*</span></Label>
@@ -352,8 +360,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
               <Label className="text-sm">비고</Label>
               <Input value={note} onChange={e => setNote(e.target.value)} placeholder="비고 입력" />
             </div>
-
+            </div>
           </div>
+        </div>
         </div>
 
         {/* ── 측정값 테이블 ── */}
