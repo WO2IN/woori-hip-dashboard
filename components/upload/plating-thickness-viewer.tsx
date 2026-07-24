@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 interface MeasurementRow {
   id: string
   values: string[]
-  dateTime?: string
 }
 
 interface PlatingRecord {
@@ -41,7 +40,6 @@ const TYPE_BADGE: Record<string, string> = {
 
 function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id: string) => Promise<void> }) {
   const [open, setOpen] = useState(false)
-  const hasDateTime = record.rows.some(r => r.dateTime)
 
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-card">
@@ -126,9 +124,6 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
                       {mat} <span className="text-muted-foreground font-normal">μm</span>
                     </th>
                   ))}
-                  {hasDateTime && (
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">측정 일시</th>
-                  )}
                 </tr>
               </thead>
               <tbody>
@@ -140,9 +135,6 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
                         {parseFloat(val) ? parseFloat(val).toFixed(3) : (val || '—')}
                       </td>
                     ))}
-                    {hasDateTime && (
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{row.dateTime ?? ''}</td>
-                    )}
                   </tr>
                 ))}
               </tbody>

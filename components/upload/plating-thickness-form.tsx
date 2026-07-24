@@ -1,27 +1,17 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Plus, Trash2, ClipboardPaste, CloudUpload, X } from 'lucide-react'
+import { Plus, Trash2, ClipboardPaste } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import dynamic from 'next/dynamic'
-
-const PdfDragPreview = dynamic(
-  () =>
-    import('@/components/upload/pdf-drag-preview').then(
-      mod => mod.PdfDragPreview
-    ),
-  { ssr: false }
-)
 
 interface MeasurementRow {
   id: string
   values: string[]
-  dateTime?: string
 }
 
 interface PlatingRecord {
@@ -36,7 +26,6 @@ interface PlatingRecord {
   specification: string
   measurementTime: string
   note: string
-  pdfFile?: string
   createdAt: string
 }
 
@@ -147,11 +136,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const [materials, setMaterials] = useState<string[]>(DEFAULT_MATERIALS)
   const [rows, setRows] = useState<MeasurementRow[]>(makeDefaultRows(DEFAULT_MATERIALS.length))
 
-  // PDF
-  const [pdfFile, setPdfFile] = useState<File | null>(null)
-  const [dragging, setDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
   const [companies, setCompanies] = useState<string[]>(['넥스플러스', '한중'])
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -171,21 +155,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   }, [])
 
   useEffect(() => { loadCompanies() }, [loadCompanies])
-
-  // ── PDF 드래그앤드롭 ─────────────────────────────────────────────────────
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragging(true) }
-  const handleDragLeave = () => setDragging(false)
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setDragging(false)
-    const f = e.dataTransfer.files[0]
-    if (f && f.type === 'application/pdf') setPdfFile(f)
-    else toast.error('PDF 파일만 업로드 가능합니다.')
-  }
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    if (f) setPdfFile(f)
-  }
 
   // ── 붙여넣기 ────────────────────────────────────────────────────────────
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -219,7 +188,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
         values: r.values.length >= mats.length
           ? r.values.slice(0, mats.length)
           : [...r.values, ...Array(mats.length - r.values.length).fill('')],
-        dateTime: r.dateTime,
       }))
       setRows(newRows)
       changed.push(`측정값 ${newRows.length}행`)
@@ -253,9 +221,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     setRows(prev => prev.map(r =>
       r.id === rowId ? { ...r, values: r.values.map((v, i) => i === colIdx ? val : v) } : r
     ))
-  }
-  const updateDateTime = (rowId: string, val: string) => {
-    setRows(prev => prev.map(r => r.id === rowId ? { ...r, dateTime: val } : r))
   }
 
   // ── 저장 ─────────────────────────────────────────────────────────────────
@@ -309,70 +274,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const selectClass = 'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
 
   return (
-    <div
-      className={cn(
-        'mx-auto items-stretch gap-6',
-        pdfFile
-          ? 'max-w-[1500px] grid grid-cols-[minmax(500px,768px)_minmax(550px,1fr)]'
-          : 'max-w-3xl'
-      )}
-    >
-      {/* 왼쪽: 폼 */}
+    <div className="mx-auto max-w-3xl">
       <div className="space-y-5">
-
-      {/* ── PDF 첨부 ── */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => !pdfFile && fileInputRef.current?.click()}
-        className={cn(
-          'border-2 border-dashed rounded-xl p-5 text-center transition-all',
-          !pdfFile && 'cursor-pointer',
-          dragging
-            ? 'border-primary bg-accent'
-            : pdfFile
-              ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
-              : 'border-border hover:border-primary/60 hover:bg-accent/40'
-        )}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        {pdfFile ? (
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-left">
-              <p className="font-semibold text-foreground text-sm">{pdfFile.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={e => { e.stopPropagation(); setPdfFile(null) }}
-              className="gap-1.5 h-7 text-xs shrink-0"
-            >
-              <X className="w-3 h-3" /> 파일 제거
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            <div className={cn(
-              'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
-              dragging ? 'bg-primary text-primary-foreground' : 'bg-muted'
-            )}>
-              <CloudUpload className={cn('w-5 h-5', dragging ? 'text-primary-foreground' : 'text-muted-foreground')} />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground text-sm">PDF 파일 첨부 (선택)</p>
-              <p className="text-xs text-muted-foreground mt-0.5">드래그하거나 클릭하여 선택 · PDF만 지원</p>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* ── 붙여넣기 영역 ── */}
       <div className="bg-card border border-dashed border-border rounded-xl p-4 space-y-2">
@@ -494,9 +397,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                       </div>
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-center text-xs font-semibold text-muted-foreground min-w-[160px]">
-                    측정시간
-                  </th>
                   <th className="w-8" />
                 </tr>
               </thead>
@@ -516,14 +416,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
                         />
                       </td>
                     ))}
-                    <td className="px-2 py-1.5">
-                      <Input
-                        value={row.dateTime ?? ''}
-                        onChange={e => updateDateTime(row.id, e.target.value)}
-                        placeholder="측정 일시"
-                        className="text-sm h-8 min-w-[150px]"
-                      />
-                    </td>
                     <td className="px-2 py-1.5 text-center">
                       <button
                         type="button"
@@ -552,15 +444,6 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       </div>
 
       </div>
-
-      {/* 오른쪽: PDF 미리보기 */}
-      {pdfFile && (
-        <div className="sticky top-5 min-h-0 max-h-[calc(100vh-60px)] overflow-y-auto">
-          <div className="border border-border rounded-xl overflow-hidden bg-card shadow-md min-h-0">
-            <PdfDragPreview file={pdfFile} />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
