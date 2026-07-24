@@ -198,7 +198,7 @@ export function PlatingThicknessViewer() {
       const XLSX = await import('xlsx')
 
       // 각 레코드를 하나의 행으로 표현 (모든 측정값을 가로로 나열)
-      // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | 1-No | 1-[재질1] | 1-[재질2] | ... | 1-측정일시 | 2-No | 2-[재질1] | ...
+      // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | Sn1 | Sn2 | ... | Sn6 | Ni1 | Ni2 | ...
       
       // 각 레코드의 최대 행 수 구하기
       const maxRowsPerRecord = Math.max(...records.map(r => r.rows.length), 1)
@@ -206,16 +206,14 @@ export function PlatingThicknessViewer() {
       // 전체 유니크 재질 수집
       const allMaterials = Array.from(new Set(records.flatMap(r => r.materials)))
 
-      // 헤더 구성
+      // 헤더 구성: 기본 정보 + 각 재질별로 1~maxRowsPerRecord 번호
       const headerRow: string[] = ['날짜', '품명', '로트번호', '초/중/종물', '업체', '도금사양', '측정시간', '비고']
       
-      for (let rowIdx = 1; rowIdx <= maxRowsPerRecord; rowIdx++) {
-        headerRow.push(`${rowIdx}-No`)
-        allMaterials.forEach(mat => {
-          headerRow.push(`${rowIdx}-${mat} (μm)`)
-        })
-        headerRow.push(`${rowIdx}-측정일시`)
-      }
+      allMaterials.forEach(mat => {
+        for (let rowIdx = 1; rowIdx <= maxRowsPerRecord; rowIdx++) {
+          headerRow.push(`${mat}${rowIdx} (μm)`)
+        }
+      })
 
       const dataRows: (string | number)[][] = []
 
@@ -231,34 +229,19 @@ export function PlatingThicknessViewer() {
           record.note ?? '',
         ]
 
-        // 각 측정 행(row)을 가로로 나열
-        for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
-          const measureRow = record.rows[rowIdx]
-          
-          if (measureRow) {
-            row.push(rowIdx + 1) // No
-            
-            // 재질 값 매핑
-            allMaterials.forEach(mat => {
-              const matIdx = record.materials.indexOf(mat)
-              if (matIdx !== -1 && measureRow.values[matIdx]) {
-                const v = parseFloat(measureRow.values[matIdx])
-                row.push(isNaN(v) ? measureRow.values[matIdx] : v)
-              } else {
-                row.push('')
-              }
-            })
-            
-            row.push(measureRow.dateTime ?? '') // 측정 일시
-          } else {
-            // 빈 행
-            row.push('') // No
-            for (let i = 0; i < allMaterials.length; i++) {
+        // 각 재질별로 측정값을 가로로 나열 (Sn1, Sn2, ... Sn6, Ni1, Ni2, ...)
+        allMaterials.forEach(mat => {
+          const matIdx = record.materials.indexOf(mat)
+          for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
+            const measureRow = record.rows[rowIdx]
+            if (measureRow && matIdx !== -1 && measureRow.values[matIdx]) {
+              const v = parseFloat(measureRow.values[matIdx])
+              row.push(isNaN(v) ? measureRow.values[matIdx] : v)
+            } else {
               row.push('')
             }
-            row.push('') // 측정 일시
           }
-        }
+        })
 
         dataRows.push(row)
       })
@@ -271,12 +254,9 @@ export function PlatingThicknessViewer() {
         { wch: 20 }, { wch: 8 }, { wch: 12 },
       ]
       
-      for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
-        cols.push({ wch: 5 }) // No
-        for (let i = 0; i < allMaterials.length; i++) {
-          cols.push({ wch: 10 }) // 재질
-        }
-        cols.push({ wch: 18 }) // 측정 일시
+      // 각 재질별 컬럼
+      for (let i = 0; i < allMaterials.length * maxRowsPerRecord; i++) {
+        cols.push({ wch: 10 })
       }
       
       ws['!cols'] = cols
