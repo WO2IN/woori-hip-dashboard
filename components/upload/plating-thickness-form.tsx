@@ -84,11 +84,22 @@ function parseClipboardText(text: string) {
     if (productMatch) result.productName = productMatch[1].trim()
 
     const lotMatch = line.match(/로트번호\s*[:：]\s*(.+)/)
-    if (lotMatch && lotMatch[1].trim()) result.lotNumber = lotMatch[1].trim()
-
+    if (lotMatch && lotMatch[1].trim()) {
+      result.lotNumber = lotMatch[1].trim()
+    }
+    
     const dateMatch = line.match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/)
     if (dateMatch && !result.date) {
-      result.date = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`
+      const yyyy = dateMatch[1]
+      const mm = dateMatch[2].padStart(2, '0')
+      const dd = dateMatch[3].padStart(2, '0')
+    
+      result.date = `${yyyy}-${mm}-${dd}`
+    
+      // 로트번호가 비어있으면 YYMMDD 자동 생성
+      if (!result.lotNumber) {
+        result.lotNumber = `${yyyy}${mm}${dd}`
+      }
     }
   }
 

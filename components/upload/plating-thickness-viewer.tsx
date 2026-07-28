@@ -55,11 +55,11 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
             {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </span>
 
-        {/* 날짜 */}
-        <span className="text-base text-muted-foreground w-24 shrink-0">{record.date}</span>
+        {/* 업체 */}
+        <span className="text-base font-semibold text-foreground hidden md:block shrink-0">{record.company}</span>
 
         {/* 품명 */}
-        <span className="text-base font-semibold flex-1 truncate">{record.productName}</span>
+        <span className="text-base flex-1 truncate">{record.productName}</span>
 
         {/* 로트번호 */}
         {record.lotNumber && (
@@ -68,8 +68,8 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
           </span>
         )}
 
-        {/* 업체 */}
-        <span className="text-sm text-muted-foreground hidden md:block shrink-0">{record.company}</span>
+        {/* 날짜 */}
+        <span className="text-base text-muted-foreground w-24 shrink-0">{record.date}</span>
 
         {/* 초/중/종물 뱃지 */}
         <span className={cn(
@@ -190,7 +190,11 @@ export function PlatingThicknessViewer() {
     if (records.length === 0) { toast.error('내보낼 데이터가 없습니다.'); return }
     setExporting(true)
     try {
-      const XLSX = await import('xlsx')
+      const ExcelJS = await import('exceljs')
+      const { saveAs } = await import('file-saver')
+
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet('도금두께')
 
       // 각 레코드를 하나의 행으로 표현 (모든 측정값을 가로로 나열)
       // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | Sn1 | Sn2 | ... | Sn6 | Ni1 | Ni2 | ...
@@ -201,64 +205,211 @@ export function PlatingThicknessViewer() {
       // 전체 유니크 재질 수집
       const allMaterials = Array.from(new Set(records.flatMap(r => r.materials)))
 
-      // 헤더 구성: 기본 정보 + 각 재질별로 1~maxRowsPerRecord 번호
-      const headerRow: string[] = ['날짜', '품명', '로트번호', '초/중/종물', '업체', '도금사양', '측정시간', '비고']
+      // 1행 여백
+      worksheet.getRow(1).height = 10
+
+      // 헤더
+      worksheet.addRow([
+        '',
+        '일자',
+        '품명',
+        'LOT',
+        '초중종',
+        '외관',
+        '밀착',
+        '도금두께(앞)',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '도금두께(뒤)',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '특이사항'
+      ])
       
-      allMaterials.forEach(mat => {
-        for (let rowIdx = 1; rowIdx <= maxRowsPerRecord; rowIdx++) {
-          headerRow.push(`${mat}${rowIdx} (μm)`)
-        }
-      })
+      worksheet.addRow([
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        'Sn #1',
+        'Ni #1',
+        'Sn #2',
+        'Ni #2',
+        'Sn #3',
+        'Ni #3',
+        'Sn #1',
+        'Ni #1',
+        'Sn #2',
+        'Ni #2',
+        'Sn #3',
+        'Ni #3',
+        ''
+      ])
+      
+      worksheet.mergeCells('B2:B3')
+      worksheet.mergeCells('C2:C3')
+      worksheet.mergeCells('D2:D3')
+      worksheet.mergeCells('E2:E3')
+      worksheet.mergeCells('F2:F3')
+      worksheet.mergeCells('G2:G3')
 
-      const dataRows: (string | number)[][] = []
+      worksheet.mergeCells('H2:M2')
+      worksheet.mergeCells('N2:S2')
 
-      records.forEach(record => {
-        const row: (string | number)[] = [
-          record.date,
-          record.productName,
-          record.lotNumber ?? '',
-          PRODUCT_TYPE_LABELS[record.productType] ?? record.productType,
-          record.company,
-          record.specification ?? '',
-          record.measurementTime ?? '',
-          record.note ?? '',
-        ]
+      worksheet.mergeCells('T2:T3')
+      
+      const header1 = worksheet.getRow(2)
+      const header2 = worksheet.getRow(3)
 
-        // 각 재질별로 측정값을 가로로 나열 (Sn1, Sn2, ... Sn6, Ni1, Ni2, ...)
-        allMaterials.forEach(mat => {
-          const matIdx = record.materials.indexOf(mat)
-          for (let rowIdx = 0; rowIdx < maxRowsPerRecord; rowIdx++) {
-            const measureRow = record.rows[rowIdx]
-            if (measureRow && matIdx !== -1 && measureRow.values[matIdx]) {
-              const v = parseFloat(measureRow.values[matIdx])
-              row.push(isNaN(v) ? measureRow.values[matIdx] : v)
-            } else {
-              row.push('')
+      ;[header1, header2].forEach(header => {
+        header.eachCell((cell, colNumber) => {
+      
+          // A열 여백 제거
+          if (colNumber === 1) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFFFF' },
             }
+      
+            cell.border = {
+              top: { style: undefined },
+              left: { style: undefined },
+              bottom: { style: undefined },
+              right: { style: undefined },
+            }
+      
+            return
+          }
+      
+          cell.font = {
+            bold: true,
+            color: { argb: 'FFFFFFFF' },
+          }
+      
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '1F4E78' },
+          }
+      
+          cell.alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          }
+      
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
           }
         })
-
-        dataRows.push(row)
       })
+        
+      // 데이터 셀 스타일
+      records.forEach(record => {
 
-      const ws = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows])
+        worksheet.addRow([
+          '',
+          record.date,
+          record.productName,
+          record.lotNumber,
+          PRODUCT_TYPE_LABELS[record.productType],
+          'OK',
+          '',
       
-      // 열 너비 설정
-      const cols: any[] = [
-        { wch: 11 }, { wch: 14 }, { wch: 14 }, { wch: 8 }, { wch: 10 },
-        { wch: 20 }, { wch: 8 }, { wch: 12 },
+          record.rows[0]?.values[0] ?? '',
+          record.rows[0]?.values[1] ?? '',
+          record.rows[1]?.values[0] ?? '',
+          record.rows[1]?.values[1] ?? '',
+          record.rows[2]?.values[0] ?? '',
+          record.rows[2]?.values[1] ?? '',
+      
+          record.rows[3]?.values[0] ?? '',
+          record.rows[3]?.values[1] ?? '',
+          record.rows[4]?.values[0] ?? '',
+          record.rows[4]?.values[1] ?? '',
+          record.rows[5]?.values[0] ?? '',
+          record.rows[5]?.values[1] ?? '',
+      
+          record.note ?? ''
+        ])
+      
+      })
+      
+      // 데이터 셀 스타일
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber <= 3) return
+
+        row.height = 140 // 원하는 높이
+
+        row.eachCell((cell, colNumber) => {
+
+          // A열 여백 제외
+          if (colNumber === 1) {
+            cell.border = {}
+            return
+          }
+        
+          cell.alignment = {
+            horizontal: 'center',
+            vertical: 'middle',
+          }
+        
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          }
+        })
+      })
+      
+      // 열너비
+      worksheet.columns = [
+        { width: 5 },  // 여백
+        { width: 12 }, // 일자
+        { width: 20 }, // 품명
+        { width: 15 }, // LOT
+        { width: 9 },  // 초중종
+        { width: 9 },  // 외관
+        { width: 20 },  // 밀착
+      
+        { width: 9 }, // 앞 Sn1
+        { width: 9 }, // 앞 Ni1
+        { width: 9 }, // 앞 Sn2
+        { width: 9 }, // 앞 Ni2
+        { width: 9 }, // 앞 Sn3
+        { width: 9 }, // 앞 Ni3
+      
+        { width: 9 }, // 뒤 Sn1
+        { width: 9 }, // 뒤 Ni1
+        { width: 9 }, // 뒤 Sn2
+        { width: 9 }, // 뒤 Ni2
+        { width: 9 }, // 뒤 Sn3
+        { width: 9 }, // 뒤 Ni3
+      
+        { width: 30 }, // 특이사항
       ]
       
-      // 각 재질별 컬럼
-      for (let i = 0; i < allMaterials.length * maxRowsPerRecord; i++) {
-        cols.push({ wch: 10 })
-      }
+      // 다운로드
+      const buffer = await workbook.xlsx.writeBuffer()
       
-      ws['!cols'] = cols
-
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, ws, '도금두께')
-      XLSX.writeFile(wb, `도금두께_${new Date().toISOString().split('T')[0]}.xlsx`)
+      saveAs(
+        new Blob([buffer]),
+        `도금두께_${new Date().toISOString().split('T')[0]}.xlsx`
+      )
+      
       toast.success('엑셀 파일이 다운로드되었습니다.')
     } catch (error) {
       console.error('[v0] Excel export error:', error)
