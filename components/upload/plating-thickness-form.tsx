@@ -291,7 +291,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
       setDate(''); setProductName(''); setLotNumber('')
       setProductType(''); setCompany(''); setSpecification('')
-      setMeasurementTime(''); setNote(''); setPdfFile(null)
+      setMeasurementTime(''); setNote(''); 
       setMaterials(DEFAULT_MATERIALS)
       setRows(makeDefaultRows(DEFAULT_MATERIALS.length))
       onSuccess?.()

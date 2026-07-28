@@ -8471,7 +8471,7 @@
     "id": "23feebbd-4d1c-446b-8374-f8a657b7271b",
     "filename": "20260721_20260721-1_20260721-16.pdf",
     "originalName": "260721_우리하이피_신흥 04 26.pdf",
-    "company": "넥스플러스",
+    "company": "신흥 SEC",
     "documentType": "성적서",
     "lotStart": "20260721-1",
     "lotEnd": "20260721-16",
@@ -8485,7 +8485,11 @@
     "storagePath": "넥스플러스/성적서/2026/20260721_20260721-1_20260721-16.pdf",
     "createdAt": "2026-07-23T23:48:44.143Z",
     "createdBy": "나우인",
-    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "note": "",
+    "updatedAt": "2026-07-24T06:06:48.709Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "69a8aea3-e78b-4f56-8b77-85c7d84557fd",
@@ -8522,6 +8526,26 @@
     "year": "2026",
     "storagePath": "풍산/성적서/2026/20260723_20260723-1.pdf",
     "createdAt": "2026-07-24T00:03:22.475Z",
+    "createdBy": "나우인",
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+  },
+  {
+    "id": "8f2d78c2-3b29-4a20-b431-d5b95efb6855",
+    "filename": "20260724_20260724-1_20260724-2.pdf",
+    "originalName": "260724_우리하이피_풍산 0.15 132 482.8.pdf",
+    "company": "풍산",
+    "documentType": "성적서",
+    "lotStart": "20260724-1",
+    "lotEnd": "20260724-2",
+    "product": "0.15*132",
+    "material": "Cu",
+    "specification": "Ni 1.0 ~ 2.0μm",
+    "quantity": 482.8,
+    "issueDate": "20260724",
+    "fileSize": 804068,
+    "year": "2026",
+    "storagePath": "풍산/성적서/2026/20260724_20260724-1_20260724-2.pdf",
+    "createdAt": "2026-07-27T23:39:19.380Z",
     "createdBy": "나우인",
     "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   }
