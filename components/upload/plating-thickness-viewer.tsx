@@ -267,7 +267,6 @@ export function PlatingThicknessViewer() {
       const { saveAs } = await import('file-saver')
 
       const workbook = new ExcelJS.Workbook()
-      const worksheet = workbook.addWorksheet('도금두께')
 
       // 각 레코드를 하나의 행으로 표현 (모든 측정값을 가로로 나열)
       // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | Sn1 | Sn2 | ... | Sn6 | Ni1 | Ni2 | ...
@@ -278,46 +277,82 @@ export function PlatingThicknessViewer() {
       // 전체 유니크 재질 수집
       const allMaterials = Array.from(new Set(records.flatMap(r => r.materials)))
 
-      // 1행 여백
-      worksheet.getRow(1).height = 10
+      // 업체 + 재질별 그룹 생성
+      const groupedRecords = records.reduce((acc, record) => {
 
-      // 헤더
-      const materials = records[0]?.materials ?? []
+        const materialKey = record.materials.join('_')
+        const sheetName = `${record.company}_${materialKey}`
 
-      const measurementCount = Math.max(
-        ...records.map(record =>
-          record.rows.length * record.materials.length
+        if (!acc[sheetName]) {
+          acc[sheetName] = []
+        }
+
+        acc[sheetName].push(record)
+
+        return acc
+
+      }, {} as Record<string, typeof records>)
+
+
+      Object.entries(groupedRecords).forEach(([sheetName, sheetRecords]) => {
+
+        const worksheet = workbook.addWorksheet(
+          sheetName.substring(0,31)
         )
-      )
-
-
-      const measurementHeader:string[] = []
-
-      for(let i = 0; i < measurementCount; i++){
-
-        const material =
-          materials[i % materials.length]
-
-        const number =
-          Math.floor(i / materials.length) + 1
-
-        measurementHeader.push(
-          `${material} #${number}`
+      
+        worksheet.getRow(1).height = 10
+      
+      
+        const materials = sheetRecords[0].materials
+      
+      
+        const measurementCount = Math.max(
+          ...sheetRecords.map(record =>
+            record.rows.length * record.materials.length
+          )
         )
-      }
 
-      worksheet.addRow([
-        '',
-        '일자',
-        '품명',
-        'LOT',
-        '초중종',
-        '외관',
-        '밀착',
-        '도금두께',
-        ...Array(measurementCount - 1).fill(''),
-        '특이사항'
-      ])
+        const measurementHeader:string[] = []
+
+        for(let i = 0; i < measurementCount; i++){
+
+          const material =
+            materials[i % materials.length]
+
+          const number =
+            Math.floor(i / materials.length) + 1
+
+          measurementHeader.push(
+            `${material} #${number}`
+          )
+        }
+
+
+        worksheet.addRow([
+          '',
+          '일자',
+          '품명',
+          'LOT',
+          '초중종',
+          '외관',
+          '밀착',
+          '도금두께',
+          ...Array(measurementCount - 1).fill(''),
+          '특이사항'
+        ])
+
+
+        worksheet.addRow([
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          ...measurementHeader,
+          ''
+        ])
 
       // 측정 시작 위치 H
       const startCol = 8
@@ -325,19 +360,6 @@ export function PlatingThicknessViewer() {
       // 측정 끝 위치
       const endCol = startCol + measurementCount - 1
 
-      // 특이사항 위치
-      worksheet.addRow([
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        ...measurementHeader,
-        ''
-      ])
-      
       worksheet.mergeCells('B2:B3')
       worksheet.mergeCells('C2:C3')
       worksheet.mergeCells('D2:D3')
@@ -411,7 +433,7 @@ export function PlatingThicknessViewer() {
       })
         
       // 데이터 셀 스타일
-      records.forEach(record => {
+      sheetRecords.forEach(record => {
 
         const values = record.rows
           .flatMap(row => row.values)
@@ -433,10 +455,10 @@ export function PlatingThicknessViewer() {
           ...measurementValues,
           record.note ?? ''
         ])
-      
-      })
-      
-      // 열너비
+        
+        })
+
+      // 데이터 셀 스타일
       const columns = [
         { width: 5 },
         { width: 12 },
@@ -447,40 +469,39 @@ export function PlatingThicknessViewer() {
         { width: 20 },
       ]
       
-      // 측정값 개수만큼 추가
       for (let i = 0; i < measurementCount; i++) {
         columns.push({
           width: 9,
         })
       }
       
-      // 특이사항
       columns.push({
         width: 30,
       })
       
       worksheet.columns = columns
-
-      // 데이터 셀 스타일
+      
+      
       worksheet.eachRow((row, rowNumber) => {
+
         if (rowNumber <= 3) return
 
-        row.height = 140 // 원하는 높이
+        row.height = 140
 
         for (let colNumber = 1; colNumber <= columns.length; colNumber++) {
 
           const cell = row.getCell(colNumber)
-        
+
           if (colNumber === 1) {
             cell.border = {}
             continue
           }
-        
+
           cell.alignment = {
             horizontal: 'center',
             vertical: 'middle',
           }
-        
+
           cell.border = {
             top: { style: 'thin' },
             left: { style: 'thin' },
@@ -489,17 +510,19 @@ export function PlatingThicknessViewer() {
           }
         }
       })
-      
-      // 다운로드
-      const buffer = await workbook.xlsx.writeBuffer()
-      
-      saveAs(
-        new Blob([buffer]),
-        `도금두께_${new Date().toISOString().split('T')[0]}.xlsx`
-      )
-      
-      toast.success('엑셀 파일이 다운로드되었습니다.')
-       } catch (error) {
+    
+    }) // Object.entries(groupedRecords) 종료
+
+    const buffer = await workbook.xlsx.writeBuffer()
+
+    saveAs(
+      new Blob([buffer]),
+      `도금두께_${new Date().toISOString().split('T')[0]}.xlsx`
+    )
+
+    toast.success('엑셀 파일이 다운로드되었습니다.')
+
+    } catch (error) {
       console.error('[v0] Excel export error:', error)
       toast.error('엑셀 내보내기에 실패했습니다.')
     } finally {
