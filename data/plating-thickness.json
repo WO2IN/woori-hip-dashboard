@@ -2,7 +2,7 @@
   {
     "id": "1785224613593",
     "date": "2026-07-24",
-    "productName": "BUSBAR NEGATIVE",
+    "productName": "BUSBAR-NEGATIVE",
     "lotNumber": "20260724",
     "productType": "initial",
     "company": "넥스플러스",
@@ -118,5 +118,136 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-28T07:49:17.679Z"
+  },
+  {
+    "id": "1785295054359",
+    "date": "2026-07-24",
+    "productName": "BUSBAR-NEGATIVE",
+    "lotNumber": "20260724",
+    "productType": "middle",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "parsed-0-1785295049079",
+        "values": [
+          "8.678",
+          "2.912"
+        ],
+        "dateTime": "12:47"
+      },
+      {
+        "id": "parsed-1-1785295049079",
+        "values": [
+          "8.416",
+          "2.512"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-2-1785295049079",
+        "values": [
+          "8.025",
+          "2.600"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-3-1785295049079",
+        "values": [
+          "8.253",
+          "2.878"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-4-1785295049079",
+        "values": [
+          "8.897",
+          "3.076"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-5-1785295049079",
+        "values": [
+          "7.647",
+          "2.133"
+        ],
+        "dateTime": "12:57"
+      },
+      {
+        "id": "1785295050815-0.7904015547917432",
+        "values": [
+          "11111",
+          "222222"
+        ]
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛ Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "createdAt": "2026-07-29T03:17:34.359Z"
+  },
+  {
+    "id": "1785295995529",
+    "date": "2026-07-25",
+    "productName": "BUSBAR-NEGATIVE",
+    "lotNumber": "20260725",
+    "productType": "final",
+    "company": "넥스플러스",
+    "materials": [
+      "Au",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "parsed-0-1785295977334",
+        "values": [
+          "8.678",
+          "2.912"
+        ],
+        "dateTime": "12:47"
+      },
+      {
+        "id": "parsed-1-1785295977334",
+        "values": [
+          "8.416",
+          "2.512"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-2-1785295977334",
+        "values": [
+          "8.025",
+          "2.600"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-3-1785295977334",
+        "values": [
+          "8.253",
+          "2.878"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-4-1785295977334",
+        "values": [
+          "8.897",
+          "3.076"
+        ],
+        "dateTime": "12:56"
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛ Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "createdAt": "2026-07-29T03:33:15.529Z"
   }
 ]

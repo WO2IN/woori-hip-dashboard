@@ -7,8 +7,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 
+type Option = {
+  label: string
+  value: string
+}
+
 interface MultiSelectProps {
-  options: string[]
+  options: (string | Option)[]
   value: string[]
   onChange: (value: string[]) => void
   placeholder?: string
@@ -28,11 +33,26 @@ export function MultiSelect({
     )
   }
 
+  const selectedLabels = options
+    .filter(option => {
+      const item =
+        typeof option === 'string'
+          ? { label: option, value: option }
+          : option
+
+      return value.includes(item.value)
+    })
+    .map(option =>
+      typeof option === 'string'
+        ? option
+        : option.label
+    )
+
   const displayText =
     value.length === 0
       ? placeholder
       : value.length === 1
-        ? value[0]
+        ? selectedLabels[0]
         : `${value.length}개 선택`
 
   return (
@@ -50,20 +70,25 @@ export function MultiSelect({
       >
         <div className="max-h-60 overflow-y-auto">
           {options.map(option => {
-            const selected = value.includes(option)
+            const item =
+              typeof option === 'string'
+                ? { label: option, value: option }
+                : option
+
+            const selected = value.includes(item.value)
 
             return (
               <button
-                key={option}
+                key={item.value}
                 type="button"
-                onClick={() => toggleValue(option)}
+                onClick={() => toggleValue(item.value)}
                 className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
               >
                 <div className="flex h-4 w-4 items-center justify-center rounded border">
                   {selected && <Check className="h-3 w-3" />}
                 </div>
 
-                <span>{option}</span>
+                <span>{item.label}</span>
               </button>
             )
           })}

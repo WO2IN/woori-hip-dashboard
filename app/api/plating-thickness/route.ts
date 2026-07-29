@@ -69,3 +69,38 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '삭제에 실패했습니다.' }, { status: 500 })
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const updatedRecord: PlatingRecord = await request.json()
+
+    const records = await readData()
+
+    const index = records.findIndex(
+      r => r.id === updatedRecord.id
+    )
+
+    if (index === -1) {
+      return NextResponse.json(
+        { error: '데이터를 찾을 수 없습니다.' },
+        { status: 404 }
+      )
+    }
+
+    records[index] = updatedRecord
+
+    await writeFile(
+      DATA_FILE,
+      JSON.stringify(records, null, 2)
+    )
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('데이터 수정 실패:', error)
+
+    return NextResponse.json(
+      { error: '수정에 실패했습니다.' },
+      { status: 500 }
+    )
+  }
+}

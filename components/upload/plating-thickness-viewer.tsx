@@ -1,7 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, Loader2, ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
+import {
+  Download,
+  Loader2,
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  Pencil,
+  SlidersHorizontal,
+} from 'lucide-react'
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -39,7 +59,15 @@ const TYPE_BADGE: Record<string, string> = {
   final: 'bg-emerald-500/15 text-emerald-400',
 }
 
-function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id: string) => Promise<void> }) {
+function RecordRow({
+  record,
+  onDelete,
+  onEdit,
+}: {
+  record: PlatingRecord
+  onDelete: (id: string) => Promise<void>
+  onEdit: (record: PlatingRecord) => void
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -88,18 +116,35 @@ function RecordRow({ record, onDelete }: { record: PlatingRecord; onDelete: (id:
           <span className="text-sm text-muted-foreground shrink-0">{record.rows.length}건</span>
         </button>
 
-        {/* 삭제 버튼 */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete(record.id)
-          }}
-          className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors shrink-0"
-          title="삭제"
-        >
-          <Trash2 className="w-4 h-4 text-destructive hover:text-destructive/80" />
-        </button>
+        <div className="flex items-center gap-1">
+
+          {/* 수정 */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onEdit(record)
+            }}
+            className="p-1.5 hover:bg-primary/10 rounded-lg transition-colors"
+            title="수정"
+          >
+            <Pencil className="w-4 h-4 text-primary" />
+          </button>
+
+          {/* 삭제 */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(record.id)
+            }}
+            className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors"
+            title="삭제"
+          >
+            <Trash2 className="w-4 h-4 text-destructive" />
+          </button>
+
+        </div>
       </div>
 
       {/* ── 펼쳐지는 상세 ── */}
@@ -153,6 +198,21 @@ export function PlatingThicknessViewer() {
   const [records, setRecords] = useState<PlatingRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  
+  const [editingRecord, setEditingRecord] = useState<PlatingRecord | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+
+  // 필터
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
+
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [lotNumber, setLotNumber] = useState('')
 
   const loadRecords = async () => {
     try {
@@ -186,6 +246,19 @@ export function PlatingThicknessViewer() {
     }
   }
 
+  const handleEdit = (record: PlatingRecord) => {
+    setEditingRecord({
+      ...record,
+      rows: record.rows.map(row => ({
+        ...row,
+        values: [...row.values],
+      })),
+      materials: [...record.materials],
+    })
+  
+    setEditOpen(true)
+  }
+
   const handleExportToExcel = async () => {
     if (records.length === 0) { toast.error('내보낼 데이터가 없습니다.'); return }
     setExporting(true)
@@ -209,6 +282,30 @@ export function PlatingThicknessViewer() {
       worksheet.getRow(1).height = 10
 
       // 헤더
+      const materials = records[0]?.materials ?? []
+
+      const measurementCount = Math.max(
+        ...records.map(record =>
+          record.rows.length * record.materials.length
+        )
+      )
+
+
+      const measurementHeader:string[] = []
+
+      for(let i = 0; i < measurementCount; i++){
+
+        const material =
+          materials[i % materials.length]
+
+        const number =
+          Math.floor(i / materials.length) + 1
+
+        measurementHeader.push(
+          `${material} #${number}`
+        )
+      }
+
       worksheet.addRow([
         '',
         '일자',
@@ -217,21 +314,18 @@ export function PlatingThicknessViewer() {
         '초중종',
         '외관',
         '밀착',
-        '도금두께(앞)',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '도금두께(뒤)',
-        '',
-        '',
-        '',
-        '',
-        '',
+        '도금두께',
+        ...Array(measurementCount - 1).fill(''),
         '특이사항'
       ])
-      
+
+      // 측정 시작 위치 H
+      const startCol = 8
+
+      // 측정 끝 위치
+      const endCol = startCol + measurementCount - 1
+
+      // 특이사항 위치
       worksheet.addRow([
         '',
         '',
@@ -240,18 +334,7 @@ export function PlatingThicknessViewer() {
         '',
         '',
         '',
-        'Sn #1',
-        'Ni #1',
-        'Sn #2',
-        'Ni #2',
-        'Sn #3',
-        'Ni #3',
-        'Sn #1',
-        'Ni #1',
-        'Sn #2',
-        'Ni #2',
-        'Sn #3',
-        'Ni #3',
+        ...measurementHeader,
         ''
       ])
       
@@ -262,11 +345,22 @@ export function PlatingThicknessViewer() {
       worksheet.mergeCells('F2:F3')
       worksheet.mergeCells('G2:G3')
 
-      worksheet.mergeCells('H2:M2')
-      worksheet.mergeCells('N2:S2')
+      worksheet.mergeCells(
+        2,
+        8,
+        2,
+        7 + measurementCount
+      )
 
-      worksheet.mergeCells('T2:T3')
-      
+      const noteCol = 8 + measurementCount
+
+      worksheet.mergeCells(
+        2,
+        noteCol,
+        3,
+        noteCol
+      )
+
       const header1 = worksheet.getRow(2)
       const header2 = worksheet.getRow(3)
 
@@ -319,6 +413,15 @@ export function PlatingThicknessViewer() {
       // 데이터 셀 스타일
       records.forEach(record => {
 
+        const values = record.rows
+          .flatMap(row => row.values)
+      
+        const measurementValues = [
+          ...values,
+          ...Array(measurementCount - values.length).fill('')
+        ].slice(0, measurementCount)
+      
+      
         worksheet.addRow([
           '',
           record.date,
@@ -327,38 +430,50 @@ export function PlatingThicknessViewer() {
           PRODUCT_TYPE_LABELS[record.productType],
           'OK',
           '',
-      
-          record.rows[0]?.values[0] ?? '',
-          record.rows[0]?.values[1] ?? '',
-          record.rows[1]?.values[0] ?? '',
-          record.rows[1]?.values[1] ?? '',
-          record.rows[2]?.values[0] ?? '',
-          record.rows[2]?.values[1] ?? '',
-      
-          record.rows[3]?.values[0] ?? '',
-          record.rows[3]?.values[1] ?? '',
-          record.rows[4]?.values[0] ?? '',
-          record.rows[4]?.values[1] ?? '',
-          record.rows[5]?.values[0] ?? '',
-          record.rows[5]?.values[1] ?? '',
-      
+          ...measurementValues,
           record.note ?? ''
         ])
       
       })
       
+      // 열너비
+      const columns = [
+        { width: 5 },
+        { width: 12 },
+        { width: 20 },
+        { width: 15 },
+        { width: 9 },
+        { width: 9 },
+        { width: 20 },
+      ]
+      
+      // 측정값 개수만큼 추가
+      for (let i = 0; i < measurementCount; i++) {
+        columns.push({
+          width: 9,
+        })
+      }
+      
+      // 특이사항
+      columns.push({
+        width: 30,
+      })
+      
+      worksheet.columns = columns
+
       // 데이터 셀 스타일
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber <= 3) return
 
         row.height = 140 // 원하는 높이
 
-        row.eachCell((cell, colNumber) => {
+        for (let colNumber = 1; colNumber <= columns.length; colNumber++) {
 
-          // A열 여백 제외
+          const cell = row.getCell(colNumber)
+        
           if (colNumber === 1) {
             cell.border = {}
-            return
+            continue
           }
         
           cell.alignment = {
@@ -372,35 +487,8 @@ export function PlatingThicknessViewer() {
             bottom: { style: 'thin' },
             right: { style: 'thin' },
           }
-        })
+        }
       })
-      
-      // 열너비
-      worksheet.columns = [
-        { width: 5 },  // 여백
-        { width: 12 }, // 일자
-        { width: 20 }, // 품명
-        { width: 15 }, // LOT
-        { width: 9 },  // 초중종
-        { width: 9 },  // 외관
-        { width: 20 },  // 밀착
-      
-        { width: 9 }, // 앞 Sn1
-        { width: 9 }, // 앞 Ni1
-        { width: 9 }, // 앞 Sn2
-        { width: 9 }, // 앞 Ni2
-        { width: 9 }, // 앞 Sn3
-        { width: 9 }, // 앞 Ni3
-      
-        { width: 9 }, // 뒤 Sn1
-        { width: 9 }, // 뒤 Ni1
-        { width: 9 }, // 뒤 Sn2
-        { width: 9 }, // 뒤 Ni2
-        { width: 9 }, // 뒤 Sn3
-        { width: 9 }, // 뒤 Ni3
-      
-        { width: 30 }, // 특이사항
-      ]
       
       // 다운로드
       const buffer = await workbook.xlsx.writeBuffer()
@@ -411,11 +499,40 @@ export function PlatingThicknessViewer() {
       )
       
       toast.success('엑셀 파일이 다운로드되었습니다.')
-    } catch (error) {
+       } catch (error) {
       console.error('[v0] Excel export error:', error)
       toast.error('엑셀 내보내기에 실패했습니다.')
     } finally {
       setExporting(false)
+    }
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingRecord) return
+
+    try {
+      const res = await fetch('/api/plating-thickness', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingRecord),
+      })
+
+      if (!res.ok) throw new Error('수정 실패')
+
+      toast.success('수정되었습니다.')
+
+      setRecords(prev =>
+        prev.map(record =>
+          record.id === editingRecord.id ? editingRecord : record
+        )
+      )
+
+      setEditOpen(false)
+      setEditingRecord(null)
+    } catch {
+      toast.error('수정에 실패했습니다.')
     }
   }
 
@@ -435,21 +552,373 @@ export function PlatingThicknessViewer() {
     )
   }
 
+  const companies = [...new Set(records.map(r => r.company))]
+  const products = [
+    ...new Set(
+      records.map(r => r.productName.trim())
+    )
+  ].sort()
+  const materials = [...new Set(records.flatMap(r => r.materials))]
+
+  const productTypes = [
+    { label: '초물', value: 'initial' },
+    { label: '중물', value: 'middle' },
+    { label: '종물', value: 'final' },
+  ]
+  const filteredRecords = records.filter(record => {
+
+    if (
+      selectedCompanies.length &&
+      !selectedCompanies.includes(record.company)
+    )
+      return false
+  
+    if (
+      selectedProducts.length &&
+      !selectedProducts.includes(record.productName.trim())
+    )
+      return false
+  
+    if (
+      selectedTypes.length &&
+      !selectedTypes.includes(record.productType)
+    )
+      return false
+  
+    if (
+      selectedMaterials.length &&
+      !record.materials.some(mat => selectedMaterials.includes(mat))
+    )
+      return false
+  
+    if (
+      lotNumber &&
+      !record.lotNumber.toLowerCase().includes(lotNumber.toLowerCase())
+    )
+      return false
+  
+    if (startDate && record.date < startDate)
+      return false
+  
+    if (endDate && record.date > endDate)
+      return false
+  
+    return true
+  })
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">총 {records.length}개 측정 기록</p>
-        <Button onClick={handleExportToExcel} disabled={exporting} variant="outline" size="sm" className="gap-2">
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+
+      <p className="text-sm text-muted-foreground">
+        총 {filteredRecords.length}개 측정 기록
+      </p>
+
+      <div className="flex items-center gap-2">
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setFiltersOpen(prev => !prev)}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+        </Button>
+
+        <Button
+          onClick={handleExportToExcel}
+          disabled={exporting}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          {exporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
           엑셀 다운로드
         </Button>
+
+      </div>
       </div>
 
-      <div className="space-y-2">
-        {records.map(record => (
-          <RecordRow key={record.id} record={record} onDelete={handleDelete} />
-        ))}
+      {/* ▼▼▼ 여기 추가 ▼▼▼ */}
+      {filtersOpen && (
+      <div className="border rounded-lg p-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div>
+            <Label>업체</Label>
+              <MultiSelect
+                options={companies}
+                value={selectedCompanies}
+                onChange={setSelectedCompanies}
+              />
+          </div>
+
+          <div>
+            <Label>품명</Label>
+              <MultiSelect
+                options={products}
+                value={selectedProducts}
+                onChange={setSelectedProducts}
+              />
+          </div>
+
+          <div>
+            <Label>초/중/종물</Label>
+            <MultiSelect
+              options={productTypes}
+              value={selectedTypes}
+              onChange={setSelectedTypes}
+            />
+          </div>
+
+          <div>
+            <Label>재질</Label>
+
+            <div className="grid gap-2 mt-2">
+              {editingRecord?.materials.map((material, index) => (
+                <Input
+                  key={index}
+                  value={material}
+                  onChange={(e) => {
+                    const newMaterial = e.target.value
+
+                    setEditingRecord(prev => {
+                      if (!prev) return prev
+
+                      const materials = [...prev.materials]
+                      materials[index] = newMaterial
+
+                      return {
+                        ...prev,
+                        materials,
+                      }
+                    })
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>시작일</Label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label>종료일</Label>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label>LOT 번호</Label>
+            <Input
+              value={lotNumber}
+              onChange={e => setLotNumber(e.target.value)}
+            />
+          </div>
+
+        </div>
       </div>
+      )}
+
+      <div className="space-y-2">
+      {filteredRecords.map(record => (
+        <RecordRow
+          key={record.id}
+          record={record}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      ))}
+      </div>
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>도금두께 수정</DialogTitle>
+          </DialogHeader>
+
+          {editingRecord && (
+            <div className="space-y-5">
+
+              <div className="grid grid-cols-2 gap-4">
+
+                <div>
+                  <Label>날짜</Label>
+                  <Input
+                    type="date"
+                    value={editingRecord.date}
+                    onChange={e =>
+                      setEditingRecord({
+                        ...editingRecord,
+                        date: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>품명</Label>
+                  <Input
+                    value={editingRecord.productName}
+                    onChange={e =>
+                      setEditingRecord({
+                        ...editingRecord,
+                        productName: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>LOT</Label>
+                  <Input
+                    value={editingRecord.lotNumber}
+                    onChange={e =>
+                      setEditingRecord({
+                        ...editingRecord,
+                        lotNumber: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>업체</Label>
+                  <Input
+                    value={editingRecord.company}
+                    onChange={e =>
+                      setEditingRecord({
+                        ...editingRecord,
+                        company: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+              </div>
+
+
+              <div>
+                <Label>비고</Label>
+
+                <Input
+                  value={editingRecord.note}
+                  onChange={e =>
+                    setEditingRecord({
+                      ...editingRecord,
+                      note: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-3">
+
+                <Label>측정값</Label>
+
+                {/* 재질 헤더 */}
+                <div
+                  className="grid gap-2"
+                  style={{
+                    gridTemplateColumns:
+                      `100px repeat(${editingRecord.materials.length}, minmax(80px,1fr))`,
+                  }}
+                >
+                  <div className="text-center text-sm font-semibold">
+                    구분
+                  </div>
+
+                  {editingRecord.materials.map((material, index) => (
+                    <Input
+                      key={index}
+                      value={material}
+                      className="text-center font-semibold"
+                      onChange={(e) => {
+                        const materials = [...editingRecord.materials]
+
+                        materials[index] = e.target.value
+
+                        setEditingRecord({
+                          ...editingRecord,
+                          materials,
+                        })
+                      }}
+                    />
+                  ))}
+                </div>
+
+
+                {/* 측정 데이터 */}
+                {editingRecord.rows.map((row, rowIndex) => (
+                  <div
+                    key={row.id}
+                    className="grid gap-2"
+                    style={{
+                      gridTemplateColumns:
+                        `100px repeat(${editingRecord.materials.length}, minmax(80px,1fr))`,
+                    }}
+                  >
+
+                    <div className="flex items-center justify-center text-sm">
+                      측정 {rowIndex + 1}
+                    </div>
+
+
+                    {row.values.map((value, valueIndex) => (
+                      <Input
+                        key={valueIndex}
+                        value={value}
+                        onChange={e => {
+                          const rows = [...editingRecord.rows]
+
+                          rows[rowIndex].values[valueIndex] =
+                            e.target.value
+
+                          setEditingRecord({
+                            ...editingRecord,
+                            rows,
+                          })
+                        }}
+                      />
+                    ))}
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+          )}
+
+          <DialogFooter>
+
+            <Button
+              variant="outline"
+              onClick={() => setEditOpen(false)}
+            >
+              취소
+            </Button>
+
+            <Button onClick={handleSaveEdit}>
+              저장
+            </Button>
+
+          </DialogFooter>
+
+          </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
