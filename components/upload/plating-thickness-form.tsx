@@ -111,7 +111,13 @@ function parseClipboardText(text: string) {
     if (/최대값|최소값|범위|평균값|표준편차|변동계수/i.test(line)) continue
 
     // 탭으로 구분된 데이터 파싱 (빈 셀 포함)
-    const parts = line.split('\t').map(p => p.trim())
+    const parts = line
+    .replace(/\u00A0/g, ' ')
+    .trim()
+    .split(/\s{2,}|\t/)
+    .map(p => p.trim())
+    .filter(Boolean)
+
     if (parts.length < matCount + 1) continue
     if (!/^\d+$/.test(parts[0])) continue
 
@@ -181,13 +187,13 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
   const loadCompanies = useCallback(async () => {
     try {
-      const res = await fetch('/api/config?name=plating-companies', { cache: 'no-store' })
+      const res = await fetch('/api/config?name=companies', { cache: 'no-store' })
       const data = await res.json()
       if (data.data && data.data.length > 0) {
         setCompanies(data.data)
       } else {
-        await saveConfigValue('plating-companies', '넥스플러스')
-        await saveConfigValue('plating-companies', '한중')
+        await saveConfigValue('companies', '넥스플러스')
+        await saveConfigValue('companies', '한중')
       }
     } catch {}
   }, [])
@@ -297,7 +303,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       })
       if (!res.ok) throw new Error('저장 실패')
 
-      await saveConfigValue('plating-companies', company)
+      await saveConfigValue('companies', company)
       toast.success('도금두께가 성공적으로 등록되었습니다.')
 
       setDate(''); setProductName(''); setLotNumber('')
@@ -351,7 +357,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
             <div className="space-y-1.5">
               <Label className="text-sm">업체 <span className="text-destructive">*</span></Label>
               <SearchableCombobox
-                configName="plating-companies"
+                configName="companies"
                 options={companies}
                 recentOptions={recentCompanies}
                 value={company}

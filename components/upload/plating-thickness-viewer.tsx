@@ -63,10 +63,14 @@ function RecordRow({
   record,
   onDelete,
   onEdit,
+  checked,
+  onCheck,
 }: {
   record: PlatingRecord
   onDelete: (id: string) => Promise<void>
   onEdit: (record: PlatingRecord) => void
+  checked: boolean
+  onCheck: (id: string) => void
 }) {
   const [open, setOpen] = useState(false)
 
@@ -74,6 +78,16 @@ function RecordRow({
     <div className="border border-border rounded-xl overflow-hidden bg-card">
       {/* ── 헤더 (클릭하면 펼쳐짐) ── */}
       <div className="w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
+
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => {
+          e.stopPropagation()
+          onCheck(record.id)
+        }}
+        className="w-4 h-4"
+      />
         <button
           type="button"
           onClick={() => setOpen(o => !o)}
@@ -209,6 +223,8 @@ export function PlatingThicknessViewer() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([])
+  
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -260,7 +276,15 @@ export function PlatingThicknessViewer() {
   }
 
   const handleExportToExcel = async () => {
-    if (records.length === 0) { toast.error('내보낼 데이터가 없습니다.'); return }
+
+    const exportRecords = records.filter(record =>
+      selectedIds.includes(record.id)
+    )
+  
+    if (exportRecords.length === 0) {
+      toast.error('선택된 데이터가 없습니다.')
+      return
+    }
     setExporting(true)
     try {
       const ExcelJS = await import('exceljs')
@@ -272,13 +296,18 @@ export function PlatingThicknessViewer() {
       // 헤더: 날짜 | 품명 | 로트번호 | 초중종물 | 업체 | 도금사양 | 측정시간 | 비고 | Sn1 | Sn2 | ... | Sn6 | Ni1 | Ni2 | ...
       
       // 각 레코드의 최대 행 수 구하기
-      const maxRowsPerRecord = Math.max(...records.map(r => r.rows.length), 1)
+      const maxRowsPerRecord = Math.max(
+        ...exportRecords.map(r => r.rows.length),
+        1
+      )
       
       // 전체 유니크 재질 수집
-      const allMaterials = Array.from(new Set(records.flatMap(r => r.materials)))
+      const allMaterials = Array.from(
+        new Set(exportRecords.flatMap(r => r.materials))
+      )
 
       // 업체 + 재질별 그룹 생성
-      const groupedRecords = records.reduce((acc, record) => {
+      const groupedRecords = exportRecords.reduce((acc, record) => {
 
         const materialKey = record.materials.join('_')
         const sheetName = `${record.company}_${materialKey}`
@@ -629,6 +658,26 @@ export function PlatingThicknessViewer() {
     return true
   })
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    )
+  }
+  
+  
+  const toggleSelectAll = () => {
+  
+    if (selectedIds.length === filteredRecords.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(
+        filteredRecords.map(record => record.id)
+      )
+    }
+  }
+
   return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -648,8 +697,17 @@ export function PlatingThicknessViewer() {
         </Button>
 
         <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleSelectAll}
+        >
+          {selectedIds.length === filteredRecords.length
+            ? '전체 해제'
+            : '전체 선택'}
+        </Button>
+        <Button
           onClick={handleExportToExcel}
-          disabled={exporting}
+          disabled={exporting || selectedIds.length === 0}
           variant="outline"
           size="sm"
           className="gap-2"
@@ -762,6 +820,8 @@ export function PlatingThicknessViewer() {
           record={record}
           onDelete={handleDelete}
           onEdit={handleEdit}
+          checked={selectedIds.includes(record.id)}
+          onCheck={toggleSelect}
         />
       ))}
       </div>
