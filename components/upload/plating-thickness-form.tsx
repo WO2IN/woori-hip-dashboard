@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Plus, Trash2, ClipboardPaste } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  ClipboardPaste,
+  Upload,
+} from "lucide-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,6 +32,7 @@ interface PlatingRecord {
   specification: string
   measurementTime: string
   note: string
+  adhesionImage?: string
   createdAt: string
 }
 
@@ -180,20 +186,20 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
   const [materials, setMaterials] = useState<string[]>(DEFAULT_MATERIALS)
   const [rows, setRows] = useState<MeasurementRow[]>(makeDefaultRows(DEFAULT_MATERIALS.length))
 
-  const [companies, setCompanies] = useState<string[]>(['넥스플러스', '한중'])
+  const [companies, setCompanies] = useState<string[]>([])
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
-  const pasteAreaRef = useRef<HTMLTextAreaElement>(null)
+  const [adhesionImage, setAdhesionImage] = useState<File | null>(null)
+  const [adhesionImageUrl, setAdhesionImageUrl] = useState('')
+  const pasteAreaRef = useRef<HTMLTextAreaElement>(null)  
 
   const loadCompanies = useCallback(async () => {
     try {
       const res = await fetch('/api/config?name=companies', { cache: 'no-store' })
       const data = await res.json()
-      if (data.data && data.data.length > 0) {
+      if (data.data) {
         setCompanies(data.data)
-      } else {
-        await saveConfigValue('companies', '넥스플러스')
-        await saveConfigValue('companies', '한중')
+        setRecentCompanies(data.data.slice(0, 5))
       }
     } catch {}
   }, [])
@@ -281,6 +287,27 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
     setSubmitting(true)
     try {
+      let uploadedImageUrl = ''
+      if (adhesionImage) {
+        const formData = new FormData()
+        formData.append(
+          'file',
+          adhesionImage
+        )
+        const uploadRes = await fetch(
+          '/api/plating-thickness/upload',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        )
+        if (!uploadRes.ok) {
+          throw new Error('사진 업로드 실패')
+        }
+        const uploadData = await uploadRes.json()
+
+        uploadedImageUrl = uploadData.url
+      }
       const record: PlatingRecord = {
         id: Date.now().toString(),
         date,
@@ -293,6 +320,7 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
         specification,
         measurementTime,
         note,
+        adhesionImage: uploadedImageUrl,
         createdAt: new Date().toISOString(),
       }
 
@@ -338,6 +366,37 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
           placeholder="측정기에서 복사한 텍스트를 여기에 붙여넣으세요 (Ctrl+V)"
           rows={3}
           className="w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-sm">밀착 사진</Label>
+
+        <label
+          htmlFor="adhesion-image"
+          className="flex h-24 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/20 transition-colors hover:border-primary hover:bg-muted/40"
+        >
+          <Upload className="mb-2 h-5 w-5 text-muted-foreground" />
+
+          <span className="text-sm font-medium">
+            {adhesionImage ? adhesionImage.name : "클릭하여 사진 선택"}
+          </span>
+
+          <span className="mt-1 text-xs text-muted-foreground">
+            JPG, PNG
+          </span>
+        </label>
+
+        <input
+          id="adhesion-image"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={e => {
+            const file = e.target.files?.[0] ?? null
+            setAdhesionImage(file)
+            setAdhesionImageUrl('')
+          }}
         />
       </div>
 

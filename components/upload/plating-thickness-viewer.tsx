@@ -262,6 +262,38 @@ export function PlatingThicknessViewer() {
     }
   }
 
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return
+
+    if (!confirm(`${selectedIds.length}개의 기록을 삭제하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      await Promise.all(
+        selectedIds.map(id =>
+          fetch('/api/plating-thickness', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id }),
+          })
+        )
+      )
+
+      setRecords(prev =>
+        prev.filter(record => !selectedIds.includes(record.id))
+      )
+
+      setSelectedIds([])
+
+      toast.success(`${selectedIds.length}건 삭제되었습니다.`)
+    } catch {
+      toast.error('삭제에 실패했습니다.')
+    }
+  }
+  
   const handleEdit = (record: PlatingRecord) => {
     setEditingRecord({
       ...record,
@@ -705,6 +737,16 @@ export function PlatingThicknessViewer() {
             ? '전체 해제'
             : '전체 선택'}
         </Button>
+
+        <Button
+          variant="destructive"
+          size="sm"
+          disabled={selectedIds.length === 0}
+          onClick={handleDeleteSelected}
+        >
+          선택 삭제
+        </Button>
+
         <Button
           onClick={handleExportToExcel}
           disabled={exporting || selectedIds.length === 0}
@@ -758,29 +800,11 @@ export function PlatingThicknessViewer() {
           <div>
             <Label>재질</Label>
 
-            <div className="grid gap-2 mt-2">
-              {editingRecord?.materials.map((material, index) => (
-                <Input
-                  key={index}
-                  value={material}
-                  onChange={(e) => {
-                    const newMaterial = e.target.value
-
-                    setEditingRecord(prev => {
-                      if (!prev) return prev
-
-                      const materials = [...prev.materials]
-                      materials[index] = newMaterial
-
-                      return {
-                        ...prev,
-                        materials,
-                      }
-                    })
-                  }}
-                />
-              ))}
-            </div>
+            <MultiSelect
+              options={materials}
+              value={selectedMaterials}
+              onChange={setSelectedMaterials}
+            />
           </div>
 
           <div>

@@ -22,6 +22,7 @@ interface PlatingRecord {
   specification: string
   measurementTime: string
   note: string
+  adhesionImage?: string
   createdAt: string
 }
 

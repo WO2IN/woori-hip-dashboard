@@ -778,5 +778,138 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:39:24.281Z"
+  },
+  {
+    "id": "1785382220702",
+    "date": "2026-07-24",
+    "productName": "Test",
+    "lotNumber": "20260724",
+    "productType": "middle",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "parsed-0-1785382215198",
+        "values": [
+          "8.678",
+          "2.912"
+        ],
+        "dateTime": "12:47"
+      },
+      {
+        "id": "parsed-1-1785382215198",
+        "values": [
+          "8.416",
+          "2.512"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-2-1785382215198",
+        "values": [
+          "8.025",
+          "2.600"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-3-1785382215198",
+        "values": [
+          "8.253",
+          "2.878"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-4-1785382215198",
+        "values": [
+          "8.897",
+          "3.076"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-5-1785382215198",
+        "values": [
+          "7.647",
+          "2.133"
+        ],
+        "dateTime": "12:57"
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛ Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "createdAt": "2026-07-30T03:30:20.702Z"
+  },
+  {
+    "id": "1785382330979",
+    "date": "2026-07-24",
+    "productName": "test",
+    "lotNumber": "20260724",
+    "productType": "middle",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "parsed-0-1785382326152",
+        "values": [
+          "8.678",
+          "2.912"
+        ],
+        "dateTime": "12:47"
+      },
+      {
+        "id": "parsed-1-1785382326152",
+        "values": [
+          "8.416",
+          "2.512"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-2-1785382326152",
+        "values": [
+          "8.025",
+          "2.600"
+        ],
+        "dateTime": "12:48"
+      },
+      {
+        "id": "parsed-3-1785382326152",
+        "values": [
+          "8.253",
+          "2.878"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-4-1785382326152",
+        "values": [
+          "8.897",
+          "3.076"
+        ],
+        "dateTime": "12:56"
+      },
+      {
+        "id": "parsed-5-1785382326152",
+        "values": [
+          "7.647",
+          "2.133"
+        ],
+        "dateTime": "12:57"
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛ Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "adhesionImage": "/storage/plating/c407877f-75db-4798-a6c3-ce05888525f8.jpg",
+    "createdAt": "2026-07-30T03:32:10.979Z"
   }
 ]
