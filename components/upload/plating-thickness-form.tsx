@@ -188,6 +188,8 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
   const [companies, setCompanies] = useState<string[]>([])
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
+  const [specifications, setSpecifications] = useState<string[]>([])
+  const [recentSpecifications, setRecentSpecifications] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [adhesionImage, setAdhesionImage] = useState<File | null>(null)
   const [adhesionImageUrl, setAdhesionImageUrl] = useState('')
@@ -204,7 +206,21 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
     } catch {}
   }, [])
 
-  useEffect(() => { loadCompanies() }, [loadCompanies])
+  const loadSpecifications = useCallback(async () => {
+    try {
+      const res = await fetch('/api/config?name=specifications', { cache: 'no-store' })
+      const data = await res.json()
+      if (data.data) {
+        setSpecifications(data.data)
+        setRecentSpecifications(data.data.slice(0, 5))
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    loadCompanies()
+    loadSpecifications()
+  }, [loadCompanies, loadSpecifications])
 
   // ── 붙여넣기 ────────────────────────────────────────────────────────────
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -332,6 +348,9 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       if (!res.ok) throw new Error('저장 실패')
 
       await saveConfigValue('companies', company)
+      if (specification.trim()) {
+        await saveConfigValue('specifications', specification.trim())
+      }
       toast.success('도금두께가 성공적으로 등록되었습니다.')
 
       setDate(''); setProductName(''); setLotNumber('')
@@ -339,6 +358,11 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
       setMeasurementTime(''); setNote(''); 
       setMaterials(DEFAULT_MATERIALS)
       setRows(makeDefaultRows(DEFAULT_MATERIALS.length))
+      setAdhesionImage(null)
+      setAdhesionImageUrl('')
+      if (pasteAreaRef.current) {
+        pasteAreaRef.current.value = ''
+      }
       onSuccess?.()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '등록에 실패했습니다.')
@@ -465,7 +489,18 @@ export function PlatingThicknessForm({ onSuccess }: { onSuccess?: () => void }) 
 
             <div className="space-y-1.5">
               <Label className="text-sm">도금사양</Label>
-              <Input value={specification} onChange={e => setSpecification(e.target.value)} placeholder="예: Sn 5~9μm / Ni 1~5μm" />
+              <SearchableCombobox
+                configName="specifications"
+                options={specifications}
+                recentOptions={recentSpecifications}
+                value={specification}
+                onChange={val => {
+                  setSpecification(val)
+                  setRecentSpecifications(prev => [val, ...prev.filter(s => s !== val)].slice(0, 5))
+                }}
+                onOptionsChange={setSpecifications}
+                placeholder="도금사양 선택 또는 입력..."
+              />
             </div>
 
             <div className="space-y-1.5">

@@ -58,7 +58,7 @@
     "measurementTime": "",
     "note": "랙걸이 위치 변경/앞-->뒤로",
     "createdAt": "2026-07-30T00:23:33.289Z",
-    "adhesionImage": "/storage/plating/3a708feb-46b9-4a81-baa5-0065f2b40dd5.png"
+    "adhesionImage": "/storage/plating/305d90ea-bf9d-475f-a959-9d3761c6eca5.png"
   },
   {
     "id": "1785371135089",
@@ -119,7 +119,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:25:35.089Z",
-    "adhesionImage": "/storage/plating/0a6abf0d-7a1b-478c-931a-7900bcf70edc.png"
+    "adhesionImage": "/storage/plating/ae698476-e7cf-48a2-8573-a439594800b1.png"
   },
   {
     "id": "1785371222449",
@@ -180,7 +180,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:27:02.449Z",
-    "adhesionImage": "/storage/plating/d8c884a1-6433-4b7d-843c-5ac9af23fe15.png"
+    "adhesionImage": "/storage/plating/5c1ebdf3-3370-42f9-b71a-aa795a59a113.png"
   },
   {
     "id": "1785371481403",
@@ -241,7 +241,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:31:21.403Z",
-    "adhesionImage": "/storage/plating/ef944c37-b1c2-48ff-be57-ebe5fc1f83a8.png"
+    "adhesionImage": "/storage/plating/86ea3b15-4183-4e24-b268-9606f1efaff6.png"
   },
   {
     "id": "1785371607217",
@@ -302,7 +302,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:33:27.217Z",
-    "adhesionImage": "/storage/plating/a74d605e-5e13-4356-8221-313625f9ef88.png"
+    "adhesionImage": "/storage/plating/17a5bc6d-cd09-4d9a-bd67-a8d4a81a4c84.png"
   },
   {
     "id": "1785371651849",
@@ -363,7 +363,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:34:11.849Z",
-    "adhesionImage": "/storage/plating/4acdff36-7399-4b8e-84cd-66e4d2bd0f2b.png"
+    "adhesionImage": "/storage/plating/a487a0ac-d316-49cd-a91c-1f9eaadf9458.png"
   },
   {
     "id": "1785371702274",
@@ -424,7 +424,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:35:02.274Z",
-    "adhesionImage": "/storage/plating/05e09280-5738-4ddc-9b57-00ca21980513.png"
+    "adhesionImage": "/storage/plating/4bd3f6eb-a601-4068-9527-e44f95010c59.png"
   },
   {
     "id": "1785371755378",
@@ -485,7 +485,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:35:55.378Z",
-    "adhesionImage": "/storage/plating/524eae33-cf6f-4faa-bc1e-8d0c075e2dce.png"
+    "adhesionImage": "/storage/plating/b034dc39-243b-4b70-b273-39f5a47cf72c.png"
   },
   {
     "id": "1785371800945",
@@ -546,7 +546,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:36:40.945Z",
-    "adhesionImage": "/storage/plating/f63743aa-d466-4122-8de9-f60fdcf8acc6.png"
+    "adhesionImage": "/storage/plating/4587c41f-d9d6-40c4-b2dd-04bd8d854153.png"
   },
   {
     "id": "1785371848098",
@@ -607,7 +607,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:37:28.098Z",
-    "adhesionImage": "/storage/plating/92a2d539-952e-4dbb-a369-b44d5ba851f1.png"
+    "adhesionImage": "/storage/plating/28fcc5ba-1421-463d-904e-bb67c204931a.png"
   },
   {
     "id": "1785371889985",
@@ -668,7 +668,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:38:09.985Z",
-    "adhesionImage": "/storage/plating/f47365f6-3f15-4bf8-95be-24d44d9dbc51.png"
+    "adhesionImage": "/storage/plating/d83401ce-dcd6-4436-8cdf-b8a6121fedb9.png"
   },
   {
     "id": "1785371928050",
@@ -729,7 +729,7 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:38:48.050Z",
-    "adhesionImage": "/storage/plating/023a67f8-d451-4c03-893c-50dd79639337.png"
+    "adhesionImage": "/storage/plating/5512422b-c9c6-4118-9dcb-7a2106f2f4d8.png"
   },
   {
     "id": "1785371964281",
@@ -790,6 +790,189 @@
     "measurementTime": "",
     "note": "",
     "createdAt": "2026-07-30T00:39:24.281Z",
-    "adhesionImage": "/storage/plating/e3ea950f-f04b-434b-8ce9-27ed7c7a537a.png"
+    "adhesionImage": "/storage/plating/72b6583d-f09f-44d5-b9ca-83af631c259f.png"
+  },
+  {
+    "id": "1785472991920",
+    "date": "2026-07-30",
+    "productName": "BUSBAR POS",
+    "lotNumber": "20260730",
+    "productType": "initial",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "1785472893659-0.289877546163391",
+        "values": [
+          "6.736",
+          "2.692"
+        ]
+      },
+      {
+        "id": "1785472893659-0.5732653179541985",
+        "values": [
+          "6.417",
+          "2.574"
+        ]
+      },
+      {
+        "id": "1785472893659-0.3799067277557615",
+        "values": [
+          "6.584",
+          "2.513"
+        ]
+      },
+      {
+        "id": "1785472893659-0.8388296198528336",
+        "values": [
+          "6.288",
+          "2.706"
+        ]
+      },
+      {
+        "id": "1785472893659-0.02680190314748465",
+        "values": [
+          "6.480",
+          "3.084"
+        ]
+      },
+      {
+        "id": "1785472893659-0.5164607144650915",
+        "values": [
+          "7.111",
+          "2.863"
+        ]
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛   Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "adhesionImage": "/storage/plating/8045da6e-597d-426e-bf17-595cf2c2c17d.png",
+    "createdAt": "2026-07-31T04:43:11.920Z"
+  },
+  {
+    "id": "1785473263494",
+    "date": "2026-07-30",
+    "productName": "BUSBAR POS",
+    "lotNumber": "20260730",
+    "productType": "middle",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "1785473191277-0.4682646384759316",
+        "values": [
+          "6.459",
+          "2.765"
+        ]
+      },
+      {
+        "id": "1785473191277-0.6225052119323335",
+        "values": [
+          "6.351",
+          "2.962"
+        ]
+      },
+      {
+        "id": "1785473191277-0.6627808539353789",
+        "values": [
+          "6.581",
+          "2.867"
+        ]
+      },
+      {
+        "id": "1785473191277-0.2020927622027442",
+        "values": [
+          "6.863",
+          "2.832"
+        ]
+      },
+      {
+        "id": "1785473191277-0.20323137559669335",
+        "values": [
+          "6.789",
+          "2.784"
+        ]
+      },
+      {
+        "id": "1785473191277-0.9783494742758365",
+        "values": [
+          "7.111",
+          "2.936"
+        ]
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛   Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "adhesionImage": "/storage/plating/fc327f00-26d2-4162-b348-4593e9c7d4e7.png",
+    "createdAt": "2026-07-31T04:47:43.494Z"
+  },
+  {
+    "id": "1785473302401",
+    "date": "2026-07-30",
+    "productName": "BUSBAR POS",
+    "lotNumber": "20260730",
+    "productType": "final",
+    "company": "넥스플러스",
+    "materials": [
+      "Sn",
+      "Ni"
+    ],
+    "rows": [
+      {
+        "id": "1785473263561-0.5039982418622502",
+        "values": [
+          "8.386",
+          "4.173"
+        ]
+      },
+      {
+        "id": "1785473263561-0.9796444630804507",
+        "values": [
+          "6.488",
+          "3.467"
+        ]
+      },
+      {
+        "id": "1785473263561-0.7839830109618805",
+        "values": [
+          "7.899",
+          "2.696"
+        ]
+      },
+      {
+        "id": "1785473263561-0.4071261468771301",
+        "values": [
+          "8.189",
+          "3.337"
+        ]
+      },
+      {
+        "id": "1785473263561-0.772490085396922",
+        "values": [
+          "7.469",
+          "2.110"
+        ]
+      },
+      {
+        "id": "1785473263561-0.2907900321732285",
+        "values": [
+          "7.473",
+          "2.136"
+        ]
+      }
+    ],
+    "specification": "Sn : 5.0~9.0㎛   Ni : 1.0~5.0㎛",
+    "measurementTime": "",
+    "note": "",
+    "adhesionImage": "/storage/plating/5c49fe16-8c87-45a2-aad9-2029bfa1d03b.png",
+    "createdAt": "2026-07-31T04:48:22.401Z"
   }
 ]
