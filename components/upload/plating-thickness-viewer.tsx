@@ -44,6 +44,7 @@ interface PlatingRecord {
   specification: string
   measurementTime: string
   note: string
+  adhesionImage?: string
   createdAt: string
 }
 
@@ -73,6 +74,11 @@ function RecordRow({
   onCheck: (id: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageError(false)
+  }, [record.adhesionImage])
 
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-card">
@@ -164,7 +170,7 @@ function RecordRow({
       {/* ── 펼쳐지는 상세 ── */}
       {open && (
         <div className="border-t border-border">
-          {/* 메타 정보 */}
+
           {(record.specification || record.note || record.measurementTime) && (
             <div className="px-4 py-2 bg-muted/10 border-b border-border flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
               {record.specification && <span>도금사양: {record.specification}</span>}
@@ -173,34 +179,82 @@ function RecordRow({
             </div>
           )}
 
-          {/* 측정값 테이블 */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-base">
-              <thead>
-                <tr className="border-b border-border bg-muted/10">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground w-12">No</th>
-                  {record.materials.map((mat, i) => (
-                    <th key={i} className="px-4 py-3 text-center text-sm font-semibold">
-                      {mat} <span className="text-muted-foreground font-normal">μm</span>
+          <div className="flex">
+
+            {/* 왼쪽 : 기존 테이블 */}
+            <div className="flex-1 overflow-x-auto">
+              <table className="w-full text-base">
+                <thead>
+                  <tr className="border-b border-border bg-muted/10">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground w-12">
+                      No
                     </th>
-                  ))}
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-muted-foreground">측정 일시</th>
-                </tr>
-              </thead>
-              <tbody>
-                {record.rows.map((row, idx) => (
-                  <tr key={row.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{idx + 1}</td>
-                    {row.values.map((val, ci) => (
-                      <td key={ci} className="px-4 py-3 text-center font-mono text-base">
-                        {parseFloat(val) ? parseFloat(val).toFixed(3) : (val || '—')}
-                      </td>
+
+                    {record.materials.map((mat, i) => (
+                      <th
+                        key={i}
+                        className="px-4 py-3 text-center text-sm font-semibold"
+                      >
+                        {mat}
+                        <span className="text-muted-foreground font-normal">
+                          {" "}μm
+                        </span>
+                      </th>
                     ))}
-                    <td className="px-4 py-3 text-center text-sm text-muted-foreground">{row.dateTime ?? '—'}</td>
+
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-muted-foreground">
+                      측정 일시
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {record.rows.map((row, idx) => (
+                    <tr
+                      key={row.id}
+                      className="border-b border-border last:border-0 hover:bg-muted/20"
+                    >
+                      <td className="px-4 py-3">
+                        {idx + 1}
+                      </td>
+
+                      {row.values.map((val, ci) => (
+                        <td
+                          key={ci}
+                          className="px-4 py-3 text-center"
+                        >
+                          {parseFloat(val)
+                            ? parseFloat(val).toFixed(3)
+                            : val || "—"}
+                        </td>
+                      ))}
+
+                      <td className="px-4 py-3 text-center">
+                        {row.dateTime ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 오른쪽 : 밀착 사진 */}
+            <div className="w-[250px] border-l border-border bg-muted/10 p-2">
+              {record.adhesionImage && !imageError ? (
+                <img
+                  src={record.adhesionImage}
+                  alt="밀착 사진"
+                  className="w-full h-[320px] rounded-lg border bg-white object-contain"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-[320px] rounded-lg border border-dashed border-border bg-muted/20 flex items-center justify-center">
+                  <span className="text-lg font-medium text-muted-foreground">
+                    사진 없음
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -215,6 +269,8 @@ export function PlatingThicknessViewer() {
   
   const [editingRecord, setEditingRecord] = useState<PlatingRecord | null>(null)
   const [editOpen, setEditOpen] = useState(false)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   // 필터
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -304,6 +360,8 @@ export function PlatingThicknessViewer() {
       materials: [...record.materials],
     })
   
+    setEditImageFile(null)
+  
     setEditOpen(true)
   }
 
@@ -355,7 +413,7 @@ export function PlatingThicknessViewer() {
       }, {} as Record<string, typeof records>)
 
 
-      Object.entries(groupedRecords).forEach(([sheetName, sheetRecords]) => {
+      for (const [sheetName, sheetRecords] of Object.entries(groupedRecords)) {
 
         const worksheet = workbook.addWorksheet(
           sheetName.substring(0,31)
@@ -494,7 +552,7 @@ export function PlatingThicknessViewer() {
       })
         
       // 데이터 셀 스타일
-      sheetRecords.forEach(record => {
+      for (const record of sheetRecords) {
 
         const values = record.rows
           .flatMap(row => row.values)
@@ -505,7 +563,7 @@ export function PlatingThicknessViewer() {
         ].slice(0, measurementCount)
       
       
-        worksheet.addRow([
+        const dataRow = worksheet.addRow([
           '',
           record.date,
           record.productName,
@@ -516,8 +574,37 @@ export function PlatingThicknessViewer() {
           ...measurementValues,
           record.note ?? ''
         ])
+        if (record.adhesionImage) {
+
+          const imageUrl = record.adhesionImage.startsWith('/')
+            ? record.adhesionImage
+            : `/${record.adhesionImage}`
         
-        })
+          const imageBuffer = await fetch(imageUrl)
+            .then(res => res.arrayBuffer())
+        
+        
+          const imageId = workbook.addImage({
+            buffer: imageBuffer,
+            extension: 'png',
+          })
+        
+        
+          worksheet.addImage(
+            imageId,
+            {
+              tl: {
+                col: 6.15,
+                row: dataRow.number - 0.6,
+              },
+              ext: {
+                width: 140,
+                height: 140,
+              },
+            }
+          )
+        }
+        }
 
       // 데이터 셀 스타일
       const columns = [
@@ -572,7 +659,7 @@ export function PlatingThicknessViewer() {
         }
       })
     
-    }) // Object.entries(groupedRecords) 종료
+    } // Object.entries(groupedRecords) 종료
 
     const buffer = await workbook.xlsx.writeBuffer()
 
@@ -593,28 +680,107 @@ export function PlatingThicknessViewer() {
 
   const handleSaveEdit = async () => {
     if (!editingRecord) return
-
+  
     try {
+  
+      let updatedRecord = {
+        ...editingRecord
+      }
+  
+  
+      if (editImageFile) {
+
+        // 기존 사진 저장
+        const oldImage = editingRecord.adhesionImage
+      
+      
+        // 새 사진 업로드
+        const formData = new FormData()
+      
+        formData.append(
+          'file',
+          editImageFile
+        )
+      
+      
+        const uploadRes = await fetch(
+          '/api/plating-thickness/upload',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        )
+      
+      
+        if (!uploadRes.ok) {
+          throw new Error('사진 업로드 실패')
+        }
+      
+      
+        const uploadData = await uploadRes.json()
+      
+      
+      
+        // 기존 사진 삭제
+        if (oldImage) {
+      
+          await fetch(
+            '/api/plating-thickness/delete-image',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                url: oldImage,
+              }),
+            }
+          )
+      
+        }
+      
+      
+      
+        // 새 사진 경로 적용
+        updatedRecord = {
+          ...updatedRecord,
+          adhesionImage: uploadData.url,
+        }
+      
+      }
+  
+  
       const res = await fetch('/api/plating-thickness', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editingRecord),
+        body: JSON.stringify(updatedRecord),
       })
-
-      if (!res.ok) throw new Error('수정 실패')
-
+  
+  
+      if (!res.ok) {
+        throw new Error('수정 실패')
+      }
+  
+  
       toast.success('수정되었습니다.')
-
+  
+  
       setRecords(prev =>
         prev.map(record =>
-          record.id === editingRecord.id ? editingRecord : record
+          record.id === updatedRecord.id
+            ? updatedRecord
+            : record
         )
       )
-
+  
+  
       setEditOpen(false)
       setEditingRecord(null)
+      setEditImageFile(null)
+  
+  
     } catch {
       toast.error('수정에 실패했습니다.')
     }
@@ -928,6 +1094,44 @@ export function PlatingThicknessViewer() {
                     })
                   }
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>밀착 사진</Label>
+
+                {editingRecord.adhesionImage && (
+                  <p className="text-xs text-muted-foreground">
+                    기존 사진 등록됨
+                  </p>
+                )}
+
+                <label
+                  htmlFor="edit-adhesion-image"
+                  className="
+                    flex h-24 cursor-pointer flex-col items-center justify-center
+                    rounded-md border-2 border-dashed border-border
+                    bg-muted/20 hover:bg-muted/40
+                  "
+                >
+                  <span className="text-sm font-medium">
+                    {editImageFile
+                      ? editImageFile.name
+                      : "사진 변경 선택"}
+                  </span>
+                </label>
+
+
+                <input
+                  id="edit-adhesion-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0] ?? null
+                    setEditImageFile(file)
+                  }}
+                />
+
               </div>
 
               <div className="space-y-3">
