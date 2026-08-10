@@ -64,9 +64,17 @@ export async function POST(req: NextRequest) {
   const effectiveDate = normalizeDate(issueDate)
   const dateStr = effectiveDate.replace(/-/g, '')
   const lotPart = lotStart
-    ? (lotEnd ? `${lotStart}_${lotEnd}` : lotStart)
-    : format(new Date(), 'HHmmss')
-  const generatedName = `${dateStr}_${lotPart}.pdf`
+  ? (lotEnd ? `${lotStart}_${lotEnd}` : lotStart)
+  : format(new Date(), 'HHmmss')
+
+  // 파일명에 사용할 제품명 정리
+  const safeProduct = product
+    ? product.replace(/[<>:"/\\|?*]/g, '_').trim()
+    : '미지정'
+
+  // 날짜 + 제품명 + LOT + UUID로 파일명 생성
+  const generatedName =
+    `${dateStr}_${safeProduct}_${lotPart}_${uuidv4()}.pdf`
 
   // Build storage path: /company/documentType/year/filename
   const year = effectiveDate.split('-')[0]

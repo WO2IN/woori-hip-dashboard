@@ -181,23 +181,29 @@ export function FileCard({
               <FileText className="w-[18px] h-[18px]" />
             </div>
             <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1.8fr_1fr_0.7fr] gap-4">
-            <div className="md:col-span-1">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-bold text-foreground truncate">
-                  {document.company}
+              <div className="md:col-span-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-2 min-w-0">
+                  <p
+                    className="text-sm font-bold text-foreground truncate"
+                    title={document.company}
+                  >
+                    {document.company}
+                  </p>
+
+                  {document.note && (
+                    <span title={document.note}>
+                      <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    </span>
+                  )}
+                </div>
+
+                <p
+                  className="text-sm text-muted-foreground truncate max-w-full"
+                  title={document.filename}
+                >
+                  {document.filename}
                 </p>
-
-                {document.note && (
-                  <span title={document.note}>
-                    <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  </span>
-                )}
               </div>
-
-              <p className="text-sm text-muted-foreground truncate">
-                {document.filename}
-              </p>
-            </div>
           <div className="hidden md:flex items-center justify-center">
             <Badge variant="secondary" className="text-xs">
               {document.documentType}
