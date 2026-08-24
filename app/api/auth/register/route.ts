@@ -3,15 +3,6 @@ import { v4 as uuidv4 } from 'uuid'
 import { readUsers, writeUsers, hashPassword } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
-  const role = req.headers.get('x-user-role')
-
-  if (role !== 'admin') {
-    return NextResponse.json(
-      { error: '권한이 없습니다.' },
-      { status: 403 }
-    )
-  }
-
   const body = await req.json()
   const username = body.username?.trim()
   const displayName = body.displayName?.trim()

@@ -1,11 +1,11 @@
 [
   {
-    "id": "61702a23-8ee0-444d-9a04-430fcd4b5df6",
-    "username": "admin",
+    "id": "a9da7402-fc9b-4727-8cad-92f7978f843b",
+    "username": "Admin",
     "displayName": "관리자",
-    "passwordHash": "a2c5209a97f60ab7392331f291e95822c11ca74dc60a537f9b1fb4feae601314",
+    "passwordHash": "1d1d3bf8dbd43007bd4e44ccb301b3305ba17757e6ff09e7bf90f5982826d654",
     "role": "admin",
-    "createdAt": "2026-07-16T03:35:09.621Z"
+    "createdAt": "2026-08-24T07:40:35.152Z"
   },
   {
     "id": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
