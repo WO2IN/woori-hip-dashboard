@@ -7,7 +7,7 @@ import { QuickActionCard } from '@/components/dashboard/quick-action-card'
 
 async function getDashboardData() {
   try {
-    const res = await fetch('http://localhost:3001/api/stats', { cache: 'no-store' })
+    const res = await fetch('http://localhost:3000/api/stats', { cache: 'no-store' })
     if (!res.ok) throw new Error()
     return await res.json()
   } catch {

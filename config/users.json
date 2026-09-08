@@ -1,18 +1,10 @@
 [
   {
-    "id": "a9da7402-fc9b-4727-8cad-92f7978f843b",
-    "username": "Admin",
-    "displayName": "관리자",
-    "passwordHash": "1d1d3bf8dbd43007bd4e44ccb301b3305ba17757e6ff09e7bf90f5982826d654",
-    "role": "admin",
-    "createdAt": "2026-08-24T07:40:35.152Z"
-  },
-  {
     "id": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
     "username": "woo_1n",
     "displayName": "나우인",
     "passwordHash": "92920ae2131ec21becae98d323aac54ade458cbc4c59b574630030c60c3b61ba",
-    "role": "editor",
+    "role": "admin",
     "createdAt": "2026-07-16T03:57:44.195Z"
   },
   {
@@ -30,5 +22,13 @@
     "passwordHash": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
     "role": "admin",
     "createdAt": "2026-07-22T01:45:58.198Z"
+  },
+  {
+    "id": "5e253b3d-30a8-4320-812d-e03c21128b51",
+    "username": "ripoot0989",
+    "displayName": "고은채",
+    "passwordHash": "0dbcba39bdb587132416ed1bd2e7b90421d1e31b3690b351fb16a711abad7ad1",
+    "role": "editor",
+    "createdAt": "2026-09-03T04:11:39.750Z"
   }
 ]
