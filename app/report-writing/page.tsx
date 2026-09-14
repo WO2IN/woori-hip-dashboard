@@ -52,7 +52,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 function ReportPreviewSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="mt-5 rounded-md border border-slate-300 bg-background p-3"><h4 className="mb-3 border-b border-slate-300 pb-2 text-sm font-bold text-primary">{title}</h4>{children}</section>
+  return <section className="report-section mt-5 overflow-hidden border border-slate-400 bg-background"><h4 className="border-b border-slate-400 bg-[#dcecf8] px-3 py-2 text-sm font-bold text-[#1f426b]">{title}</h4><div className="p-2">{children}</div></section>
 }
 
 export default function ReportWritingPage() {
@@ -113,13 +113,28 @@ export default function ReportWritingPage() {
         </Tabs>
       </div>
       <style jsx global>{`
+        .report-paper { color: #183b61; }
+        .report-paper table { border-collapse: collapse; }
+        .report-paper th, .report-paper td { border: 1px solid #8eaec8; }
+        .report-paper th { background: #dcecf8; font-weight: 700; }
+        .report-paper .report-section { break-inside: avoid; }
         @media print {
-          @page { size: A4; margin: 12mm; }
-          body { background: white !important; }
+          @page { size: A4 portrait; margin: 7mm; }
+          html, body { background: white !important; }
           body * { visibility: hidden; }
           .report-preview, .report-preview * { visibility: visible; }
-          .report-preview { position: absolute; inset: 0; width: 100%; margin: 0; border: 0; box-shadow: none; }
+          .report-preview { position: absolute; inset: 0; width: 100%; margin: 0; border: 0; background: white !important; box-shadow: none; }
           .report-preview > div:first-child { display: none; }
+          .report-preview .report-paper { width: 100%; min-height: 0; border: 1.5px solid #203f61; border-radius: 0; padding: 3mm; box-shadow: none; font-size: 8px; }
+          .report-paper h3 { font-size: 17px; line-height: 1.1; }
+          .report-paper img { height: 25px; }
+          .report-paper .mt-4 { margin-top: 5px; }
+          .report-paper .mt-5 { margin-top: 6px; }
+          .report-paper .p-3 { padding: 5px; }
+          .report-paper .p-2 { padding: 3px; }
+          .report-paper th, .report-paper td { padding: 3px 4px !important; line-height: 1.15; }
+          .report-paper .report-section h4 { padding: 4px 6px; font-size: 9px; }
+          .report-paper .report-section { break-inside: avoid; }
           .report-preview .rounded-lg { border-radius: 0; }
         }
       `}</style>
