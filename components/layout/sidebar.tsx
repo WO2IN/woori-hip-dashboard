@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Home, Upload, Settings, FolderOpen, Folder, ChevronRight,
-  ChevronDown, Building2, PanelLeftClose, PanelLeft, Users, Gauge
+  ChevronDown, Building2, PanelLeftClose, PanelLeft, Users, Gauge, FileCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -137,6 +137,7 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
                 { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' },
                 { href: '/explorer', label: '문서 탐색기', icon: FolderOpen, minRole: 'viewer' },
                 { href: '/upload', label: '문서 등록', icon: Upload, minRole: 'editor' },
+                { href: '/report-writing', label: '성적서 작성', icon: FileCheck, minRole: 'editor' },
                 // { href: '/plating-thickness', label: '도금두께 관리', icon: Gauge, minRole: 'editor' },
                 { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' },
                 { href: '/admin/users', label: '사용자 관리', icon: Users, minRole: 'admin' },
