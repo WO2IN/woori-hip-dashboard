@@ -4,8 +4,10 @@ import { useState } from 'react'
 import {
   Check,
   ChevronDown,
+  Download,
   FileCheck,
   Plus,
+  Printer,
   RotateCcw,
   Settings2,
   Trash2,
@@ -71,16 +73,17 @@ export default function ReportWritingPage() {
   const updateThickness = (id: number, key: keyof ThicknessRow, value: string) => setThicknessRows(rows => rows.map(row => row.id === id ? { ...row, [key]: value } : row))
   const reset = () => { setCustomer(''); setProduct(''); setLotNumber(''); setIssueDate(''); setSpecification(''); setLotSize(''); setInspectionDate(''); setVisualRows(initialVisualRows); setThicknessRows(initialThicknessRows); toast.success('입력 내용을 초기화했습니다.') }
   const save = () => { if (!customer || !product || !lotNumber) { toast.error('고객명, 품명, 로트번호를 입력해주세요.'); return } toast.success('성적서 초안이 저장되었습니다.') }
+  const printReport = () => window.print()
 
   return (
-    <main className="min-h-full bg-muted/20 p-4 sm:p-6 lg:p-8">
+    <main className="report-page min-h-full bg-muted/20 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div className="flex items-start gap-3">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><FileCheck className="size-5" /></div>
             <div><p className="text-sm font-medium text-primary">QUALITY ASSURANCE</p><h1 className="text-2xl font-bold tracking-tight text-foreground">성적서 작성</h1><p className="mt-1 text-sm text-muted-foreground">검사 정보를 입력해 품질보증 성적서를 작성하세요.</p></div>
           </div>
-          <div className="flex gap-2"><Button variant="outline" onClick={reset}><RotateCcw data-icon="inline-start" />초기화</Button><Button onClick={save}><Check data-icon="inline-start" />성적서 저장</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={reset}><RotateCcw data-icon="inline-start" />초기화</Button><Button variant="outline" onClick={printReport}><Printer data-icon="inline-start" />인쇄</Button><Button variant="outline" onClick={printReport}><Download data-icon="inline-start" />PDF 다운로드</Button><Button onClick={save}><Check data-icon="inline-start" />성적서 저장</Button></div>
         </div>
 
         <Tabs defaultValue="write" className="gap-5">
@@ -100,11 +103,22 @@ export default function ReportWritingPage() {
 
             <Card><CardHeader><div className="flex items-center justify-between gap-4"><SectionTitle number="03" title="도금두께" description="도금 종류와 측정 포인트를 설정할 수 있습니다." /><Button variant="outline" size="sm"><Settings2 data-icon="inline-start" />항목 설정</Button></div></CardHeader><CardContent className="flex flex-col gap-4"><div className="grid gap-4 rounded-lg bg-muted/40 p-4 sm:grid-cols-[minmax(0,240px)_1fr]"><Field label="도금 종류"><div className="relative"><select value={platingType} onChange={e => setPlatingType(e.target.value)} className="h-9 w-full appearance-none rounded-md border border-input bg-background px-3 pr-8 text-sm outline-none focus:ring-2 focus:ring-ring"><option>Ni</option><option>Sn</option><option>Au</option><option>Cu</option><option>Zn</option><option>Ag</option></select><ChevronDown className="pointer-events-none absolute right-3 top-2.5 size-4 text-muted-foreground" /></div></Field><div className="flex items-end pb-1 text-sm text-muted-foreground"><span className="rounded-md border bg-background px-3 py-2">측정 단위: μm</span></div></div><div className="overflow-x-auto rounded-lg border"><table className="w-full min-w-[560px] text-sm"><thead className="bg-muted/60"><tr><th className="w-20 px-3 py-3 text-center font-medium text-muted-foreground">NO.</th><th className="px-3 py-3 text-left font-medium text-muted-foreground">측정 포인트</th><th className="px-3 py-3 text-left font-medium text-muted-foreground">도금두께 (μm)</th><th className="w-28 px-3 py-3 text-center font-medium text-muted-foreground">판정</th><th className="w-12" /></tr></thead><tbody>{thicknessRows.map(row => <tr key={row.id} className="border-t"><td className="px-3 py-2 text-center text-muted-foreground">{row.id}</td><td className="px-2 py-2"><Input value={row.point} onChange={e => updateThickness(row.id, 'point', e.target.value)} placeholder="예: 1차" /></td><td className="px-2 py-2"><Input value={row.value} onChange={e => updateThickness(row.id, 'value', e.target.value)} placeholder="측정값" /></td><td className="px-2 py-2"><Input className="text-center" value={row.result} onChange={e => updateThickness(row.id, 'result', e.target.value)} /></td><td className="px-2"><Button variant="ghost" size="icon" onClick={() => setThicknessRows(rows => rows.filter(item => item.id !== row.id))} aria-label="측정 항목 삭제"><Trash2 className="size-4 text-muted-foreground" /></Button></td></tr>)}</tbody></table></div><Button variant="outline" className="w-fit" onClick={() => setThicknessRows(rows => [...rows, { id: rows.length + 1, point: '', value: '', result: 'OK' }])}><Plus data-icon="inline-start" />측정 포인트 추가</Button></CardContent></Card>
 
-            <Card><CardHeader><SectionTitle number="04" title="성적서 미리보기" description="입력한 정보가 성적서에 어떻게 표시되는지 확인합니다." /></CardHeader><CardContent><div className="rounded-lg border bg-background p-5"><div className="mb-5 flex items-center justify-between border-b pb-4"><div><p className="text-xs font-medium tracking-wider text-primary">WOORI</p><h3 className="text-lg font-bold">QUALITY ASSURANCE REPORT</h3></div><div className="text-right text-xs text-muted-foreground"><p>성적서 No.</p><p className="font-medium text-foreground">{lotNumber || '미입력'}</p></div></div><div className="grid grid-cols-2 gap-px overflow-hidden rounded border bg-border text-sm sm:grid-cols-4"><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">고객명</p><p className="mt-1 font-medium">{customer || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">품명</p><p className="mt-1 font-medium">{product || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">규격</p><p className="mt-1 font-medium">{specification || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">도금 종류</p><p className="mt-1 font-medium">{platingType}</p></div></div><div className="mt-5 flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3"><span className="text-sm font-medium">종합 판정</span><span className="text-xl font-bold text-primary">PASS / OK</span></div></div></CardContent></Card>
+            <Card className="report-preview"><CardHeader><SectionTitle number="04" title="성적서 미리보기" description="입력한 정보가 성적서에 어떻게 표시되는지 확인합니다." /></CardHeader><CardContent><div className="rounded-lg border bg-background p-5"><div className="mb-5 flex items-center justify-between border-b pb-4"><div><p className="text-xs font-medium tracking-wider text-primary">WOORI</p><h3 className="text-lg font-bold">QUALITY ASSURANCE REPORT</h3></div><div className="text-right text-xs text-muted-foreground"><p>성적서 No.</p><p className="font-medium text-foreground">{lotNumber || '미입력'}</p></div></div><div className="grid grid-cols-2 gap-px overflow-hidden rounded border bg-border text-sm sm:grid-cols-4"><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">고객명</p><p className="mt-1 font-medium">{customer || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">품명</p><p className="mt-1 font-medium">{product || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">규격</p><p className="mt-1 font-medium">{specification || '-'}</p></div><div className="bg-muted/50 p-3"><p className="text-xs text-muted-foreground">도금 종류</p><p className="mt-1 font-medium">{platingType}</p></div></div><div className="mt-5 flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3"><span className="text-sm font-medium">종합 판정</span><span className="text-xl font-bold text-primary">PASS / OK</span></div></div></CardContent></Card>
           </TabsContent>
           <TabsContent value="saved"><Card><CardContent className="flex min-h-52 items-center justify-center text-sm text-muted-foreground">저장된 성적서가 없습니다.</CardContent></Card></TabsContent>
         </Tabs>
       </div>
+      <style jsx global>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          body { background: white !important; }
+          body * { visibility: hidden; }
+          .report-preview, .report-preview * { visibility: visible; }
+          .report-preview { position: absolute; inset: 0; width: 100%; margin: 0; border: 0; box-shadow: none; }
+          .report-preview > div:first-child { display: none; }
+          .report-preview .rounded-lg { border-radius: 0; }
+        }
+      `}</style>
     </main>
   )
 }
