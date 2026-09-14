@@ -19,16 +19,24 @@
     "id": "5830fffd-d740-4380-8319-e43a8a8c0926",
     "username": "woorihipqc",
     "displayName": "조승현",
-    "passwordHash": "0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c",
+    "passwordHash": "e65477d7f442bc8ca3f949d7a08947cf200d7b6e8dab2e0497e107fedbf0b117",
     "role": "admin",
     "createdAt": "2026-07-22T01:45:58.198Z"
   },
   {
-    "id": "5e253b3d-30a8-4320-812d-e03c21128b51",
-    "username": "ripoot0989",
+    "id": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "username": "ripot0989",
     "displayName": "고은채",
-    "passwordHash": "0dbcba39bdb587132416ed1bd2e7b90421d1e31b3690b351fb16a711abad7ad1",
+    "passwordHash": "9d73bfb92adaebaa346e5c12db11ce0bf0dc5ae059677dcec5198d7302d32493",
     "role": "editor",
-    "createdAt": "2026-09-03T04:11:39.750Z"
+    "createdAt": "2026-09-10T00:05:08.484Z"
+  },
+  {
+    "id": "d526cd37-e816-435a-823a-dc3c8b0d640c",
+    "username": "smk",
+    "displayName": "심문경",
+    "passwordHash": "4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942",
+    "role": "editor",
+    "createdAt": "2026-09-10T01:52:50.261Z"
   }
 ]

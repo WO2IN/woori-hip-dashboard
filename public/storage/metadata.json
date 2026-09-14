@@ -9342,8 +9342,8 @@
     "originalName": "260810_우리하이피_신흥 04 30.pdf",
     "company": "신흥 SEC",
     "documentType": "성적서",
-    "lotStart": "202608010-1",
-    "lotEnd": "202608010-8",
+    "lotStart": "20260810-1",
+    "lotEnd": "20260810-8",
     "product": "0.4*30",
     "material": "AL",
     "specification": "Ni 1.5μm ~",
@@ -9354,7 +9354,11 @@
     "storagePath": "신흥 SEC/성적서/2026/20260810_0.4_30_202608010-1_202608010-8_0dd67562-719e-4898-9be3-590795ec8bd9.pdf",
     "createdAt": "2026-08-24T01:56:30.632Z",
     "createdBy": "나우인",
-    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "note": "",
+    "updatedAt": "2026-09-10T00:00:51.728Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "23999927-1f09-496d-98a6-69309d816321",
