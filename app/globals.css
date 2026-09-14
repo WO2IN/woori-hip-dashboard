@@ -205,6 +205,9 @@
 .report-table .table-head { min-height: 22px; background: #dcebf7; font-weight: 700; }
 .visual-table > div { grid-template-columns: .45fr 3.4fr .65fr .7fr; }
 .dimension-table > div { grid-template-columns: .45fr 1.8fr .8fr .8fr .8fr .8fr .8fr .65fr; }
+.dimension-table > div > :nth-child(3), .dimension-table > div > :nth-child(5) { border-left: 2px solid #517fa8; }
+.dimension-table > div > :nth-child(3) { background: rgb(220 235 247 / .35); }
+.dimension-table > div > :nth-child(5), .dimension-table > div > :nth-child(6), .dimension-table > div > :nth-child(7) { background: rgb(245 249 252 / .8); }
 .plating-table > div { grid-template-columns: .45fr 2fr 1.35fr 1.35fr .65fr; }
 .report-bottom { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 8px; }
 .sample-box, .approval-box { border: 1px solid #8eb0ce; }
