@@ -205,8 +205,7 @@
 .report-table .table-head { min-height: 22px; background: #dcebf7; font-weight: 700; }
 .visual-table > div { grid-template-columns: .45fr 3.4fr .65fr .7fr; }
 .dimension-table > div { grid-template-columns: .45fr 1.8fr .8fr .8fr .8fr .8fr .8fr .65fr; }
-.plating-table > div { grid-template-columns: .45fr 2fr 1fr 1fr 1fr 1fr .65fr; }
-.functional-table > div { grid-template-columns: .45fr 2.3fr 1.5fr 1.4fr .65fr; }
+.plating-table > div { grid-template-columns: .45fr 2fr 1.35fr 1.35fr .65fr; }
 .report-bottom { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 8px; }
 .sample-box, .approval-box { border: 1px solid #8eb0ce; }
 .box-label { padding: 4px; color: #153b63; background: #dcebf7; font-weight: 800; text-align: center; }
