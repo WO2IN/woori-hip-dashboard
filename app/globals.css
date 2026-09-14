@@ -220,7 +220,15 @@
 .approval-grid span { background: #dcebf7; font-weight: 700; }
 @media (max-width: 760px) { .report-page { padding: .75rem; } .report-toolbar { align-items: start; flex-direction: column; } .quality-report { min-width: 760px; } .report-page { overflow-x: auto; } }
 @media (max-width: 560px) { .visual-split { grid-template-columns: 1fr; } }
-@media print { .no-print, aside, header:not(.report-header-grid) { display: none !important; } .report-page { padding: 0; } .quality-report { width: 100%; box-shadow: none; border: 0; } }
+@media print {
+  .no-print, aside, header:not(.report-header-grid) { display: none !important; }
+  .report-page { padding: 0; }
+  .quality-report { width: 100%; box-shadow: none; border: 1px solid #000; color: #000; }
+  .report-header-grid, .report-header-grid > *, .report-table, .report-table > div, .report-table span, .sample-box, .approval-box, .approval-grid, .approval-grid > * { border-color: #000 !important; }
+  .report-section-title { background: #000; color: #fff; }
+  .report-field span, .report-table .table-head, .box-label, .approval-grid span { background: #e5e5e5; color: #000; }
+  .report-field input, .report-table input { color: #000; }
+}
 
 /* Animations */
 @keyframes fadeInUp {
