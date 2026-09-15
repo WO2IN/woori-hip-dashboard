@@ -213,10 +213,13 @@
 .dimension-table > div > :nth-child(4) { background: rgb(245 249 252 / .8); }
 .dimension-measure-table > div > * { background: rgb(245 249 252 / .8); }
 .plating-table { border: 2px solid #153b63; }
-.plating-table > div { grid-template-columns: .45fr 3fr .8fr; }
+.plating-table > div { grid-template-columns: .45fr repeat(3, minmax(0, 1fr)) .7fr; }
 .plating-table > div > * { border-color: #153b63; border-right-width: 1px; }
 .plating-table > div:last-child { border-bottom: 0; }
 .plating-table > div > :last-child { border-right: 0; }
+.plating-table .table-head span { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+.plating-table .table-head em { font-style: normal; font-weight: 400; line-height: 1; }
+.plating-table .table-head input { width: 100%; height: 18px; padding: 0 2px; border: 0; background: transparent; color: inherit; font-size: 11px; text-align: center; }
 .report-bottom { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 8px; }
 .sample-box, .approval-box { border: 1px solid #8eb0ce; }
 .box-label { padding: 4px; color: #153b63; background: #dcebf7; font-weight: 800; text-align: center; }
@@ -237,7 +240,9 @@
   .dimension-split { gap: 8px; }
   .dimension-info-table, .dimension-measure-table, .dimension-info-table > div, .dimension-measure-table > div, .dimension-info-table span, .dimension-measure-table span { border-color: #000 !important; }
   .plating-table, .plating-table > div, .plating-table > div > * { border-color: #000 !important; }
-  .plating-table { border-width: 2px !important; }
+  .plating-table { border: 2px solid #000 !important; }
+  .plating-table > div, .plating-table > div > * { border-color: #000 !important; }
+  .plating-table .table-head input { color: #000 !important; }
   .report-field span, .report-table .table-head, .box-label, .approval-grid span { background: #e5e5e5 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .report-section-title { background: #fff !important; border: 1px solid #000 !important; border-bottom: 0 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .report-field input, .report-table input { color: #000 !important; background: #fff !important; }
