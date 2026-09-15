@@ -240,12 +240,15 @@
 
 /* Keep the on-screen report identical to its printed grayscale version. */
 .quality-report { color: #000; border-color: #000; box-shadow: none; }
+.quality-report * { border-color: #000; }
 .quality-report .report-logo, .quality-report .report-main-title, .quality-report .report-section-title, .quality-report .box-label, .quality-report .pass { color: #000; }
 .quality-report .report-section-title { background: #fff; border: 1px solid #000; border-bottom: 0; }
 .quality-report .report-header-grid, .quality-report .report-header-grid > *, .quality-report .report-table, .quality-report .report-table > div, .quality-report .report-table > div > span, .quality-report .sample-box, .quality-report .approval-box, .quality-report .approval-grid, .quality-report .approval-grid > * { border-color: #000; }
 .quality-report .report-table, .quality-report .report-header-grid, .quality-report .sample-box, .quality-report .approval-box { border-color: #000; }
 .quality-report .report-field span, .quality-report .report-table .table-head, .quality-report .box-label, .quality-report .approval-grid span { background: #e5e5e5; color: #000; }
 .quality-report .report-field input, .quality-report .report-table input { color: #000; background: #fff; }
+.quality-report .report-table > div > span { background: #fff; color: #000; }
+.quality-report .dimension-table > div > :nth-child(3), .quality-report .dimension-table > div > :nth-child(4), .quality-report .dimension-measure-table > div > * { background: #fff; }
 .quality-report .plating-table { border-color: #000; }
 
 @media (max-width: 760px) { .report-page { padding: .75rem; } .report-toolbar { align-items: start; flex-direction: column; } .quality-report { min-width: 760px; } .report-page { overflow-x: auto; } }
