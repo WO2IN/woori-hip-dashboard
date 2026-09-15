@@ -25,7 +25,8 @@ function SectionTitle({ roman, title, plan }: { roman: string; title: string; pl
 export default function ReportPage() {
   const [status, setStatus] = useState('저장되지 않음')
   const [platingCount, setPlatingCount] = useState(3)
-  const [previewScale, setPreviewScale] = useState(0.72)
+  const [previewScale, setPreviewScale] = useState(0.82)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [values, setValues] = useState<ReportValues>({ customer: '(주)고객사', product: '0.15*187', lotNo: '20260910-01', issueDate: '2026-09-10', specification: '0.15*187 / CU', quantity: '343.8 Kg', inspectionDate: '2026-09-10', platingTypes: ['', '', ''] })
   const update = (key: keyof ReportValues) => (value: string) => setValues((current) => ({ ...current, [key]: value }))
   const save = () => { setStatus('저장됨'); window.setTimeout(() => setStatus('저장되지 않음'), 1800) }
@@ -34,18 +35,18 @@ export default function ReportPage() {
     <div className="report-toolbar no-print"><div><p className="eyebrow">QUALITY ASSURANCE</p><h1>성적서 작성</h1></div><div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{status}</span><Button variant="outline" onClick={() => window.print()}><Printer data-icon="inline-start" />인쇄</Button><Button onClick={save}><Save data-icon="inline-start" />저장</Button></div></div>
     <div className="report-workspace">
       <aside className="report-editor no-print"><div className="report-editor-heading"><FileText /> <div><strong>성적서 정보</strong><p>입력한 값이 미리보기에 반영됩니다.</p></div></div><div className="report-editor-fields">
-        <label>고객명<Input value={values.customer} onChange={(e) => update('customer')(e.target.value)} /></label>
+        <div className="report-info-fields"><label>고객명<Input value={values.customer} onChange={(e) => update('customer')(e.target.value)} /></label>
         <label>품명<Input value={values.product} onChange={(e) => update('product')(e.target.value)} /></label>
         <label>로트번호<Input value={values.lotNo} onChange={(e) => update('lotNo')(e.target.value)} /></label>
         <label>발행일자<Input type="date" value={values.issueDate} onChange={(e) => update('issueDate')(e.target.value)} /></label>
         <label>규격<Input value={values.specification} onChange={(e) => update('specification')(e.target.value)} /></label>
         <label>수량<Input value={values.quantity} onChange={(e) => update('quantity')(e.target.value)} /></label>
-        <label>검사일자<Input type="date" value={values.inspectionDate} onChange={(e) => update('inspectionDate')(e.target.value)} /></label>
-        <div className="plating-count-control"><span>도금 종류 수</span><div><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.max(1, count - 1))} disabled={platingCount === 1} aria-label="도금 종류 줄이기">−</Button><strong>{platingCount}</strong><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.min(MAX_PLATING_TYPES, count + 1))} disabled={platingCount === MAX_PLATING_TYPES} aria-label="도금 종류 늘리기">+</Button></div></div>
-        {values.platingTypes.slice(0, platingCount).map((type, index) => <label key={index}>도금 {index + 1}<Input value={type} onChange={(e) => setValues((current) => ({ ...current, platingTypes: current.platingTypes.map((item, itemIndex) => itemIndex === index ? e.target.value : item) as [string, string, string] }))} /></label>)}
+        <label>검사일자<Input type="date" value={values.inspectionDate} onChange={(e) => update('inspectionDate')(e.target.value)} /></label></div>
+        <div className="plating-editor-card"><div className="plating-editor-heading"><strong>도금 두께 정보</strong><span>도금 종류를 선택하고 항목명을 입력하세요.</span></div><div className="plating-editor-fields"><div className="plating-count-control"><span>도금 종류 수</span><div><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.max(1, count - 1))} disabled={platingCount === 1} aria-label="도금 종류 줄이기">−</Button><strong>{platingCount}</strong><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.min(MAX_PLATING_TYPES, count + 1))} disabled={platingCount === MAX_PLATING_TYPES} aria-label="도금 종류 늘리기">+</Button></div></div>
+        {values.platingTypes.slice(0, platingCount).map((type, index) => <label key={index}>도금 {index + 1}<Input value={type} onChange={(e) => setValues((current) => ({ ...current, platingTypes: current.platingTypes.map((item, itemIndex) => itemIndex === index ? e.target.value : item) as [string, string, string] }))} /></label>)}</div></div>
+        <Button type="button" className="report-preview-open" onClick={() => setPreviewOpen(true)}><FileText data-icon="inline-start" />성적서 미리보기 크게 보기</Button>
       </div></aside>
-      <section className="report-preview-panel">
-        <div className="report-preview-toolbar no-print"><strong>성적서 미리보기</strong><div className="report-preview-actions"><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.max(0.5, Number((scale - 0.1).toFixed(2))))} aria-label="미리보기 축소"><ZoomOut /></Button><span>{Math.round(previewScale * 100)}%</span><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.min(1, Number((scale + 0.1).toFixed(2))))} aria-label="미리보기 확대"><ZoomIn /></Button><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale(0.72)} aria-label="미리보기 초기화"><Maximize2 /></Button></div></div><div className="report-preview-viewport"><div className="report-preview-canvas" style={{ transform: `scale(${previewScale})` }}>
+      {previewOpen && <div className="report-preview-modal no-print" role="dialog" aria-modal="true" aria-label="성적서 미리보기"><div className="report-preview-modal-header"><strong>성적서 미리보기</strong><div className="report-preview-actions"><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.max(0.5, Number((scale - 0.1).toFixed(2))))} aria-label="미리보기 축소"><ZoomOut /></Button><span>{Math.round(previewScale * 100)}%</span><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.min(1, Number((scale + 0.1).toFixed(2))))} aria-label="미리보기 확대"><ZoomIn /></Button><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale(0.82)} aria-label="미리보기 초기화"><Maximize2 /></Button><Button type="button" variant="outline" onClick={() => setPreviewOpen(false)}>닫기</Button></div></div><div className="report-preview-viewport"><div className="report-preview-canvas" style={{ transform: `scale(${previewScale})` }}>
         <div className="quality-report">
         <header className="report-header-grid"><div className="report-logo"><img src="/company-logo.png" alt="WOORI 로고" /></div><div className="report-main-title">QUALITY ASSURANCE REPORT</div><Field label="CUSTOMER (고객명)" value={values.customer} onChange={update('customer')} /><Field label="DESCRIPTION (품명)" value={values.product} onChange={update('product')} /><Field label="LOT NO. (로트번호)" value={values.lotNo} onChange={update('lotNo')} /><Field label="ISSUED DATE (발행일자)" value={values.issueDate} onChange={update('issueDate')} /><Field label="규격" value={values.specification} onChange={update('specification')} /><Field label="재질" value={values.quantity} onChange={update('quantity')} /><Field label="LOT SIZE (수량)" value={values.inspectionDate} onChange={update('inspectionDate')} /></header>
         <section><SectionTitle roman="I" title="VISUAL INSPECTION (외관검사)" plan="n=50 / Reel, Lot" /><div className="visual-split">{[visualRows.slice(0, 5), visualRows.slice(5)].map((rows, groupIndex) => <div className="report-table visual-table" key={groupIndex}><div className="table-head"><span>NO.</span><span>INSPECTION ITEMS (검사항목)</span><span>A/c/Re</span><span>RESULT (판정)</span></div>{rows.map((row) => <div key={row[0]}><span>{row[0]}</span><span>{row[1]}</span><span>{row[2]}</span><span>{row[3]}</span></div>)}</div>)}</div></section>
@@ -55,7 +56,7 @@ export default function ReportPage() {
         </div>
         </div>
         </div>
-      </section>
+      </div>}
     </div>
   </div>
 }
