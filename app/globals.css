@@ -389,8 +389,8 @@
 
 .report-logo img {
   display: block;
-  width: min(100%, 86px);
-  height: auto;
+  width: 120px;
+  height: 50px;
   object-fit: contain;
 }
 
@@ -399,7 +399,7 @@
   align-items: center;
   justify-content: flex-start;
   padding-left: 12px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: .02em;
 }
