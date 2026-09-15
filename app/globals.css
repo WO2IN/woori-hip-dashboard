@@ -222,12 +222,13 @@
 .plating-table .table-head span { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
 .plating-table .table-head em { font-style: normal; font-weight: 400; line-height: 1; }
 .plating-table .table-head .plating-type-value { min-height: 18px; padding: 0 2px; color: inherit; font-size: 11px; line-height: 18px; text-align: center; }
-.report-bottom { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 8px; }
+.report-bottom { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-top: 8px; align-items: stretch; }
 .sample-box, .approval-box { border: 1px solid #8eb0ce; }
+.approval-box { display: flex; flex-direction: column; }
 .box-label { padding: 4px; color: #153b63; background: #dcebf7; font-weight: 800; text-align: center; }
-.sample-blank { height: 155px; background: white; }
+.sample-blank { height: 120px; background: white; }
 .pass { padding: 14px 9px; color: #153b63; font-size: 18px; font-weight: 800; text-align: center; }
-.approval-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #8eb0ce; }
+.approval-grid { display: grid; grid-template-columns: repeat(4, 1fr); flex: 1; border-top: 1px solid #8eb0ce; }
 .approval-grid > * { min-height: 60px; display: flex; align-items: center; justify-content: center; border-right: 1px solid #8eb0ce; border-bottom: 1px solid #8eb0ce; }
 .approval-grid span { background: #dcebf7; font-weight: 700; }
 @media (max-width: 760px) { .report-page { padding: .75rem; } .report-toolbar { align-items: start; flex-direction: column; } .quality-report { min-width: 760px; } .report-page { overflow-x: auto; } }
