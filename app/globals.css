@@ -392,6 +392,7 @@
   width: 120px;
   height: 50px;
   object-fit: contain;
+  font-size: 12px;
 }
 
 .report-main-title {
