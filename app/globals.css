@@ -206,10 +206,12 @@
 .report-table .table-head { min-height: 22px; background: #dcebf7; font-weight: 700; }
 .visual-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .visual-table > div { grid-template-columns: .45fr 3.4fr .65fr .7fr; }
-.dimension-table > div { grid-template-columns: .45fr 1.8fr .8fr .8fr .8fr .8fr .8fr .65fr; }
+.dimension-split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px; }
+.dimension-table > div { grid-template-columns: .45fr 1.8fr .8fr .8fr; }
+.dimension-measure-table > div { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .dimension-table > div > :nth-child(3) { background: rgb(220 235 247 / .35); }
-.dimension-table > div > :nth-child(5) { border-left: 7px solid #fff; }
-.dimension-table > div > :nth-child(5), .dimension-table > div > :nth-child(6), .dimension-table > div > :nth-child(7) { background: rgb(245 249 252 / .8); }
+.dimension-table > div > :nth-child(4) { background: rgb(245 249 252 / .8); }
+.dimension-measure-table > div > * { background: rgb(245 249 252 / .8); }
 .plating-table { border: 1px solid #6f94b4; }
 .plating-table > div { grid-template-columns: .45fr 2fr 1.35fr 1.35fr .65fr; }
 .plating-table > div > * { border-color: #6f94b4; }
@@ -222,7 +224,7 @@
 .approval-grid > * { min-height: 42px; display: flex; align-items: center; justify-content: center; border-right: 1px solid #8eb0ce; border-bottom: 1px solid #8eb0ce; }
 .approval-grid span { background: #dcebf7; font-weight: 700; }
 @media (max-width: 760px) { .report-page { padding: .75rem; } .report-toolbar { align-items: start; flex-direction: column; } .quality-report { min-width: 760px; } .report-page { overflow-x: auto; } }
-@media (max-width: 560px) { .visual-split { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .visual-split, .dimension-split { grid-template-columns: 1fr; } }
 @media print {
   .no-print, aside, header:not(.report-header-grid) { display: none !important; }
   .report-page { padding: 0; background: #fff; }
@@ -230,7 +232,8 @@
   .report-header-grid, .report-header-grid > *, .report-table, .report-table > div, .report-table span, .sample-box, .approval-box, .approval-grid, .approval-grid > * { border-color: #000 !important; }
   .report-header-grid, .report-table, .sample-box, .approval-box { border: 1px solid #000 !important; }
   .report-header-grid > *, .report-table > div, .report-table span, .approval-grid > * { border-right: 1px solid #000 !important; border-bottom: 1px solid #000 !important; }
-  .dimension-table > div > :nth-child(5) { border-left: 7px solid #fff !important; }
+  .dimension-split { gap: 8px; }
+  .dimension-info-table, .dimension-measure-table, .dimension-info-table > div, .dimension-measure-table > div, .dimension-info-table span, .dimension-measure-table span { border-color: #000 !important; }
   .plating-table, .plating-table > div, .plating-table > div > * { border-color: #000 !important; }
   .report-field span, .report-table .table-head, .box-label, .approval-grid span { background: #e5e5e5 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .report-section-title { background: #fff !important; border: 1px solid #000 !important; border-bottom: 0 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
