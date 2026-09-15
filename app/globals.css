@@ -260,7 +260,9 @@
 .report-preview-open { width: 100%; margin-top: .25rem; }
 .report-preview-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: rgb(15 23 42 / .72); padding: 1.25rem; }
 .report-preview-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-radius: .75rem .75rem 0 0; background: var(--card); }
-.report-preview-viewport { flex: 1; height: auto; min-height: 0; border-radius: 0 0 .75rem .75rem; }
+.report-preview-viewport { flex: 1; height: auto; min-height: 0; display: flex; justify-content: center; align-items: flex-start; overflow: auto; border-radius: 0 0 .75rem .75rem; }
+.report-preview-canvas { width: min(1040px, calc(100% - 2rem)); transform-origin: top center; }
+.report-preview-canvas .quality-report { width: 100%; min-width: 0; }
 
 .report-editor-fields label {
   display: flex;
