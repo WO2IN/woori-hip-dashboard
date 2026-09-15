@@ -207,8 +207,8 @@
 .report-table { display: grid; border: 1px solid #8eb0ce; border-top: 0; }
 .report-table > div { display: grid; min-height: 20px; border-bottom: 1px solid #b5cbe0; }
 .report-table > div:last-child { border-bottom: 0; }
-.report-table span { display: flex; align-items: center; justify-content: center; padding: 2px 3px; border-right: 1px solid #b5cbe0; text-align: center; }
-.report-table span:last-child { border-right: 0; }
+.report-table > div > span { display: flex; align-items: center; justify-content: center; padding: 2px 3px; border-right: 1px solid #b5cbe0; text-align: center; }
+.report-table > div > span:last-child { border-right: 0; }
 .report-table .table-head { min-height: 22px; background: #dcebf7; font-weight: 700; }
 .visual-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .visual-table > div { grid-template-columns: .45fr 3.4fr .65fr .7fr; }
@@ -247,7 +247,8 @@
   .quality-report { box-sizing: border-box; width: 210mm; min-height: 297mm; padding: 8mm; box-shadow: none; border: 1px solid #000 !important; color: #000; }
   .report-header-grid, .report-header-grid > *, .report-table, .report-table > div, .report-table span, .sample-box, .approval-box, .approval-grid, .approval-grid > * { border-color: #000 !important; }
   .report-header-grid, .report-table, .sample-box, .approval-box { border: 1px solid #000 !important; }
-  .report-header-grid > *, .report-table > div, .report-table span, .approval-grid > * { border-right: 1px solid #000 !important; border-bottom: 1px solid #000 !important; }
+  .report-header-grid > *, .report-table > div, .report-table > div > span, .approval-grid > * { border-right: 1px solid #000 !important; border-bottom: 1px solid #000 !important; }
+  .plating-table .table-head > span > .plating-type-value { border: 0 !important; box-shadow: none !important; }
   .dimension-split { gap: 8px; }
   .dimension-info-table, .dimension-measure-table, .dimension-info-table > div, .dimension-measure-table > div, .dimension-info-table span, .dimension-measure-table span { border-color: #000 !important; }
   .plating-table { border: 2px solid #000 !important; }
