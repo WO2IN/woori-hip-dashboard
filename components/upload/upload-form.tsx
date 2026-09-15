@@ -13,7 +13,6 @@ import { notifyDataChanged, useDataChanged } from '@/lib/data-events'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import dynamic from 'next/dynamic'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
-import { PlatingThicknessForm } from './plating-thickness-form'
 
 const saveConfigValue = async (
   name: string,
@@ -84,8 +83,6 @@ function normalizeDate(date: string) {
 }
 
 export function UploadForm() {
-  const [activeTab, setActiveTab] = useState<'pdf' | 'plating'>('pdf')
-  
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -399,35 +396,7 @@ export function UploadForm() {
 
   return (
     <div className="space-y-6">
-      {/* 탭 네비게이션 */}
-      <div className="flex gap-2 border-b border-border">
-        <button
-          onClick={() => setActiveTab('pdf')}
-          className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
-            activeTab === 'pdf'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          PDF 문서 등록
-        </button>
-        <button
-          onClick={() => setActiveTab('plating')}
-          className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
-            activeTab === 'plating'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          도금두께 등록
-        </button>
-      </div>
-
-      {/* 탭 콘텐츠 */}
-      {activeTab === 'pdf' && (
-        <div
+      <div
           className={cn(
             'mx-auto items-stretch gap-6',
             file
@@ -744,14 +713,6 @@ export function UploadForm() {
             </div>
           )}
         </div>
-      )}
-
-      {/* 도금두께 등록 탭 */}
-      {activeTab === 'plating' && (
-        <div className="mx-auto w-full max-w-4xl">
-          <PlatingThicknessForm />
-        </div>
-      )}
     </div>
   )
 }
