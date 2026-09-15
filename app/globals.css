@@ -260,10 +260,11 @@
 .report-preview-open { width: 100%; margin-top: .25rem; }
 .report-preview-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: rgb(15 23 42 / .72); padding: 1.25rem; }
 .report-preview-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-radius: .75rem .75rem 0 0; background: var(--card); }
-.report-preview-viewport { flex: 1; height: auto; min-height: 0; display: flex; justify-content: center; align-items: flex-start; overflow: auto; padding: 1rem; border-radius: 0 0 .75rem .75rem; }
-.report-preview-canvas { width: 100%; max-width: 1040px; min-width: 0; margin: 0 auto; transform-origin: top center; }
-.report-preview-canvas .quality-report { width: 100%; min-width: 0; overflow: hidden; }
-.report-preview-canvas .report-header-grid, .report-preview-canvas .report-table, .report-preview-canvas .report-bottom { min-width: 0; }
+.report-preview-viewport { flex: 1; height: auto; min-height: 0; display: flex; justify-content: center; align-items: flex-start; overflow: auto; padding: 1rem; box-sizing: border-box; border-radius: 0 0 .75rem .75rem; }
+.report-preview-canvas { width: 100%; max-width: 1040px; min-width: 0; margin: 0 auto; padding: 0 1px 1rem; box-sizing: border-box; transform-origin: top center; }
+.report-preview-canvas .quality-report { width: 100%; min-width: 0; max-width: none; overflow: visible; box-sizing: border-box; }
+.report-preview-canvas .report-header-grid, .report-preview-canvas .report-table, .report-preview-canvas .report-bottom { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.report-preview-canvas .report-main-title { min-width: 0; overflow: visible; white-space: nowrap; }
 
 .report-editor-fields label {
   display: flex;
