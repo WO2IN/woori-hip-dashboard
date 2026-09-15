@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Printer, Save } from 'lucide-react'
+import { FileText, Printer, Save, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -25,6 +25,7 @@ function SectionTitle({ roman, title, plan }: { roman: string; title: string; pl
 export default function ReportPage() {
   const [status, setStatus] = useState('저장되지 않음')
   const [platingCount, setPlatingCount] = useState(3)
+  const [previewScale, setPreviewScale] = useState(0.72)
   const [values, setValues] = useState<ReportValues>({ customer: '(주)고객사', product: '0.15*187', lotNo: '20260910-01', issueDate: '2026-09-10', specification: '0.15*187 / CU', quantity: '343.8 Kg', inspectionDate: '2026-09-10', platingTypes: ['', '', ''] })
   const update = (key: keyof ReportValues) => (value: string) => setValues((current) => ({ ...current, [key]: value }))
   const save = () => { setStatus('저장됨'); window.setTimeout(() => setStatus('저장되지 않음'), 1800) }
@@ -43,13 +44,18 @@ export default function ReportPage() {
         <div className="plating-count-control"><span>도금 종류 수</span><div><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.max(1, count - 1))} disabled={platingCount === 1} aria-label="도금 종류 줄이기">−</Button><strong>{platingCount}</strong><Button type="button" variant="outline" size="icon" onClick={() => setPlatingCount((count) => Math.min(MAX_PLATING_TYPES, count + 1))} disabled={platingCount === MAX_PLATING_TYPES} aria-label="도금 종류 늘리기">+</Button></div></div>
         {values.platingTypes.slice(0, platingCount).map((type, index) => <label key={index}>도금 {index + 1}<Input value={type} onChange={(e) => setValues((current) => ({ ...current, platingTypes: current.platingTypes.map((item, itemIndex) => itemIndex === index ? e.target.value : item) as [string, string, string] }))} /></label>)}
       </div></aside>
-      <div className="quality-report">
+      <section className="report-preview-panel">
+        <div className="report-preview-toolbar no-print"><strong>성적서 미리보기</strong><div className="report-preview-actions"><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.max(0.5, Number((scale - 0.1).toFixed(2))))} aria-label="미리보기 축소"><ZoomOut /></Button><span>{Math.round(previewScale * 100)}%</span><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale((scale) => Math.min(1, Number((scale + 0.1).toFixed(2))))} aria-label="미리보기 확대"><ZoomIn /></Button><Button type="button" variant="outline" size="icon" onClick={() => setPreviewScale(0.72)} aria-label="미리보기 초기화"><Maximize2 /></Button></div></div><div className="report-preview-viewport"><div className="report-preview-canvas" style={{ transform: `scale(${previewScale})` }}>
+        <div className="quality-report">
         <header className="report-header-grid"><div className="report-logo"><img src="/company-logo.png" alt="WOORI 로고" /></div><div className="report-main-title">QUALITY ASSURANCE REPORT</div><Field label="CUSTOMER (고객명)" value={values.customer} onChange={update('customer')} /><Field label="DESCRIPTION (품명)" value={values.product} onChange={update('product')} /><Field label="LOT NO. (로트번호)" value={values.lotNo} onChange={update('lotNo')} /><Field label="ISSUED DATE (발행일자)" value={values.issueDate} onChange={update('issueDate')} /><Field label="규격" value={values.specification} onChange={update('specification')} /><Field label="재질" value={values.quantity} onChange={update('quantity')} /><Field label="LOT SIZE (수량)" value={values.inspectionDate} onChange={update('inspectionDate')} /></header>
         <section><SectionTitle roman="I" title="VISUAL INSPECTION (외관검사)" plan="n=50 / Reel, Lot" /><div className="visual-split">{[visualRows.slice(0, 5), visualRows.slice(5)].map((rows, groupIndex) => <div className="report-table visual-table" key={groupIndex}><div className="table-head"><span>NO.</span><span>INSPECTION ITEMS (검사항목)</span><span>A/c/Re</span><span>RESULT (판정)</span></div>{rows.map((row) => <div key={row[0]}><span>{row[0]}</span><span>{row[1]}</span><span>{row[2]}</span><span>{row[3]}</span></div>)}</div>)}</div></section>
         <section><SectionTitle roman="II" title="DIMENSION INSPECTION (치수검사)" plan="n=100mm/Reel, Reel/Shipping, C=0" /><div className="dimension-split"><div className="report-table dimension-table dimension-info-table"><div className="table-head"><span>NO.</span><span>검사 항목</span><span>규격</span><span>허용차</span></div>{dimensionRows.map((row) => <div key={row[0]}>{row.slice(0, 4).map((cell, i) => <span key={`${row[0]}-${i}`}>{cell}</span>)}</div>)}</div><div className="report-table dimension-table dimension-measure-table"><div className="table-head"><span>1차</span><span>2차</span><span>3차</span><span>판정</span></div>{dimensionRows.map((row) => <div key={row[0]}>{row.slice(4).map((cell, i) => <span key={`${row[0]}-${i}`}>{cell}</span>)}</div>)}</div></div></section>
         <section><SectionTitle roman="III" title="PLATING THICKNESS (도금두께)" plan="X-Ray 검사 / Reel, Lot" /><div className={`report-table plating-table plating-count-${platingCount}`}><div className="table-head"><span>No.</span>{values.platingTypes.slice(0, platingCount).map((type, index) => <span key={index}><em>μm</em><span className="plating-type-value">{type}</span></span>)}<span>판정</span></div>{Array.from({ length: 10 }, (_, i) => <div key={i}><span>{i + 1}</span>{Array.from({ length: platingCount }, (_, column) => <Input key={column} aria-label={`${i + 1}번 ${column + 1}번째 도금 두께`} />)}<span>OK</span></div>)}</div></section>
-        <div className="report-bottom"><div className="sample-box"><div className="box-label">ADHESION TEST SAMPLE (밀착 테스트 시료)</div><div className="sample-blank" aria-label="실제 밀착 테스트 시료 부착 영역" /></div><div className="approval-box"><div className="box-label">종합판정</div><div className="pass">PASS / OK</div><div className="approval-grid"><span>작성</span><span>승인</span><span>검토</span><span>고객</span><div /><div /><div /><div /></div></div></div>
-      </div>
+        <div className="report-bottom"><div className="sample-box"><div className="box-label">ADHESION TEST SAMPLE (���착 테스트 시료)</div><div className="sample-blank" aria-label="실제 밀착 테스트 시료 부착 영역" /></div><div className="approval-box"><div className="box-label">종합판정</div><div className="pass">PASS / OK</div><div className="approval-grid"><span>작성</span><span>승인</span><span>검토</span><span>고객</span><div /><div /><div /><div /></div></div></div>
+        </div>
+        </div>
+        </div>
+      </section>
     </div>
   </div>
 }
