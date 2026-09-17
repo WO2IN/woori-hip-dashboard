@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readConfig, writeConfig } from '@/lib/storage'
 import { readMetadata } from '@/lib/storage'
 
-const VALID_CONFIGS = ['companies', 'document-types', 'materials', 'specifications', 'products']
+const VALID_CONFIGS = ['companies', 'document-types', 'materials', 'specifications', 'products', 'shipment-categories']
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -70,6 +70,7 @@ export async function DELETE(req: NextRequest) {
     materials: 'material',
     specifications: 'specification',
     products: 'product',
+    'shipment-categories': 'shipmentCategory',
   }
   const field = fieldMap[name] as keyof typeof metadata[0]
   if (field) {

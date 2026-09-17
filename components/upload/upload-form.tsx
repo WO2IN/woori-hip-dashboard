@@ -698,7 +698,7 @@ export function UploadForm() {
                   <div className="space-y-1.5">
                     <Label className="text-sm">도금 종류</Label>
                     <SearchableCombobox
-                      configName="shipment-category"
+                      configName="shipment-categories"
 options={shipmentCategories}
   recentOptions={shipmentCategories.slice(0, 5)}
                       value={shipmentCategory}
