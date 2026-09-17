@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,7 +13,6 @@ import { cn } from '@/lib/utils'
 type Tab = 'login' | 'register'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [tab, setTab] = useState<Tab>('login')
 
   // Login state
@@ -38,8 +36,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     const session = getSession()
-    if (session) router.replace('/')
-  }, [router])
+    if (session) window.location.replace('/')
+  }, [])
 
   useEffect(() => {
     const stored = localStorage.getItem('theme')
@@ -71,8 +69,7 @@ export default function LoginPage() {
       }
 
       setSession(data.user as SessionUser)
-      router.replace('/')
-      router.refresh()
+      window.location.replace('/')
     } catch {
       setLoginError('서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
     } finally {

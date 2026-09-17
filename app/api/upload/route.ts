@@ -26,6 +26,12 @@ export async function POST(req: NextRequest) {
 
   const company = (formData.get('company') as string)?.trim()
   const documentType = (formData.get('documentType') as string)?.trim()
+  const shipmentCategoryRaw = (formData.get('shipmentCategory') as string)?.trim()
+  const shipmentCategory = ['판재', '커넥터', '랙'].includes(shipmentCategoryRaw)
+    ? shipmentCategoryRaw as DocumentMetadata['shipmentCategory']
+    : undefined
+  const shipmentFloorRaw = (formData.get('shipmentFloor') as string)?.trim()
+  const shipmentFloor = ['1', '2', '3'].includes(shipmentFloorRaw) ? Number(shipmentFloorRaw) as 1 | 2 | 3 : undefined
   const lotStart = normalizeLot(formData.get('lotStart') as string)
   const lotEndRaw = normalizeLot(formData.get('lotEnd') as string)
   const lotEnd = lotEndRaw.includes('-')
@@ -37,6 +43,10 @@ export async function POST(req: NextRequest) {
   const material = (formData.get('material') as string) || ''
   const specification = (formData.get('specification') as string) || ''
   const quantity = formData.get('quantity') ? Number(formData.get('quantity')) : undefined
+  const quantityUnitRaw = (formData.get('quantityUnit') as string)?.trim()
+  const quantityUnit = ['Kg', 'EA', 'R'].includes(quantityUnitRaw)
+    ? quantityUnitRaw as DocumentMetadata['quantityUnit']
+    : undefined
   const issueDate = (formData.get('issueDate') as string) || ''
   const note = (formData.get('note') as string) || ''
 
@@ -92,12 +102,15 @@ export async function POST(req: NextRequest) {
     originalName: file.name,
     company,
     documentType,
+    shipmentCategory,
+    shipmentFloor,
     lotStart,
     lotEnd: lotEnd || undefined,
     product,
     material,
     specification: specification || undefined,
     quantity,
+    quantityUnit,
     issueDate: issueDate || effectiveDate,
     note: note || undefined,
     fileSize: file.size,

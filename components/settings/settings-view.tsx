@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, FileType, Layers, Tag, Package, ChevronRight } from 'lucide-react'
+import { Building2, FileType, Layers, Tag, Package, ChevronRight, Table2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ConfigManager } from './config-manager'
+import { PlatingInfoManager } from './plating-info-manager'
 import { cn } from '@/lib/utils'
 
 const settingsItems = [
@@ -47,6 +48,26 @@ const settingsItems = [
     bg: 'bg-orange-50 dark:bg-orange-950/30',
     configName: 'specifications',
     placeholder: '새 도금사양 입력',
+  },
+  {
+    key: 'shipment-categories',
+    label: '도금 종류 관리',
+    description: '판재, 커넥터, 랙 등 도금 종류를 관리합니다.',
+    icon: Tag,
+    color: 'text-rose-500',
+    bg: 'bg-rose-50 dark:bg-rose-950/30',
+    configName: 'shipment-categories',
+    placeholder: '새 도금 종류 입력',
+  },
+  {
+    key: 'plating-info',
+    label: '도금 정보 관리',
+    description: '업체·품목별 재질과 도금사양 CSV를 관리합니다.',
+    icon: Table2,
+    color: 'text-cyan-500',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/30',
+    configName: 'plating-info',
+    placeholder: '',
   },
   {
     key: 'products',
@@ -98,7 +119,12 @@ export function SettingsView() {
 
       {/* Management Dialog */}
       <Dialog open={!!activeDialog} onOpenChange={v => !v && setActiveDialog(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className={cn(
+          'max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] overflow-hidden',
+          active?.key === 'plating-info'
+            ? 'w-[calc(100vw-2rem)] sm:w-[1100px] sm:max-w-[1100px]'
+            : 'w-full sm:max-w-md'
+        )}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {active && (
@@ -111,13 +137,15 @@ export function SettingsView() {
               )}
             </DialogTitle>
           </DialogHeader>
-          {active && (
+          {active && active.key === 'plating-info' ? (
+            <PlatingInfoManager />
+          ) : active ? (
             <ConfigManager
               configName={active.configName}
               label={active.label.replace(' 관리', '')}
               placeholder={active.placeholder}
             />
-          )}
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>

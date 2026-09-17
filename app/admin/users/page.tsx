@@ -44,6 +44,7 @@ interface UserRow {
   username: string
   displayName: string
   role: UserRole
+  floor?: 1 | 2 | 3
   createdAt: string
 }
 
@@ -82,12 +83,12 @@ export default function AdminUsersPage() {
 
   // Create dialog
   const [createOpen, setCreateOpen] = useState(false)
-  const [createForm, setCreateForm] = useState({ username: '', displayName: '', password: '', role: 'viewer' as UserRole })
+  const [createForm, setCreateForm] = useState({ username: '', displayName: '', password: '', role: 'viewer' as UserRole, floor: '' })
   const [creating, setCreating] = useState(false)
 
   // Edit dialog
   const [editTarget, setEditTarget] = useState<UserRow | null>(null)
-  const [editForm, setEditForm] = useState({ displayName: '', role: 'viewer' as UserRole, password: '' })
+  const [editForm, setEditForm] = useState({ displayName: '', role: 'viewer' as UserRole, password: '', floor: '' })
   const [editing, setEditing] = useState(false)
 
   // Delete dialog
@@ -148,7 +149,7 @@ export default function AdminUsersPage() {
       toast.success('사용자가 추가되었습니다.')
       setUsers(prev => [...prev, data.user])
       setCreateOpen(false)
-      setCreateForm({ username: '', displayName: '', password: '', role: 'viewer' })
+      setCreateForm({ username: '', displayName: '', password: '', role: 'viewer', floor: '' })
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : '추가에 실패했습니다.')
     } finally {
@@ -164,6 +165,7 @@ export default function AdminUsersPage() {
       if (editForm.displayName) body.displayName = editForm.displayName
       if (editForm.role) body.role = editForm.role
       if (editForm.password) body.password = editForm.password
+      if (editForm.floor) body.floor = editForm.floor
 
       const res = await fetch(`/api/users/${editTarget.id}`, {
         method: 'PATCH',
@@ -267,7 +269,7 @@ export default function AdminUsersPage() {
             {/* Table header */}
             <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-5 py-3 bg-muted/40">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">아이디 / 이름</span>
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">권한</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">권한 / 층</span>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">등록일</span>
               <span className="w-16" />
             </div>
@@ -278,7 +280,7 @@ export default function AdminUsersPage() {
                   <p className="text-xs text-muted-foreground">{u.username}</p>
                 </div>
                 <div>
-                  <RoleBadge role={u.role} />
+                  <div className="flex items-center gap-2"><RoleBadge role={u.role} />{u.floor ? <span className="text-xs text-muted-foreground">{u.floor}층</span> : <span className="text-xs text-muted-foreground">층 미지정</span>}</div>
                 </div>
                 <div className="text-xs text-muted-foreground whitespace-nowrap">
                   {u.createdAt ? new Date(u.createdAt).toLocaleDateString('ko-KR') : '-'}
@@ -290,7 +292,7 @@ export default function AdminUsersPage() {
                     className="w-7 h-7 text-muted-foreground hover:text-foreground"
                     onClick={() => {
                       setEditTarget(u)
-                      setEditForm({ displayName: u.displayName, role: u.role, password: '' })
+                      setEditForm({ displayName: u.displayName, role: u.role, password: '', floor: u.floor ? String(u.floor) : '' })
                     }}
                     title="수정"
                   >
@@ -350,6 +352,13 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="grid gap-1.5">
+              <Label>층 지정</Label>
+              <Select value={createForm.floor} onValueChange={v => setCreateForm(p => ({ ...p, floor: v }))}>
+                <SelectTrigger><SelectValue placeholder="층을 선택하세요" /></SelectTrigger>
+                <SelectContent><SelectItem value="1">1층 · 판재</SelectItem><SelectItem value="2">2층 · 커넥터</SelectItem><SelectItem value="3">3층 · 랙</SelectItem></SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-1.5">
               <Label>권한</Label>
               <Select
                 value={createForm.role}
@@ -389,6 +398,13 @@ export default function AdminUsersPage() {
                 value={editForm.displayName}
                 onChange={e => setEditForm(p => ({ ...p, displayName: e.target.value }))}
               />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>층 지정</Label>
+              <Select value={editForm.floor} onValueChange={v => setEditForm(p => ({ ...p, floor: v }))}>
+                <SelectTrigger><SelectValue placeholder="층을 선택하세요" /></SelectTrigger>
+                <SelectContent><SelectItem value="1">1층 · 판재</SelectItem><SelectItem value="2">2층 · 커넥터</SelectItem><SelectItem value="3">3층 · 랙</SelectItem></SelectContent>
+              </Select>
             </div>
             <div className="grid gap-1.5">
               <Label>권한</Label>

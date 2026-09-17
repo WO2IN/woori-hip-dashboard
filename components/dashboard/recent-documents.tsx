@@ -285,7 +285,7 @@ const sortedDocuments = useMemo(() => {
 
                   <td className="px-5 py-3.5 hidden xl:table-cell">
                     <span className="text-sm text-muted-foreground">
-                      {doc.quantity ? `${doc.quantity} Kg` : '-'}
+                      {doc.quantity ? `${doc.quantity.toLocaleString()} ${doc.quantityUnit || 'Kg'}` : '-'}
                     </span>
                   </td>
 

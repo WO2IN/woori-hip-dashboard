@@ -95,6 +95,16 @@ export function UploadForm() {
   // Required fields
   const [documentType, setDocumentType] = useState('')
   const [company, setCompany] = useState('')
+  const [shipmentCategory, setShipmentCategory] = useState('판재')
+  const [shipmentFloor, setShipmentFloor] = useState('1')
+  const sessionUser = getSession()?.user
+
+  useEffect(() => {
+    const floor = sessionUser?.floor || 1
+    setShipmentFloor(String(floor))
+    setShipmentCategory(floor === 1 ? '판재' : floor === 2 ? '커넥터' : '랙')
+    setQuantityUnit(floor === 3 ? 'EA' : 'Kg')
+  }, [sessionUser?.floor])
 
   // Optional fields
   const [lotStart, setLotStart] = useState('')
@@ -104,7 +114,9 @@ export function UploadForm() {
   const [product, setProduct] = useState('')
   const [material, setMaterial] = useState('')
   const [specification, setSpecification] = useState('')
+  const [platingMatches, setPlatingMatches] = useState<Array<{ material: string; specification: string }>>([])
   const [quantity, setQuantity] = useState('')
+  const [quantityUnit, setQuantityUnit] = useState<'Kg' | 'EA' | 'R'>('Kg')
   const [issueDate, setIssueDate] = useState('')
   const [note, setNote] = useState('')
 
@@ -114,21 +126,23 @@ export function UploadForm() {
   const [materials, setMaterials] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<string[]>([])
   const [products, setProducts] = useState<string[]>([])
+  const [shipmentCategories, setShipmentCategories] = useState<string[]>(['판재', '커넥터', '랙'])
 
   const [recentProducts, setRecentProducts] = useState<string[]>([])
   const [recentMaterials, setRecentMaterials] = useState<string[]>([])
   const [recentSpecifications, setRecentSpecifications] = useState<string[]>([])
-  
+
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
   const [recentDocTypes, setRecentDocTypes] = useState<string[]>([])
 
   const loadConfig = useCallback(async () => {
-    const [c, dt, m, s, p] = await Promise.all([
+    const [c, dt, m, s, p, scat] = await Promise.all([
       fetch('/api/config?name=companies', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/config?name=document-types', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/config?name=materials', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/config?name=specifications', { cache: 'no-store' }).then(r => r.json()),
       fetch('/api/config?name=products', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/config?name=shipment-categories', { cache: 'no-store' }).then(r => r.json()),
     ])
 
     setCompanies(c.data || [])
@@ -136,6 +150,7 @@ export function UploadForm() {
     setMaterials(m.data || [])
     setSpecifications(s.data || [])
     setProducts(p.data || [])
+    setShipmentCategories(scat.data?.length ? scat.data : ['판재', '커넥터', '랙'])
   }, [])
 
   const loadRecentValues = useCallback(async () => {
@@ -150,67 +165,106 @@ export function UploadForm() {
         fetch('/api/config?name=products', {
           cache: 'no-store',
         }).then(res => res.json()),
-  
+
         fetch('/api/config?name=materials', {
           cache: 'no-store',
         }).then(res => res.json()),
-  
+
         fetch('/api/config?name=specifications', {
           cache: 'no-store',
         }).then(res => res.json()),
-  
+
         fetch('/api/config?name=companies', {
           cache: 'no-store',
         }).then(res => res.json()),
-  
+
         fetch('/api/config?name=document-types', {
           cache: 'no-store',
         }).then(res => res.json()),
       ])
-  
+
       setRecentProducts(
         productsRes.data?.slice(0, 5) || []
       )
-  
+
       setRecentMaterials(
         materialsRes.data?.slice(0, 5) || []
       )
-  
+
       setRecentSpecifications(
         specificationsRes.data?.slice(0, 5) || []
       )
-  
+
       setRecentCompanies(
         companiesRes.data?.slice(0, 5) || []
       )
-  
+
       setRecentDocTypes(
         docTypesRes.data?.slice(0, 5) || []
       )
-  
+
     } catch (error) {
       console.error('최근 사용 항목 로드 실패:', error)
     }
   }, [])
 
   useEffect(() => {
-  loadConfig()
-  loadRecentValues()
+    loadConfig()
+    loadRecentValues()
   }, [loadConfig, loadRecentValues])
+
+  useEffect(() => {
+    setPlatingMatches([])
+    setMaterial('')
+    setSpecification('')
+
+    if (!company || !product) return
+
+    const controller = new AbortController()
+
+    fetch(`/api/plating-info?company=${encodeURIComponent(company)}&product=${encodeURIComponent(product)}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async response => {
+        const body = await response.text()
+        if (!response.ok) throw new Error(`도금 정보 API 오류 (${response.status})`)
+        if (!body.trim()) return { matches: [] }
+        try {
+          return JSON.parse(body) as { matches?: Array<{ material: string; specification: string }> }
+        } catch {
+          throw new Error('도금 정보 API가 올바른 JSON을 반환하지 않았습니다.')
+        }
+      })
+      .then(({ matches = [] }) => {
+        setPlatingMatches(matches)
+        const firstMatch = matches[0]
+        if (!firstMatch) return
+        setMaterial(firstMatch.material || '')
+        setSpecification(firstMatch.specification || '')
+      })
+      .catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error('도금 정보 자동 입력 실패:', error)
+        }
+      })
+
+    return () => controller.abort()
+  }, [company, product])
 
   useEffect(() => {
     const element = formRef.current
     if (!element) return
-  
+
     const updateHeight = () => {
       setFormHeight(element.getBoundingClientRect().height)
     }
-  
+
     updateHeight()
-  
+
     const observer = new ResizeObserver(updateHeight)
     observer.observe(element)
-  
+
     return () => {
       observer.disconnect()
     }
@@ -294,10 +348,12 @@ export function UploadForm() {
       formData.append('file', file)
       formData.append('company', company)
       formData.append('documentType', documentType)
+      if (shipmentCategory) formData.append('shipmentCategory', shipmentCategory)
+      if (shipmentFloor) formData.append('shipmentFloor', shipmentFloor)
 
       const normalizedLotStart = normalizeLot(lotStart)
 
-        if (normalizedLotStart) {
+      if (normalizedLotStart) {
         const startNo = String(parseInt(lotStartNo || '1', 10))
 
         formData.append(
@@ -312,12 +368,13 @@ export function UploadForm() {
             `${normalizedLotStart}-${parseInt(lotEndNo, 10)}`
           )
         }
-        }
+      }
 
       if (product) formData.append('product', product)
       if (material) formData.append('material', material)
       if (specification) formData.append('specification', specification)
       if (quantity) formData.append('quantity', quantity)
+      formData.append('quantityUnit', quantityUnit)
 
       if (issueDate) {
         formData.append('issueDate', normalizeDate(issueDate))
@@ -357,6 +414,8 @@ export function UploadForm() {
       setFile(null)
       setCompany('')
       setDocumentType('')
+      setShipmentCategory('')
+      setShipmentFloor('')
       setLotStart('')
       setLotEnd('')
       setLotStartNo('')
@@ -364,6 +423,7 @@ export function UploadForm() {
       setProduct('')
       setMaterial('')
       setSpecification('')
+      setPlatingMatches([])
       setQuantity('')
       setIssueDate('')
       setNote('')
@@ -397,322 +457,373 @@ export function UploadForm() {
   return (
     <div className="space-y-6">
       <div
-          className={cn(
-            'mx-auto items-stretch gap-6',
-            file
-              ? 'max-w-[1500px] grid grid-cols-[minmax(500px,768px)_minmax(550px,1fr)]'
-              : 'max-w-3xl'
-          )}
-        >
-          {/* ============================= */}
-          {/* 왼쪽: 업로드 + 입력 폼 */}
-          {/* ============================= */}
-          <div ref={formRef} className="space-y-5">
+        className={cn(
+          'mx-auto items-stretch gap-6',
+          file
+            ? 'max-w-[1500px] grid grid-cols-[minmax(500px,768px)_minmax(550px,1fr)]'
+            : 'max-w-3xl'
+        )}
+      >
+        {/* ============================= */}
+        {/* 왼쪽: 업로드 + 입력 폼 */}
+        {/* ============================= */}
+        <div ref={formRef} className="space-y-5">
 
-        {/* Drop zone */}
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={cn(
-            'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
-            dragging
-              ? 'border-primary bg-accent'
-              : file
-                ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
-                : 'border-border hover:border-primary/60 hover:bg-accent/40'
-          )}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            onChange={e => handleFileDrop(e.target.files)}
-          />
+          {/* Drop zone */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={cn(
+              'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
+              dragging
+                ? 'border-primary bg-accent'
+                : file
+                  ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
+                  : 'border-border hover:border-primary/60 hover:bg-accent/40'
+            )}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={e => handleFileDrop(e.target.files)}
+            />
 
-          {file ? (
-            <div className="flex flex-col items-center gap-3">
-              <div>
-                <p className="font-semibold text-foreground text-sm">
-                  {file.name}
-                </p>
+            {file ? (
+              <div className="flex flex-col items-center gap-3">
+                <div>
+                  <p className="font-semibold text-foreground text-sm">
+                    {file.name}
+                  </p>
 
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {formatBytes(file.size)}
-                </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatBytes(file.size)}
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={e => {
+                    e.stopPropagation()
+                    setFile(null)
+                  }}
+                  className="gap-1.5 h-7 text-xs"
+                >
+                  <X className="w-3 h-3" />
+                  파일 변경
+                </Button>
               </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={e => {
-                  e.stopPropagation()
-                  setFile(null)
-                }}
-                className="gap-1.5 h-7 text-xs"
-              >
-                <X className="w-3 h-3" />
-                파일 변경
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className={cn(
-                  'w-14 h-14 rounded-xl flex items-center justify-center transition-colors',
-                  dragging
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                )}
-              >
-                <CloudUpload
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <div
                   className={cn(
-                    'w-7 h-7',
+                    'w-14 h-14 rounded-xl flex items-center justify-center transition-colors',
                     dragging
-                      ? 'text-primary-foreground'
-                      : 'text-muted-foreground'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
                   )}
-                />
+                >
+                  <CloudUpload
+                    className={cn(
+                      'w-7 h-7',
+                      dragging
+                        ? 'text-primary-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <p className="font-semibold text-foreground text-sm">
+                    PDF 파일을 드래그하거나 클릭하여 선택
+                  </p>
+
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    PDF 형식만 지원 · 최대 50MB
+                  </p>
+                </div>
               </div>
-
-              <div>
-                <p className="font-semibold text-foreground text-sm">
-                  PDF 파일을 드래그하거나 클릭하여 선택
-                </p>
-
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  PDF 형식만 지원 · 최대 50MB
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Form card */}
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-
-          {/* 필수 항목 */}
-          <div className="px-5 py-4 border-b border-border bg-muted/30">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-              필수 항목
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-sm">
-                  문서유형 <span className="text-destructive">*</span>
-                </Label>
-
-                <SearchableCombobox
-                  configName="document-types"
-                  options={docTypes}
-                  recentOptions={recentDocTypes}
-                  value={documentType}
-                  onChange={setDocumentType}
-                  onOptionsChange={setDocTypes}
-                  placeholder="성적서, 도면, 시험성적서..."
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-sm">
-                  업체명 <span className="text-destructive">*</span>
-                </Label>
-
-                <SearchableCombobox
-                  configName="companies"
-                  options={companies}
-                  recentOptions={recentCompanies}
-                  value={company}
-                  onChange={setCompany}
-                  onOptionsChange={setCompanies}
-                  placeholder="업체 검색 또는 입력..."
-                />
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* 선택 항목 */}
-          <div className="px-5 py-4 space-y-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              선택 항목
-            </p>
+          {/* Form card */}
+          <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 필수 항목 */}
+            <div className="px-5 py-4 border-b border-border bg-muted/30">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                필수 항목
+              </p>
 
-              {/* LOT 번호 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">LOT 번호</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm">
+                    문서유형 <span className="text-destructive">*</span>
+                  </Label>
 
-                <div className="flex items-stretch">
-                  <Input
-                    value={lotStart}
-                    onChange={e => {
-                      const value = e.target.value
-                        .replace(/-\d+$/, '')
-                        .trim()
-
-                      setLotStart(value)
-                    }}
-                    placeholder="예: 20260713"
-                    className="rounded-r-none flex-1 min-w-0"
+                  <SearchableCombobox
+                    configName="document-types"
+                    options={docTypes}
+                    recentOptions={recentDocTypes}
+                    value={documentType}
+                    onChange={setDocumentType}
+                    onOptionsChange={setDocTypes}
+                    placeholder="성적서, 도면, 시험성적서..."
                   />
+                </div>
 
-                  <Input
-                    value={lotStartNo}
-                    onChange={e => {
-                      setLotStartNo(e.target.value.replace(/\D/g, ''))
-                    }}
-                    placeholder="1"
-                    className="rounded-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
-                  />
+                <div className="space-y-1.5">
+                  <Label className="text-sm">
+                    업체명 <span className="text-destructive">*</span>
+                  </Label>
 
-                  <Input
-                    value={lotEndNo}
-                    onChange={e => {
-                      setLotEndNo(e.target.value.replace(/\D/g, ''))
-                    }}
-                    placeholder="8"
-                    className="rounded-l-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
+                  <SearchableCombobox
+                    configName="companies"
+                    options={companies}
+                    recentOptions={recentCompanies}
+                    value={company}
+                    onChange={setCompany}
+                    onOptionsChange={setCompanies}
+                    placeholder="업체 검색 또는 입력..."
                   />
                 </div>
               </div>
+            </div>
 
-              {/* 품목 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">품목</Label>
+            {/* 선택 항목 */}
+            <div className="px-5 py-4 space-y-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                선택 항목
+              </p>
 
-                <SearchableCombobox
-                  configName="products"
-                  options={products}
-                  recentOptions={recentProducts}
-                  value={product}
-                  onChange={setProduct}
-                  onOptionsChange={setProducts}
-                  placeholder="품목 선택 또는 입력..."
-                />
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-              {/* 재질 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">재질</Label>
+                {/* LOT 번호 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">LOT 번호</Label>
 
-                <SearchableCombobox
-                  configName="materials"
-                  options={materials}
-                  recentOptions={recentMaterials}
-                  value={material}
-                  onChange={setMaterial}
-                  onOptionsChange={setMaterials}
-                  placeholder="재질 선택 또는 입력..."
-                />
-              </div>
+                  <div className="flex items-stretch">
+                    <Input
+                      value={lotStart}
+                      onChange={e => {
+                        const rawValue = e.target.value
+                          .replace(/-\d+$/, '')
+                          .trim()
+                        const value = /^\d{6}$/.test(rawValue) ? `20${rawValue}` : rawValue
 
-              {/* 도금사양 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">도금사양</Label>
+                        setLotStart(value)
+                        if (/^\d{8}$/.test(value)) setIssueDate(value)
+                      }}
+                      placeholder="예: 20260713"
+                      className="rounded-r-none flex-1 min-w-0"
+                    />
 
-                <SearchableCombobox
-                  configName="specifications"
-                  options={specifications}
-                  recentOptions={recentSpecifications}
-                  value={specification}
-                  onChange={setSpecification}
-                  onOptionsChange={setSpecifications}
-                  placeholder="사양 선택 또는 입력..."
-                />
-              </div>
+                    <Input
+                      value={lotStartNo}
+                      onChange={e => {
+                        setLotStartNo(e.target.value.replace(/\D/g, ''))
+                      }}
+                      placeholder="1"
+                      className="rounded-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
+                    />
 
-              {/* 수량 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">수량</Label>
+                    <Input
+                      value={lotEndNo}
+                      onChange={e => {
+                        setLotEndNo(e.target.value.replace(/\D/g, ''))
+                      }}
+                      placeholder="8"
+                      className="rounded-l-none border-l-0 w-[3.25rem] shrink-0 text-center px-1.5 font-mono"
+                    />
+                  </div>
+                </div>
 
-                <Input
-                  type="number"
-                  value={quantity}
-                  onChange={e => setQuantity(e.target.value)}
-                  placeholder="수량"
-                  min={0}
-                />
-              </div>
+                {/* 품목 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">품목</Label>
 
-              {/* 발행일 */}
-              <div className="space-y-1.5">
-                <Label className="text-sm">발행일</Label>
+                  <SearchableCombobox
+                    configName="products"
+                    options={products}
+                    recentOptions={recentProducts}
+                    value={product}
+                    onChange={setProduct}
+                    onOptionsChange={setProducts}
+                    placeholder="품목 선택 또는 입력..."
+                  />
+                </div>
 
-                <Input
-                  value={issueDate}
-                  onChange={e => setIssueDate(e.target.value)}
-                  placeholder="예: 20260721"
-                />
-              </div>
+                {/* 재질 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">재질</Label>
 
-              {/* 비고 */}
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-sm">비고</Label>
+                  <SearchableCombobox
+                    configName="materials"
+                    options={materials}
+                    recentOptions={recentMaterials}
+                    value={material}
+                    onChange={setMaterial}
+                    onOptionsChange={setMaterials}
+                    placeholder="재질 선택 또는 입력..."
+                  />
+                </div>
 
-                <Textarea
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder="추가 메모"
-                  rows={2}
-                />
+                {/* 도금사양 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">도금사양</Label>
+
+                  <SearchableCombobox
+                    configName="specifications"
+                    options={specifications}
+                    recentOptions={recentSpecifications}
+                    value={specification}
+                    onChange={setSpecification}
+                    onOptionsChange={setSpecifications}
+                    placeholder="사양 선택 또는 입력..."
+                  />
+                </div>
+
+                {platingMatches.length > 1 && (
+                  <p className="col-span-1 text-xs text-amber-600 dark:text-amber-400 sm:col-span-2">
+                    같은 업체와 품목의 정보가 {platingMatches.length}개 있습니다. 재질과 도금사양을 확인해 주세요.
+                  </p>
+                )}
+
+                {/* 도금 종류 / 층 */}
+                <div className="grid grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">도금 종류</Label>
+                    <SearchableCombobox
+                      configName="shipment-category"
+options={shipmentCategories}
+  recentOptions={shipmentCategories.slice(0, 5)}
+                      value={shipmentCategory}
+                      onChange={setShipmentCategory}
+                      placeholder="구분 선택"
+                      clearable={!sessionUser?.floor}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">층</Label>
+                    <SearchableCombobox
+                      configName="shipment-floor"
+                      options={['1층', '2층', '3층']}
+                      recentOptions={['1층', '2층', '3층']}
+                      value={shipmentFloor ? `${shipmentFloor}층` : ''}
+                      onChange={value => setShipmentFloor(value.replace('층', ''))}
+                      placeholder="층 선택"
+                      clearable={!sessionUser?.floor}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                {/* 수량 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">수량</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      value={quantity}
+                      onChange={e => setQuantity(e.target.value)}
+                      placeholder="수량"
+                      min={0}
+                      className="h-10 min-w-0 flex-1"
+                    />
+                    <select
+                      value={quantityUnit}
+                      onChange={e => setQuantityUnit(e.target.value as 'Kg' | 'EA' | 'R')}
+                      aria-label="수량 단위"
+                      className="h-10 w-20 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <option value="Kg">Kg</option>
+                      <option value="EA">EA</option>
+                      <option value="R">R</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 발행일 */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">발행일</Label>
+
+                  <Input
+                    value={issueDate}
+                    onChange={e => setIssueDate(e.target.value)}
+                    placeholder="예: 20260721"
+                    className="h-10"
+                  />
+                </div>
+
+                {/* ���고 */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-sm">비고</Label>
+
+                  <Textarea
+                    value={note}
+                    onChange={e => setNote(e.target.value)}
+                    placeholder="추가 메모"
+                    rows={2}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* 액션 */}
-          <div className="px-5 py-4 border-t border-border flex gap-3 bg-muted/10">
-            <Button
-              onClick={handleSubmit}
-              disabled={uploading}
-              size="default"
-              className="gap-2 min-w-[110px]"
-            >
-              {uploading ? (
-                <>
-                  <Upload className="w-4 h-4 animate-bounce" />
-                  등록 중...
-                </>
-              ) : success ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  등록 완료
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  등록하기
-                </>
-              )}
-            </Button>
+            {/* 액션 */}
+            <div className="px-5 py-4 border-t border-border flex gap-3 bg-muted/10">
+              <Button
+                onClick={handleSubmit}
+                disabled={uploading}
+                size="default"
+                className="gap-2 min-w-[110px]"
+              >
+                {uploading ? (
+                  <>
+                    <Upload className="w-4 h-4 animate-bounce" />
+                    등록 중...
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    등록 완료
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    등록하기
+                  </>
+                )}
+              </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleReset}
-            >
-              초기화
-            </Button>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+              >
+                초기화
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* ============================= */}
+        {/* 오른쪽: PDF 미리보기 */}
+        {/* ============================= */}
+        {file && formHeight > 0 && (
+          <div
+            className="sticky top-5 min-h-0"
+            style={{ height: `${Math.max(0, formHeight - 1)}px` }}
+          >
+            <div className="w-full h-full min-h-0 border border-border rounded-xl overflow-hidden bg-background shadow-md">
+              <PdfDragPreview file={file} />
+            </div>
+          </div>
+        )}
       </div>
-
-          {/* ============================= */}
-          {/* 오른쪽: PDF 미리보기 */}
-          {/* ============================= */}
-          {file && formHeight > 0 && (
-            <div
-              className="sticky top-5 min-h-0"
-              style={{ height: `${Math.max(0, formHeight - 1)}px` }}
-            >
-              <div className="w-full h-full min-h-0 border border-border rounded-xl overflow-hidden bg-background shadow-md">
-                <PdfDragPreview file={file} />
-              </div>
-            </div>
-          )}
-        </div>
     </div>
   )
 }

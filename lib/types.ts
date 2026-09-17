@@ -6,6 +6,7 @@ export interface User {
   displayName: string
   passwordHash: string      // SHA-256 hex hash
   role: UserRole
+  floor?: 1 | 2 | 3
   createdAt: string
 }
 
@@ -22,12 +23,15 @@ export interface DocumentMetadata {
   originalName: string      // original upload name
   company: string
   documentType: string
+  shipmentCategory?: '판재' | '커넥터' | '랙'
+  floor?: 1 | 2 | 3
   lotStart: string
   lotEnd?: string
   product: string
   material: string
   specification?: string
   quantity?: number
+  quantityUnit?: 'Kg' | 'EA' | 'R'
   issueDate: string         // YYYY-MM-DD
   note?: string
   fileSize: number          // bytes

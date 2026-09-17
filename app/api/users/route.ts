@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     username: u.username,
     displayName: u.displayName,
     role: u.role,
+    floor: u.floor,
     createdAt: u.createdAt,
   }))
 
@@ -27,10 +28,14 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { username, displayName, password, role } = body
+  const { username, displayName, password, role, floor } = body
 
   if (!username || !displayName || !password || !role) {
     return NextResponse.json({ error: '모든 필드를 입력해주세요.' }, { status: 400 })
+  }
+
+  if (floor !== undefined && ![1, 2, 3].includes(Number(floor))) {
+    return NextResponse.json({ error: '유효하지 않은 층입니다.' }, { status: 400 })
   }
 
   if (!['viewer', 'editor', 'admin'].includes(role)) {
@@ -49,6 +54,7 @@ export async function POST(req: NextRequest) {
     displayName,
     passwordHash,
     role,
+    floor: floor ? Number(floor) as 1 | 2 | 3 : undefined,
     createdAt: new Date().toISOString(),
   }
 
@@ -57,6 +63,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    user: { id: newUser.id, username, displayName, role, createdAt: newUser.createdAt },
+    user: { id: newUser.id, username, displayName, role, floor: newUser.floor, createdAt: newUser.createdAt },
   })
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { SessionUser } from '@/lib/types'
 import { getSession, clearSession } from '@/lib/auth-client'
 
@@ -18,7 +18,6 @@ const AuthContext = createContext<AuthContextValue>({
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<SessionUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,15 +28,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
 
     if (!session && pathname !== '/login') {
-      router.replace('/login')
+      window.location.replace('/login')
     }
-  }, [pathname, router])
+  }, [pathname])
 
   const logout = useCallback(() => {
     clearSession()
     setUser(null)
-    router.replace('/login')
-  }, [router])
+    window.location.replace('/login')
+  }, [])
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>

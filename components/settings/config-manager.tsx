@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
+import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
 
 import {
@@ -65,9 +66,10 @@ export function ConfigManager({
 
       const res = await fetch('/api/config', {
         method: 'POST',
-        headers:{
-          'Content-Type':'application/json'
-        },
+headers: {
+        'Content-Type': 'application/json',
+        ...buildAuthHeaders(getSession()!),
+      },
         body:JSON.stringify({
           name:configName,
           value:trimmed
@@ -105,9 +107,10 @@ export function ConfigManager({
     try{
       const res = await fetch('/api/config',{
         method:'DELETE',
-        headers:{
-          'Content-Type':'application/json'
-        },
+headers: {
+        'Content-Type': 'application/json',
+        ...buildAuthHeaders(getSession()!),
+      },
         body:JSON.stringify({
           name:configName,
           value
@@ -154,9 +157,10 @@ export function ConfigManager({
     try{
       const res = await fetch('/api/config',{
         method:'DELETE',
-        headers:{
-          'Content-Type':'application/json'
-        },
+headers: {
+        'Content-Type': 'application/json',
+        ...buildAuthHeaders(getSession()!),
+      },
         body:JSON.stringify({
           name:configName,
           value,

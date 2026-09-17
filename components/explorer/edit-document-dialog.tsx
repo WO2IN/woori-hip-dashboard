@@ -28,7 +28,10 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
     product: document.product,
     material: document.material,
     specification: document.specification || '',
+    shipmentCategory: document.shipmentCategory || '',
+    floor: document.floor ? `${document.floor}층` : '',
     quantity: document.quantity?.toString() || '',
+    quantityUnit: document.quantityUnit || 'Kg',
     issueDate: document.issueDate,
     note: document.note || '',
   })
@@ -94,14 +97,24 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
           id: document.id,
           ...form,
           quantity: form.quantity ? Number(form.quantity) : undefined,
+          quantityUnit: form.quantityUnit,
           lotEnd: form.lotEnd,
           specification: form.specification,
+          shipmentCategory: form.shipmentCategory || undefined,
+          floor: form.floor ? Number(form.floor.replace('층', '')) : undefined,
           note: form.note,
         }),
       })
       if (!res.ok) throw new Error()
       toast.success('문서 정보가 수정되었습니다.')
-      onUpdate({ ...document, ...form, quantity: form.quantity ? Number(form.quantity) : undefined })
+      onUpdate({
+        ...document,
+        ...form,
+        shipmentCategory: form.shipmentCategory as DocumentMetadata['shipmentCategory'],
+        floor: form.floor ? Number(form.floor.replace('층', '')) as DocumentMetadata['floor'] : undefined,
+        quantity: form.quantity ? Number(form.quantity) : undefined,
+        quantityUnit: form.quantityUnit as DocumentMetadata['quantityUnit'],
+      })
       notifyDataChanged('documents')
       onClose()
     } catch {
@@ -187,6 +200,32 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
             </div>
           </div>
 
+          {/* 도금 종류 / 층 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm">도금 종류</Label>
+              <SearchableCombobox
+                configName="shipment-category"
+                options={['판재', '커넥터', '랙']}
+                recentOptions={['판재', '커넥터', '랙']}
+                value={form.shipmentCategory}
+                onChange={set('shipmentCategory')}
+                placeholder="도금 종류 선택..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">층</Label>
+              <SearchableCombobox
+                configName="shipment-floor"
+                options={['1층', '2층', '3층']}
+                recentOptions={['1층', '2층', '3층']}
+                value={form.floor}
+                onChange={set('floor')}
+                placeholder="층 선택..."
+              />
+            </div>
+          </div>
+
           {/* 사양 / 수량 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -203,7 +242,24 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm">수량</Label>
-              <Input type="number" value={form.quantity} onChange={e => set('quantity')(e.target.value)} />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={form.quantity}
+                  onChange={e => set('quantity')(e.target.value)}
+                  className="h-10 min-w-0 flex-1"
+                />
+                <select
+                  value={form.quantityUnit}
+                  onChange={e => set('quantityUnit')(e.target.value)}
+                  aria-label="수량 단위"
+                  className="h-10 w-20 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="Kg">Kg</option>
+                  <option value="EA">EA</option>
+                  <option value="R">R</option>
+                </select>
+              </div>
             </div>
           </div>
 

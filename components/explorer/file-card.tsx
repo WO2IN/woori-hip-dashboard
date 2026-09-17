@@ -240,7 +240,7 @@ export function FileCard({
               <div className="hidden md:flex items-center justify-center">
                 <span className="text-xs text-muted-foreground">
                   {document.quantity
-                    ? `${document.quantity}Kg`
+                    ? `${document.quantity.toLocaleString()} ${document.quantityUnit || 'Kg'}`
                     : '-'}
                 </span>
               </div>
@@ -385,7 +385,7 @@ export function FileCard({
               </p>
               <p className="text-sm font-medium">
                 {document.quantity
-                  ? `${document.quantity}Kg`
+                  ? `${document.quantity.toLocaleString()} ${document.quantityUnit || 'Kg'}`
                   : '-'}
               </p>
             </div>

@@ -29,7 +29,8 @@
     "displayName": "고은채",
     "passwordHash": "9d73bfb92adaebaa346e5c12db11ce0bf0dc5ae059677dcec5198d7302d32493",
     "role": "editor",
-    "createdAt": "2026-09-10T00:05:08.484Z"
+    "createdAt": "2026-09-10T00:05:08.484Z",
+    "floor": 3
   },
   {
     "id": "d526cd37-e816-435a-823a-dc3c8b0d640c",
@@ -37,6 +38,7 @@
     "displayName": "심문경",
     "passwordHash": "4ea140588150773ce3aace786aeef7f4049ce100fa649c94fbbddb960f1da942",
     "role": "editor",
-    "createdAt": "2026-09-10T01:52:50.261Z"
+    "createdAt": "2026-09-10T01:52:50.261Z",
+    "floor": 1
   }
 ]

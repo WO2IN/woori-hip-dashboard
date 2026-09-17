@@ -12,7 +12,7 @@ export async function PATCH(
 
   const { id } = await params
   const body = await req.json()
-  const { displayName, role, password } = body
+  const { displayName, role, password, floor } = body
 
   const users = readUsers()
   const idx = users.findIndex(u => u.id === id)
@@ -22,6 +22,7 @@ export async function PATCH(
 
   if (displayName) users[idx].displayName = displayName
   if (role && ['viewer', 'editor', 'admin'].includes(role)) users[idx].role = role
+  if (floor !== undefined && [1, 2, 3].includes(Number(floor))) users[idx].floor = Number(floor) as 1 | 2 | 3
   if (password) users[idx].passwordHash = await hashPassword(password)
 
   writeUsers(users)
@@ -33,6 +34,7 @@ export async function PATCH(
       username: users[idx].username,
       displayName: users[idx].displayName,
       role: users[idx].role,
+      floor: users[idx].floor,
       createdAt: users[idx].createdAt,
     },
   })

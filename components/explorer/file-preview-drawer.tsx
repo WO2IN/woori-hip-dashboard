@@ -162,7 +162,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
                 <MetaRow label="품목" value={document.product} />
                 <MetaRow label="재질" value={document.material} />
                 <MetaRow label="도금사양" value={document.specification} />
-                <MetaRow label="수량" value={document.quantity ? `${document.quantity.toLocaleString()} Kg` : null} />
+                <MetaRow label="수량" value={document.quantity ? `${document.quantity.toLocaleString()} ${document.quantityUnit || 'Kg'}` : null} />
                 <MetaRow
                   label="발행일"
                   value={
