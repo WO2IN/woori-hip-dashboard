@@ -59,9 +59,25 @@ export function PlatingInfoManager() {
   }
 
   const importCsv = async (file: File) => {
-    const buffer = await file.arrayBuffer(); const text = new TextDecoder('euc-kr').decode(buffer); const imported = parseCsv(text)
+    const buffer = await file.arrayBuffer()
+    const bytes = new Uint8Array(buffer)
+    let text: string
+
+    if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+      text = new TextDecoder('utf-8').decode(bytes)
+    } else {
+      try {
+        text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+      } catch {
+        text = new TextDecoder('windows-949').decode(bytes)
+      }
+    }
+
+    const imported = parseCsv(text)
     if (!imported.length) return toast.error('CSV 데이터가 없습니다.')
-    setRows(imported); toast.success(`${imported.length}개 행을 불러왔습니다. 저장 버튼을 눌러 반영하세요.`)
+    setRows(imported)
+    toast.success(`${imported.length}개 행을 불러왔습니다. 저장 버튼을 눌러 반영하세요.`)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   return <div className="space-y-4">
