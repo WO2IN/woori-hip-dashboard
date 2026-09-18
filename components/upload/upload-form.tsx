@@ -10,7 +10,7 @@ import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { notifyDataChanged, useDataChanged } from '@/lib/data-events'
-import { normalizeLot, buildLotEnd } from '@/lib/lot'
+import { normalizeLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
 import dynamic from 'next/dynamic'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 
@@ -97,7 +97,7 @@ export function UploadForm() {
   const [company, setCompany] = useState('')
   const [shipmentCategory, setShipmentCategory] = useState('판재')
   const [shipmentFloor, setShipmentFloor] = useState('1')
-  const sessionUser = getSession()?.user
+  const sessionUser = getSession()
 
   useEffect(() => {
     const floor = sessionUser?.floor || 1
@@ -377,7 +377,7 @@ export function UploadForm() {
       formData.append('quantityUnit', quantityUnit)
 
       if (issueDate) {
-        formData.append('issueDate', normalizeDate(issueDate))
+        formData.append('issueDate', normalizeIssueDate(issueDate))
       }
 
       if (note) formData.append('note', note)
@@ -414,8 +414,9 @@ export function UploadForm() {
       setFile(null)
       setCompany('')
       setDocumentType('')
-      setShipmentCategory('')
-      setShipmentFloor('')
+      const defaultFloor = sessionUser?.floor || 1
+      setShipmentFloor(String(defaultFloor))
+      setShipmentCategory(defaultFloor === 1 ? '판재' : defaultFloor === 2 ? '커넥터' : '랙')
       setLotStart('')
       setLotEnd('')
       setLotStartNo('')
@@ -572,7 +573,7 @@ export function UploadForm() {
                     value={documentType}
                     onChange={setDocumentType}
                     onOptionsChange={setDocTypes}
-                    placeholder="성적서, 도면, 시험성적서..."
+                    placeholder="성적서, 도면, 시험성적��..."
                   />
                 </div>
 

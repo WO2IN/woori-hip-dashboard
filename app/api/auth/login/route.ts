@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       username: user.username,
       displayName: user.displayName,
       role: user.role,
+      floor: user.floor,
     },
   })
 }

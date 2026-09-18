@@ -13086,5 +13086,28 @@
     "createdAt": "2026-09-18T03:41:41.445Z",
     "createdBy": "나우인",
     "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+  },
+  {
+    "id": "fa9ce908-2292-48b0-b3a0-838af631fdd5",
+    "filename": "20260918_0.2_65_260918-1_260918-2_7c565f51-fe01-4ccb-940c-b0f1710f77bd.pdf",
+    "originalName": "260916_우선기업 0.2 65 53.5.pdf",
+    "company": "우선기업",
+    "documentType": "성적서",
+    "shipmentCategory": "랙",
+    "shipmentFloor": 3,
+    "lotStart": "260918-1",
+    "lotEnd": "260918-2",
+    "product": "0.2*65",
+    "material": "Ni 1.0㎛ ~",
+    "specification": "C7701 1/2H 양백",
+    "quantity": 11111,
+    "quantityUnit": "Kg",
+    "issueDate": "20260999",
+    "fileSize": 800337,
+    "year": "2026",
+    "storagePath": "우선기업/성적서/2026/20260918_0.2_65_260918-1_260918-2_7c565f51-fe01-4ccb-940c-b0f1710f77bd.pdf",
+    "createdAt": "2026-09-18T06:07:38.062Z",
+    "createdBy": "나우인",
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   }
 ]

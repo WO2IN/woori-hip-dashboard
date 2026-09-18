@@ -23,7 +23,7 @@ export function ShipmentView() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  const [sortKey, setSortKey] = useState<'company' | 'shipmentCategory' | 'product' | 'lot' | 'issueDate' | 'quantity'>('issueDate')
+  const [sortKey, setSortKey] = useState<'company' | 'floor' | 'shipmentCategory' | 'product' | 'lot' | 'issueDate' | 'quantity'>('issueDate')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [floorFilter, setFloorFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -38,6 +38,7 @@ export function ShipmentView() {
     return [...filteredDocuments].sort((a, b) => {
       const values = {
         company: [a.company || '', b.company || ''],
+        floor: [a.floor ?? a.shipmentFloor ?? 0, b.floor ?? b.shipmentFloor ?? 0],
         shipmentCategory: [a.shipmentCategory || '미분류', b.shipmentCategory || '미분류'],
         product: [a.product || '', b.product || ''],
         lot: [formatLot(a), formatLot(b)],
@@ -101,7 +102,7 @@ export function ShipmentView() {
       sheet.addRows(sortedDocuments.map((doc, index) => ({
         number: index + 1,
         company: doc.company || '-',
-        floor: doc.floor ? `${doc.floor}층` : '-',
+        floor: (doc.floor ?? doc.shipmentFloor) ? `${doc.floor ?? doc.shipmentFloor}층` : '-',
         category: doc.shipmentCategory || '미분류',
         product: doc.product || '-',
         lot: formatLot(doc),
@@ -206,7 +207,7 @@ export function ShipmentView() {
               ] as const).map(([key, label]) => <th key={key} className="px-5 py-3"><button type="button" onClick={() => handleSort(key)} className="inline-flex items-center gap-1 rounded px-1 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`${label} ${sortKey === key ? (sortDirection === 'asc' ? '오름차순' : '내림차순') : '정렬'}`}>{label}<span aria-hidden="true" className="text-[10px]">{sortKey === key ? (sortDirection === 'asc' ? '▲' : '▼') : '↕'}</span></button></th>)}</tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {loading ? Array.from({ length: 5 }).map((_, index) => <tr key={index}>{Array.from({ length: 6 }).map((__, cell) => <td key={cell} className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>)}</tr>) : sortedDocuments.length > 0 ? sortedDocuments.map(doc => <tr key={doc.id} className="hover:bg-muted/30"><td className="px-5 py-4 font-medium">{doc.company || '-'}</td><td className="px-5 py-4">{doc.floor ? `${doc.floor}층` : '-'}</td><td className="px-5 py-4">{doc.shipmentCategory || '미분류'}</td><td className="px-5 py-4">{doc.product || '-'}</td><td className="px-5 py-4">{formatLot(doc)}</td><td className="px-5 py-4">{formatDate(doc.issueDate)}</td><td className="px-5 py-4">{doc.quantity ?? '-'}</td></tr>) : <tr><td colSpan={7} className="px-5 py-16 text-center text-muted-foreground">등록된 성적서가 없습니다.</td></tr>}
+              {loading ? Array.from({ length: 5 }).map((_, index) => <tr key={index}>{Array.from({ length: 6 }).map((__, cell) => <td key={cell} className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>)}</tr>) : sortedDocuments.length > 0 ? sortedDocuments.map(doc => <tr key={doc.id} className="hover:bg-muted/30"><td className="px-5 py-4 font-medium">{doc.company || '-'}</td><td className="px-5 py-4">{(doc.floor ?? doc.shipmentFloor) ? `${doc.floor ?? doc.shipmentFloor}층` : '-'}</td><td className="px-5 py-4">{doc.shipmentCategory || '미분류'}</td><td className="px-5 py-4">{doc.product || '-'}</td><td className="px-5 py-4">{formatLot(doc)}</td><td className="px-5 py-4">{formatDate(doc.issueDate)}</td><td className="px-5 py-4">{doc.quantity ?? '-'}</td></tr>) : <tr><td colSpan={7} className="px-5 py-16 text-center text-muted-foreground">등록된 성적서가 없습니다.</td></tr>}
             </tbody>
           </table>
         </div>

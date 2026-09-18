@@ -15,6 +15,7 @@ export interface SessionUser {
   username: string
   displayName: string
   role: UserRole
+  floor?: 1 | 2 | 3
 }
 
 export interface DocumentMetadata {
@@ -24,6 +25,7 @@ export interface DocumentMetadata {
   company: string
   documentType: string
   shipmentCategory?: '판재' | '커넥터' | '랙'
+  shipmentFloor?: 1 | 2 | 3
   floor?: 1 | 2 | 3
   lotStart: string
   lotEnd?: string

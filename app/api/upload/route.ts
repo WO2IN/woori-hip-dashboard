@@ -4,7 +4,7 @@ import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { appendMetadata, STORAGE_DIR } from '@/lib/storage'
 import { DocumentMetadata } from '@/lib/types'
-import { normalizeLot, buildLotEnd } from '@/lib/lot'
+import { normalizeLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
 import { format } from 'date-fns'
 import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
@@ -27,11 +27,24 @@ export async function POST(req: NextRequest) {
   const company = (formData.get('company') as string)?.trim()
   const documentType = (formData.get('documentType') as string)?.trim()
   const shipmentCategoryRaw = (formData.get('shipmentCategory') as string)?.trim()
-  const shipmentCategory = ['판재', '커넥터', '랙'].includes(shipmentCategoryRaw)
-    ? shipmentCategoryRaw as DocumentMetadata['shipmentCategory']
-    : undefined
   const shipmentFloorRaw = (formData.get('shipmentFloor') as string)?.trim()
-  const shipmentFloor = ['1', '2', '3'].includes(shipmentFloorRaw) ? Number(shipmentFloorRaw) as 1 | 2 | 3 : undefined
+  const userFloor = requestUser.floor
+  // 사용자에게 층이 지정되어 있으면 클라이언트가 보낸 값보다 서버의 로그인 정보를 우선합니다.
+  const effectiveFloor = userFloor ?? (
+    ['1', '2', '3'].includes(shipmentFloorRaw)
+      ? Number(shipmentFloorRaw) as 1 | 2 | 3
+      : undefined
+  )
+  const shipmentFloor = effectiveFloor
+  const shipmentCategory = effectiveFloor === 1
+    ? '판재'
+    : effectiveFloor === 2
+      ? '커넥터'
+      : effectiveFloor === 3
+        ? '랙'
+        : ['판재', '커넥터', '랙'].includes(shipmentCategoryRaw)
+          ? shipmentCategoryRaw as DocumentMetadata['shipmentCategory']
+          : undefined
   const lotStart = normalizeLot(formData.get('lotStart') as string)
   const lotEndRaw = normalizeLot(formData.get('lotEnd') as string)
   const lotEnd = lotEndRaw.includes('-')
@@ -54,24 +67,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '업체명과 문서유형은 필수입니다.' }, { status: 400 })
   }
 
-  // Normalize various date formats → yyyy-MM-dd
-  function normalizeDate(raw: string): string {
-    if (!raw) return format(new Date(), 'yyyy-MM-dd')
-    // Already yyyy-MM-dd
-    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw
-    // yyyyMMdd
-    if (/^\d{8}$/.test(raw)) return `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}`
-    // yy.MM.dd or yy-MM-dd or yy/MM/dd
-    const short = raw.match(/^(\d{2})[.\-\/](\d{2})[.\-\/](\d{2})$/)
-    if (short) return `20${short[1]}-${short[2]}-${short[3]}`
-    // yyyy.MM.dd or yyyy/MM/dd
-    const long = raw.match(/^(\d{4})[.\-\/](\d{2})[.\-\/](\d{2})$/)
-    if (long) return `${long[1]}-${long[2]}-${long[3]}`
-    // fallback: return as-is and let the year extraction handle it
-    return raw
+  // 저장 전 서버에서도 발행일 형식과 실제 날짜를 검증합니다.
+  let effectiveDate: string
+  try {
+    effectiveDate = normalizeIssueDate(issueDate) || format(new Date(), 'yyyy-MM-dd')
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : '유효하지 않은 발행일입니다.' }, { status: 400 })
   }
-
-  const effectiveDate = normalizeDate(issueDate)
   const dateStr = effectiveDate.replace(/-/g, '')
   const lotPart = lotStart
   ? (lotEnd ? `${lotStart}_${lotEnd}` : lotStart)
@@ -104,6 +106,7 @@ export async function POST(req: NextRequest) {
     documentType,
     shipmentCategory,
     shipmentFloor,
+    floor: shipmentFloor,
     lotStart,
     lotEnd: lotEnd || undefined,
     product,

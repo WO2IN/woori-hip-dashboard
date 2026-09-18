@@ -12,8 +12,9 @@
     "username": "Test",
     "displayName": "Test",
     "passwordHash": "532eaabd9574880dbf76b9b8cc00832c20a6ec113d682299550d7a6e0f345e25",
-    "role": "viewer",
-    "createdAt": "2026-07-21T07:11:22.384Z"
+    "role": "editor",
+    "createdAt": "2026-07-21T07:11:22.384Z",
+    "floor": 2
   },
   {
     "id": "5830fffd-d740-4380-8319-e43a8a8c0926",

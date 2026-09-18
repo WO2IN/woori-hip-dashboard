@@ -71,6 +71,7 @@ export function getUserFromHeaders(headers: Headers): {
   id: string
   displayName: string
   role: UserRole
+  floor?: 1 | 2 | 3
 } | null {
   const id = headers.get('x-user-id')
   const displayNameRaw = headers.get('x-user-name')
@@ -82,5 +83,7 @@ export function getUserFromHeaders(headers: Headers): {
   if (!id || !displayName || !role) return null
   if (!['viewer', 'editor', 'admin'].includes(role)) return null
 
-  return { id, displayName, role }
+  const user = readUsers().find(candidate => candidate.id === id)
+  return { id, displayName, role, floor: user?.floor }
 }
+  

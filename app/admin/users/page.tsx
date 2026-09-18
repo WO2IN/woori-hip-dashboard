@@ -353,7 +353,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="grid gap-1.5">
               <Label>층 지정</Label>
-              <Select value={createForm.floor} onValueChange={v => setCreateForm(p => ({ ...p, floor: v }))}>
+              <Select value={createForm.floor} onValueChange={v => setCreateForm(p => ({ ...p, floor: v ?? '' }))}>
                 <SelectTrigger><SelectValue placeholder="층을 선택하세요" /></SelectTrigger>
                 <SelectContent><SelectItem value="1">1층 · 판재</SelectItem><SelectItem value="2">2층 · 커넥터</SelectItem><SelectItem value="3">3층 · 랙</SelectItem></SelectContent>
               </Select>
@@ -401,7 +401,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="grid gap-1.5">
               <Label>층 지정</Label>
-              <Select value={editForm.floor} onValueChange={v => setEditForm(p => ({ ...p, floor: v }))}>
+              <Select value={editForm.floor} onValueChange={v => setEditForm(p => ({ ...p, floor: v ?? '' }))}>
                 <SelectTrigger><SelectValue placeholder="층을 선택하세요" /></SelectTrigger>
                 <SelectContent><SelectItem value="1">1층 · 판재</SelectItem><SelectItem value="2">2층 · 커넥터</SelectItem><SelectItem value="3">3층 · 랙</SelectItem></SelectContent>
               </Select>
