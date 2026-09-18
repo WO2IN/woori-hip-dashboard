@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readConfig, writeConfig } from '@/lib/storage'
 import { readMetadata } from '@/lib/storage'
 
-const VALID_CONFIGS = ['companies', 'document-types', 'materials', 'specifications', 'products']
+const VALID_CONFIGS = ['companies', 'document-types', 'materials', 'specifications', 'products', 'shipment-categories']
+const CONFIG_ALIASES: Record<string, string> = {
+  'shipment-category': 'shipment-categories',
+}
+
+function normalizeConfigName(name: unknown) {
+  const value = typeof name === 'string' ? name.trim() : ''
+  return CONFIG_ALIASES[value] ?? value
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const name = searchParams.get('name')
+  const name = normalizeConfigName(searchParams.get('name'))
   if (!name || !VALID_CONFIGS.includes(name)) {
     return NextResponse.json({ error: '유효하지 않은 설정 파일입니다.' }, { status: 400 })
   }
@@ -24,7 +32,8 @@ export async function POST(req: NextRequest) {
     )
   }
   const body = await req.json()
-  const { name, value } = body
+  const name = normalizeConfigName(body.name)
+  const { value } = body
 
   if (!name || !VALID_CONFIGS.includes(name) || !value?.trim()) {
     return NextResponse.json(
@@ -57,7 +66,8 @@ export async function DELETE(req: NextRequest) {
     )
   }
   const body = await req.json()
-  const { name, value, force } = body
+  const name = normalizeConfigName(body.name)
+  const { value, force } = body
   if (!name || !VALID_CONFIGS.includes(name) || !value?.trim()) {
     return NextResponse.json({ error: '유효하지 않은 요청입니다.' }, { status: 400 })
   }
@@ -70,6 +80,7 @@ export async function DELETE(req: NextRequest) {
     materials: 'material',
     specifications: 'specification',
     products: 'product',
+    'shipment-categories': 'shipmentCategory',
   }
   const field = fieldMap[name] as keyof typeof metadata[0]
   if (field) {

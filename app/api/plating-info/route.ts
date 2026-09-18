@@ -55,8 +55,8 @@ function validateRows(rows: unknown): PlatingInfo[] {
       material: String(item.material ?? '').trim(),
     }
     if (!normalized.company || !normalized.product) throw new Error('업체명과 품목은 필수입니다.')
-    const key = `${normalized.company}\u0000${normalized.product}`
-    if (seen.has(key)) throw new Error(`중복된 업체명·품목입니다: ${normalized.company} / ${normalized.product}`)
+    const key = [normalized.company, normalized.product, normalized.material, normalized.gold, normalized.nickel].join('\u0000')
+    if (seen.has(key)) throw new Error(`동일한 도금 정보가 중복됩니다: ${normalized.company} / ${normalized.product} / ${normalized.material}`)
     seen.add(key)
     return normalized
   })

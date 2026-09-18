@@ -205,7 +205,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
             <div className="space-y-1.5">
               <Label className="text-sm">도금 종류</Label>
               <SearchableCombobox
-                configName="shipment-category"
+                configName="shipment-categories"
                 options={['판재', '커넥터', '랙']}
                 recentOptions={['판재', '커넥터', '랙']}
                 value={form.shipmentCategory}
