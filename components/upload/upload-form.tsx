@@ -610,15 +610,18 @@ export function UploadForm() {
                     <Input
                       value={lotStart}
                       onChange={e => {
-                        const rawValue = e.target.value
+                        const value = e.target.value
                           .replace(/-\d+$/, '')
                           .trim()
-                        const value = /^\d{6}$/.test(rawValue) ? `20${rawValue}` : rawValue
 
                         setLotStart(value)
-                        if (/^\d{8}$/.test(value)) setIssueDate(value)
+                        if (/^\d{6}$/.test(value)) {
+                          setIssueDate(`20${value}`)
+                        } else if (/^\d{8}$/.test(value)) {
+                          setIssueDate(value)
+                        }
                       }}
-                      placeholder="예: 20260713"
+                      placeholder="예: 260918"
                       className="rounded-r-none flex-1 min-w-0"
                     />
 
