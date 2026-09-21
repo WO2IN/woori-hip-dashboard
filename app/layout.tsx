@@ -6,6 +6,10 @@ import { AppShell } from '@/components/layout/app-shell'
 export const metadata: Metadata = {
   title: 'WOORI-HIP',
   description: '문서 관리 시스템 - 등록된 문서를 빠르게 검색하고 관리합니다.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export const viewport: Viewport = {

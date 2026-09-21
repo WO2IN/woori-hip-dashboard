@@ -59,19 +59,24 @@ function formatBytes(bytes?: number) {
 function normalizeDate(value?: string | null) {
   if (!value) return null
 
-  const date = value.replace(/\./g, '-')
+  const raw = value.trim().replace(/\./g, '-')
+  const match = raw.match(/^(\d{4})-?(\d{2})-?(\d{2})/)
+  if (!match) return null
 
-  // 20260713
-  if (/^\d{8}$/.test(date)) {
-    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`
+  const [, year, month, day] = match
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+
+  // Reject impossible calendar dates instead of passing them to date-fns.
+  if (
+    !Number.isFinite(date.getTime()) ||
+    date.getUTCFullYear() !== Number(year) ||
+    date.getUTCMonth() !== Number(month) - 1 ||
+    date.getUTCDate() !== Number(day)
+  ) {
+    return null
   }
 
-  // 2026-07-13
-  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return date
-  }
-
-  return null
+  return date
 }
 
 function getDocumentTypeStyle(type: string) {

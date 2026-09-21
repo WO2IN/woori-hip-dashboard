@@ -10,7 +10,7 @@ import { SearchableCombobox } from '@/components/ui/searchable-combobox'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { notifyDataChanged, useDataChanged } from '@/lib/data-events'
-import { normalizeLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
+import { normalizeLot, normalizeRegisteredLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
 import dynamic from 'next/dynamic'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 
@@ -351,7 +351,7 @@ export function UploadForm() {
       if (shipmentCategory) formData.append('shipmentCategory', shipmentCategory)
       if (shipmentFloor) formData.append('shipmentFloor', shipmentFloor)
 
-      const normalizedLotStart = normalizeLot(lotStart)
+      const normalizedLotStart = normalizeRegisteredLot(normalizeLot(lotStart))
 
       if (normalizedLotStart) {
         const startNo = String(parseInt(lotStartNo || '1', 10))
@@ -376,9 +376,15 @@ export function UploadForm() {
       if (quantity) formData.append('quantity', quantity)
       formData.append('quantityUnit', quantityUnit)
 
-      if (issueDate) {
-        formData.append('issueDate', normalizeIssueDate(issueDate))
-      }
+  if (issueDate) {
+    try {
+      formData.append('issueDate', normalizeIssueDate(issueDate))
+    } catch {
+      // 존재하지 않는 날짜는 등록을 막지 않고 미지정 값으로 저장합니다.
+      formData.append('issueDate', '-')
+    }
+  }
+
 
       if (note) formData.append('note', note)
 
@@ -573,7 +579,7 @@ export function UploadForm() {
                     value={documentType}
                     onChange={setDocumentType}
                     onOptionsChange={setDocTypes}
-                    placeholder="성적서, 도면, 시험성적��..."
+                    placeholder="성적서, 도면 검색 또는 입력..."
                   />
                 </div>
 
@@ -622,7 +628,7 @@ export function UploadForm() {
                           setIssueDate(value)
                         }
                       }}
-                      placeholder="예: 260918"
+                      placeholder="예: 20260918"
                       className="rounded-r-none flex-1 min-w-0"
                     />
 

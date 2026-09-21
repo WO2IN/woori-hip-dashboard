@@ -3,6 +3,13 @@ export function normalizeLot(value?: string): string {
   return value?.trim() ?? ''
 }
 
+/** 등록 시 LOT 날짜를 YYMMDD 형식으로 저장합니다. 입력 중에는 원문을 유지합니다. */
+export function normalizeRegisteredLot(value?: string): string {
+  const raw = value?.trim() ?? ''
+  if (/^\d{8}$/.test(raw)) return raw.slice(2)
+  return raw
+}
+
 /** 발행일을 yyyy-MM-dd로 변환하고 실제 달력 날짜인지 검증 */
 export function normalizeIssueDate(value?: string): string {
   const raw = value?.trim() ?? ''
@@ -18,7 +25,7 @@ export function normalizeIssueDate(value?: string): string {
 
   const [, year, month, day] = match
   const candidate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-  const date = new Date(`${candidate}T00:00:00`)
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
   if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== candidate) {
     throw new Error('존재하지 않는 발행일입니다.')
   }

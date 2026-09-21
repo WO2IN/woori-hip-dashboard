@@ -4,7 +4,7 @@ import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { appendMetadata, STORAGE_DIR } from '@/lib/storage'
 import { DocumentMetadata } from '@/lib/types'
-import { normalizeLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
+import { normalizeLot, normalizeRegisteredLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
 import { format } from 'date-fns'
 import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         : ['판재', '커넥터', '랙'].includes(shipmentCategoryRaw)
           ? shipmentCategoryRaw as DocumentMetadata['shipmentCategory']
           : undefined
-  const lotStart = normalizeLot(formData.get('lotStart') as string)
+  const lotStart = normalizeRegisteredLot(normalizeLot(formData.get('lotStart') as string))
   const lotEndRaw = normalizeLot(formData.get('lotEnd') as string)
   const lotEnd = lotEndRaw.includes('-')
     ? lotEndRaw
@@ -70,9 +70,12 @@ export async function POST(req: NextRequest) {
   // 저장 전 서버에서도 발행일 형식과 실제 날짜를 검증합니다.
   let effectiveDate: string
   try {
-    effectiveDate = normalizeIssueDate(issueDate) || format(new Date(), 'yyyy-MM-dd')
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : '유효하지 않은 발행일입니다.' }, { status: 400 })
+    effectiveDate = issueDate === '-'
+      ? format(new Date(), 'yyyy-MM-dd')
+      : normalizeIssueDate(issueDate) || format(new Date(), 'yyyy-MM-dd')
+  } catch {
+    // 잘못된 발행일도 문서 등록은 허용하고, 표시값은 미지정(-)으로 저장합니다.
+    effectiveDate = format(new Date(), 'yyyy-MM-dd')
   }
   const dateStr = effectiveDate.replace(/-/g, '')
   const lotPart = lotStart
@@ -114,7 +117,7 @@ export async function POST(req: NextRequest) {
     specification: specification || undefined,
     quantity,
     quantityUnit,
-    issueDate: issueDate || effectiveDate,
+    issueDate: issueDate === '-' ? '-' : effectiveDate,
     note: note || undefined,
     fileSize: file.size,
     year,

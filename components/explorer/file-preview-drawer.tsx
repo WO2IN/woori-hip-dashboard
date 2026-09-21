@@ -37,19 +37,32 @@ interface FilePreviewDrawerProps {
 function normalizeDate(value?: string | null) {
   if (!value) return null
 
-  const date = value.replace(/\./g, '-')
+  const raw = value.trim().replace(/\./g, '-')
+  const match = raw.match(/^(\d{4})-?(\d{2})-?(\d{2})/)
+  if (!match) return null
 
-  // 20260713
-  if (/^\d{8}$/.test(date)) {
-    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`
+  const [, year, month, day] = match
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+
+  if (
+    !Number.isFinite(date.getTime()) ||
+    date.getUTCFullYear() !== Number(year) ||
+    date.getUTCMonth() !== Number(month) - 1 ||
+    date.getUTCDate() !== Number(day)
+  ) {
+    return null
   }
 
-  // 2026-07-13
-  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return date
-  }
+  return date
+}
 
-  return null
+function formatTimestamp(value?: string | null) {
+  if (!value) return '-'
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime())
+    ? '-'
+    : format(date, 'yyyy-MM-dd HH:mm', { locale: ko })
 }
 
 function MetaRow({ label, value }: { label: string; value?: string | number | null }) {
@@ -157,6 +170,11 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
               <div className="divide-y divide-border/50">
                 <MetaRow label="업체명" value={document.company} />
                 <MetaRow label="문서유형" value={document.documentType} />
+                <MetaRow label="도금 종류" value={document.shipmentCategory} />
+                <MetaRow
+                  label="층수"
+                  value={document.floor ?? document.shipmentFloor ? `${document.floor ?? document.shipmentFloor}층` : null}
+                />
                 <MetaRow label="LOT 시작" value={document.lotStart} />
                 <MetaRow label="LOT 종료" value={document.lotEnd} />
                 <MetaRow label="품목" value={document.product} />
@@ -203,7 +221,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
                           등록일시
                         </span>
                         <span className="text-[15px] text-foreground flex-1">
-                          {format(new Date(document.createdAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                          {formatTimestamp(document.createdAt)}
                         </span>
                       </div>
                     )}
@@ -225,7 +243,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
                           수정일시
                         </span>
                         <span className="text-[15px] text-foreground flex-1">
-                          {format(new Date(document.updatedAt), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                          {formatTimestamp(document.updatedAt)}
                         </span>
                       </div>
                     )}
