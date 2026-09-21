@@ -137,7 +137,7 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
                 { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' },
                 { href: '/explorer', label: '문서 탐색기', icon: FolderOpen, minRole: 'viewer' },
                 { href: '/upload', label: '문서 등록', icon: Upload, minRole: 'editor' },
-                { href: '/shipment', label: '출하관리', icon: PackageCheck, minRole: 'editor' },
+                { href: '/shipment', label: '출하관리', icon: PackageCheck, minRole: 'viewer' },
                 { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' },
                 { href: '/admin/users', label: '사용자 관리', icon: Users, minRole: 'admin' },
               ] as const

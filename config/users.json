@@ -38,8 +38,8 @@
     "username": "테스트",
     "displayName": "테스트",
     "passwordHash": "70c3b45f8ae56146873c993d898f6f2167926320d5b1ef3fb5475356a45b1c04",
-    "role": "editor",
+    "role": "viewer",
     "createdAt": "2026-09-18T07:24:04.641Z",
-    "floor": 3
+    "floor": 1
   }
 ]
