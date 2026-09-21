@@ -3,11 +3,9 @@ export function normalizeLot(value?: string): string {
   return value?.trim() ?? ''
 }
 
-/** 등록 시 LOT 날짜를 YYMMDD 형식으로 저장합니다. 입력 중에는 원문을 유지합니다. */
+/** 등록 시 입력한 LOT 번호를 원문 형식 그대로 저장합니다. */
 export function normalizeRegisteredLot(value?: string): string {
-  const raw = value?.trim() ?? ''
-  if (/^\d{8}$/.test(raw)) return raw.slice(2)
-  return raw
+  return value?.trim() ?? ''
 }
 
 /** 발행일을 yyyy-MM-dd로 변환하고 실제 달력 날짜인지 검증 */

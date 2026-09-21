@@ -46,6 +46,15 @@ interface FileCardProps {
   onSelect?: () => void
 }
 
+function getDownloadName(document: DocumentMetadata) {
+  const date = String(document.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8) || '날짜없음'
+  const quantity = document.quantity != null ? String(document.quantity) : '수량없음'
+  const sanitize = (value: string) =>
+    value.replace(/[\\/:*?"<>|]/g, '_').trim() || '미입력'
+
+  return `${date}_${sanitize(document.company)}_${sanitize(document.product)}_${sanitize(quantity)}.pdf`
+}
+
 function formatBytes(bytes?: number) {
   if (!bytes || bytes === 0) return '0 Bytes'
 
@@ -313,8 +322,8 @@ export function FileCard({
 
             <DropdownMenuItem
               onClick={() => {
-                window.location.href =
-                `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
+window.location.href =
+      `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true&downloadName=${encodeURIComponent(getDownloadName(document))}`
               }}
             >
               <Download className="w-3.5 h-3.5 mr-2"/>

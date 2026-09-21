@@ -19,12 +19,14 @@ export async function GET(req: NextRequest) {
 
   const buffer = fs.readFileSync(absPath)
   const download = searchParams.get('download') === 'true'
+  const downloadName = searchParams.get('downloadName') || filePath.split('/').pop() || 'document.pdf'
+  const safeDownloadName = downloadName.replace(/[\\/:*?"<>|\r\n]/g, '_')
 
   return new NextResponse(buffer, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': download
-        ? `attachment; filename="${encodeURIComponent(filePath.split('/').pop() ?? 'document.pdf')}"`
+        ? `attachment; filename*=UTF-8''${encodeURIComponent(safeDownloadName)}`
         : 'inline',
     },
   })

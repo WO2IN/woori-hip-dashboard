@@ -580,13 +580,16 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     setAllDocs(prev => prev.map(d => d.id === updated.id ? updated : d))
 
   const downloadSingleDocument = (doc: DocumentMetadata) => {
+    const date = String(doc.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8) || '날짜없음'
+    const quantity = doc.quantity != null ? String(doc.quantity) : '수량없음'
+    const sanitize = (value: string) =>
+      value.replace(/[\\/:*?"<>|]/g, '_').trim() || '미입력'
+    const downloadName = `${date}_${sanitize(doc.company)}_${sanitize(doc.product)}_${sanitize(quantity)}.pdf`
     const a = document.createElement('a')
-  
+
     a.href =
-      `/api/file?path=${encodeURIComponent(doc.storagePath)}&download=true`
-  
-    a.download = doc.originalName || doc.filename
-  
+      `/api/file?path=${encodeURIComponent(doc.storagePath)}&download=true&downloadName=${encodeURIComponent(downloadName)}`
+    a.download = downloadName
     a.click()
   }
   
