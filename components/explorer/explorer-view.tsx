@@ -519,8 +519,8 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
           break
     
         case 'issueDate':
-          va = Number(a.issueDate || 0)
-          vb = Number(b.issueDate || 0)
+          va = Number(String(a.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8)) || 0
+          vb = Number(String(b.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8)) || 0
           break
     
         case 'quantity':
@@ -581,10 +581,13 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
   const downloadSingleDocument = (doc: DocumentMetadata) => {
     const date = String(doc.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8) || '날짜없음'
-    const quantity = doc.quantity != null ? String(doc.quantity) : '수량없음'
+    const quantity = doc.quantity != null
+      ? `${doc.quantity}${doc.quantityUnit || 'Kg'}`
+      : '수량없음'
     const sanitize = (value: string) =>
-      value.replace(/[\\/:*?"<>|]/g, '_').trim() || '미입력'
-    const downloadName = `${date}_${sanitize(doc.company)}_${sanitize(doc.product)}_${sanitize(quantity)}.pdf`
+      value.replace(/[\\/:?"<>|]/g, '_').replace(/\s+/g, '_').trim() || '미입력'
+    const product = String(doc.product || '').replace(/\*/g, 'x').replace(/\s+/g, '_')
+    const downloadName = `${date}_${sanitize(doc.company)}_${product}_${quantity}.pdf`
     const a = document.createElement('a')
 
     a.href =

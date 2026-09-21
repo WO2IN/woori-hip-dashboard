@@ -86,6 +86,18 @@ function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
+function getDownloadName(document: DocumentMetadata) {
+  const date = String(document.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8) || '날짜없음'
+  const quantity = document.quantity != null
+    ? `${document.quantity}${document.quantityUnit || 'Kg'}`
+    : '수량없음'
+  const sanitize = (value: string) =>
+    value.replace(/[\\/:?"<>|\r\n]/g, '_').replace(/\s+/g, '_').trim() || '미입력'
+  const product = String(document.product || '').replace(/\*/g, 'x').replace(/\s+/g, '_')
+
+  return `${date}_${sanitize(document.company)}_${product}_${quantity}.pdf`
+}
+
 export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate }: FilePreviewDrawerProps) {
   const { user } = useAuth()
   const canEditDoc = user && ['editor', 'admin'].includes(user.role)
@@ -119,6 +131,8 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
   if (!document) return null
 
   const fileUrl = `/api/file?path=${encodeURIComponent(document.storagePath)}`
+  const downloadName = getDownloadName(document)
+  const downloadUrl = `${fileUrl}&download=true&downloadName=${encodeURIComponent(downloadName)}`
 
   return (
     <>
@@ -259,7 +273,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
               variant="default"
               className="flex-1 gap-1.5"
               onClick={() => {
-                window.location.href = `${fileUrl}&download=true`
+                window.location.href = downloadUrl
               }}
             >
               <Download className="w-4 h-4" />
@@ -291,6 +305,7 @@ export function FilePreviewDrawer({ document, open, onClose, onDelete, onUpdate 
         onClose={() => setFullViewOpen(false)}
         fileUrl={fileUrl}
         filename={document.filename}
+        downloadName={downloadName}
         subtitle={`${document.company} · ${document.documentType}`}
       />
 

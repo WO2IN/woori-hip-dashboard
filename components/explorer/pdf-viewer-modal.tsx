@@ -9,6 +9,7 @@ interface PdfViewerModalProps {
   onClose: () => void
   fileUrl: string
   filename: string
+  downloadName?: string
   subtitle?: string
 }
 
@@ -17,6 +18,7 @@ export function PdfViewerModal({
   onClose,
   fileUrl,
   filename,
+  downloadName,
   subtitle,
 }: PdfViewerModalProps) {
   return (
@@ -53,7 +55,7 @@ export function PdfViewerModal({
               size="sm"
               className="shrink-0 gap-1.5"
               onClick={() => {
-                window.location.href = `${fileUrl}&download=true`
+                window.location.href = `${fileUrl}&download=true${downloadName ? `&downloadName=${encodeURIComponent(downloadName)}` : ''}`
               }}
             >
               <Download className="h-3.5 w-3.5" />

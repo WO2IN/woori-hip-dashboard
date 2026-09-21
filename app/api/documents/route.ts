@@ -157,18 +157,8 @@ export async function GET(req: NextRequest) {
   // =========================
   docs.sort((a,b)=>{
 
-    const dateA = a.issueDate
-      ? new Date(
-          a.issueDate.replace(/\./g,'-')
-        ).getTime()
-      : 0
-
-
-    const dateB = b.issueDate
-      ? new Date(
-          b.issueDate.replace(/\./g,'-')
-        ).getTime()
-      : 0
+    const dateA = Number(String(a.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8)) || 0
+    const dateB = Number(String(b.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8)) || 0
 
 
     return dateB - dateA

@@ -13286,28 +13286,5 @@
     "updatedAt": "2026-09-21T01:20:36.649Z",
     "updatedBy": "고은채",
     "updatedById": "d2964b88-f155-4d0f-b095-42b6bbfc324c"
-  },
-  {
-    "id": "25f9f4c2-29a7-4a71-b915-ae51b6872f36",
-    "filename": "20260922_0.15_107_20260922-1_fd51c7ab-2aa5-40d3-a7ab-7cc4de2ab383.pdf",
-    "originalName": "260907_우리하이피_풍산 0.15 107 259.4.pdf",
-    "company": "풍산",
-    "documentType": "성적서",
-    "shipmentCategory": "판재",
-    "shipmentFloor": 1,
-    "floor": 1,
-    "lotStart": "20260922-1",
-    "product": "0.15*107",
-    "material": "Cu",
-    "specification": "Ni 1.0 ~ 2.0μm",
-    "quantity": 259.4,
-    "quantityUnit": "Kg",
-    "issueDate": "2026-09-22",
-    "fileSize": 760660,
-    "year": "2026",
-    "storagePath": "풍산/성적서/2026/20260922_0.15_107_20260922-1_fd51c7ab-2aa5-40d3-a7ab-7cc4de2ab383.pdf",
-    "createdAt": "2026-09-21T03:42:14.997Z",
-    "createdBy": "나우인",
-    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   }
 ]

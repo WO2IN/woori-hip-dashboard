@@ -48,11 +48,15 @@ interface FileCardProps {
 
 function getDownloadName(document: DocumentMetadata) {
   const date = String(document.issueDate || '').replace(/[^0-9]/g, '').slice(0, 8) || '날짜없음'
-  const quantity = document.quantity != null ? String(document.quantity) : '수량없음'
+  const quantity = document.quantity != null
+    ? `${document.quantity}${document.quantityUnit || 'Kg'}`
+    : '수량없음'
   const sanitize = (value: string) =>
-    value.replace(/[\\/:*?"<>|]/g, '_').trim() || '미입력'
+    value.replace(/[\\/:?"<>|]/g, '_').replace(/\s+/g, '_').trim() || '미입력'
 
-  return `${date}_${sanitize(document.company)}_${sanitize(document.product)}_${sanitize(quantity)}.pdf`
+  const product = String(document.product || '').replace(/\*/g, 'x').replace(/\s+/g, '_')
+
+  return `${date}_${sanitize(document.company)}_${product}_${quantity}.pdf`
 }
 
 function formatBytes(bytes?: number) {
@@ -120,7 +124,7 @@ function getDocumentTypeStyle(type: string) {
         icon: 'bg-gray-50 text-gray-500',
       }
   }
-} 
+}
 
 export function FileCard({
   document,
@@ -189,75 +193,75 @@ export function FileCard({
 
 
           {/* 파일 아이콘 */}
-            <div 
-              className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeStyle.icon}`}
-            >
-              <FileText className="w-[18px] h-[18px]" />
-            </div>
-            <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1.8fr_1fr_0.7fr] gap-4">
-              <div className="md:col-span-1 min-w-0 overflow-hidden">
-                <div className="flex items-center gap-2 min-w-0">
-                  <p
-                    className="text-sm font-bold text-foreground truncate"
-                    title={document.company}
-                  >
-                    {document.company}
-                  </p>
-
-                  {document.note && (
-                    <span title={document.note}>
-                      <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    </span>
-                  )}
-                </div>
-
+          <div
+            className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeStyle.icon}`}
+          >
+            <FileText className="w-[18px] h-[18px]" />
+          </div>
+          <div className="flex-1 min-w-0 grid grid-cols-[2fr_1fr_1.2fr_1.8fr_1fr_0.7fr] gap-4">
+            <div className="md:col-span-1 min-w-0 overflow-hidden">
+              <div className="flex items-center gap-2 min-w-0">
                 <p
-                  className="text-sm text-muted-foreground truncate max-w-full"
-                  title={document.filename}
+                  className="text-sm font-bold text-foreground truncate"
+                  title={document.company}
                 >
-                  {document.filename}
+                  {document.company}
                 </p>
+
+                {document.note && (
+                  <span title={document.note}>
+                    <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  </span>
+                )}
               </div>
-          <div className="hidden md:flex items-center justify-center">
-            <Badge variant="secondary" className="text-xs">
-              {document.documentType}
-            </Badge>
-          </div>
 
-          {/* 품목 */}
-          <div className="hidden md:flex items-center justify-center">
-            <span 
-              className="text-sm text-muted-foreground truncate"
-              title={document.product}
-            >
-              {document.product || '-'}
-            </span>
-          </div>
+              <p
+                className="text-sm text-muted-foreground truncate max-w-full"
+                title={document.filename}
+              >
+                {document.filename}
+              </p>
+            </div>
+            <div className="hidden md:flex items-center justify-center">
+              <Badge variant="secondary" className="text-xs">
+                {document.documentType}
+              </Badge>
+            </div>
 
-          {/* LOT */}
-          <div className="hidden md:flex items-center justify-start px-2">
-            <span className="text-sm text-muted-foreground font-mono truncate whitespace-nowrap">
-              {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
-            </span>
-          </div>
+            {/* 품목 */}
+            <div className="hidden md:flex items-center justify-center">
+              <span
+                className="text-sm text-muted-foreground truncate"
+                title={document.product}
+              >
+                {document.product || '-'}
+              </span>
+            </div>
+
+            {/* LOT */}
+            <div className="hidden md:flex items-center justify-start px-2">
+              <span className="text-sm text-muted-foreground font-mono truncate whitespace-nowrap">
+                {document.lotStart}{document.lotEnd ? ` ~ ${document.lotEnd}` : ''}
+              </span>
+            </div>
             <div className="hidden md:flex items-center justify-center">
               <span className="text-xs text-muted-foreground">
                 {formattedIssueDate
                   ? format(
-                      new Date(formattedIssueDate),
-                      'yyyy.MM.dd'
-                    )
+                    new Date(formattedIssueDate),
+                    'yyyy.MM.dd'
+                  )
                   : '-'}
-                </span>
-              </div>
+              </span>
+            </div>
 
-              <div className="hidden md:flex items-center justify-center">
-                <span className="text-xs text-muted-foreground">
-                  {document.quantity
-                    ? `${document.quantity.toLocaleString()} ${document.quantityUnit || 'Kg'}`
-                    : '-'}
-                </span>
-              </div>
+            <div className="hidden md:flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">
+                {document.quantity
+                  ? `${document.quantity.toLocaleString()} ${document.quantityUnit || 'Kg'}`
+                  : '-'}
+              </span>
+            </div>
           </div>
         </div>
         <DeleteDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} deleting={deleting} filename={document.filename} />
@@ -276,14 +280,14 @@ export function FileCard({
           }
         `}
       >
-  
+
         {/* Header */}
         <div className="flex items-start justify-between">
 
-        {/* 체크박스 */}
-        <button
-          type="button"
-          className="
+          {/* 체크박스 */}
+          <button
+            type="button"
+            className="
             flex
             items-center
             justify-center
@@ -294,91 +298,91 @@ export function FileCard({
             rounded-md
             hover:bg-muted
           "
-          onClick={(e) => {
-            e.stopPropagation()
-            onSelect?.()
-          }}
-        >
-          {selected ? (
-            <CheckSquare className="w-5 h-5 text-primary" />
-          ) : (
-            <Square className="w-5 h-5 text-muted-foreground" />
-          )}
-        </button>
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelect?.()
+            }}
+          >
+            {selected ? (
+              <CheckSquare className="w-5 h-5 text-primary" />
+            ) : (
+              <Square className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
 
 
-        {/* 메뉴 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger className="w-7 h-7 opacity-0 group-hover:opacity-100 inline-flex items-center justify-center rounded-md hover:bg-accent">
-            <MoreVertical className="w-3.5 h-3.5" />
-          </DropdownMenuTrigger>
+          {/* 메뉴 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="w-7 h-7 opacity-0 group-hover:opacity-100 inline-flex items-center justify-center rounded-md hover:bg-accent">
+              <MoreVertical className="w-3.5 h-3.5" />
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onPreview(document)}>
-              <Eye className="w-3.5 h-3.5 mr-2"/>
-              미리보기
-            </DropdownMenuItem>
-
-
-            <DropdownMenuItem
-              onClick={() => {
-window.location.href =
-      `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true&downloadName=${encodeURIComponent(getDownloadName(document))}`
-              }}
-            >
-              <Download className="w-3.5 h-3.5 mr-2"/>
-              다운로드
-            </DropdownMenuItem>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onPreview(document)}>
+                <Eye className="w-3.5 h-3.5 mr-2" />
+                미리보기
+              </DropdownMenuItem>
 
 
-            <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  window.location.href =
+                    `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true&downloadName=${encodeURIComponent(getDownloadName(document))}`
+                }}
+              >
+                <Download className="w-3.5 h-3.5 mr-2" />
+                다운로드
+              </DropdownMenuItem>
 
 
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2 className="w-3.5 h-3.5 mr-2"/>
-              삭제
-            </DropdownMenuItem>
+              <DropdownMenuSeparator />
 
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-2" />
+                삭제
+              </DropdownMenuItem>
+
+            </DropdownMenuContent>
+          </DropdownMenu>
 
         </div>
-  
+
         {/* 정보 */}
         <div
           onClick={() => onPreview(document)}
           className="mt-3 space-y-3"
         >
 
-        <div>
-          <p className="text-xs text-muted-foreground">
-            업체 :
-          </p>
-
-          <div className="flex items-center gap-2">
-            <p 
-              className="text-base font-bold truncate"
-              title={document.company}
-            >
-              {document.company}
+          <div>
+            <p className="text-xs text-muted-foreground">
+              업체 :
             </p>
 
-            <Badge 
-              className={`text-sm border-0 px-3 py-1 ${typeStyle.badge}`}
-            >
-              {document.documentType}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <p
+                className="text-base font-bold truncate"
+                title={document.company}
+              >
+                {document.company}
+              </p>
 
-            {document.note && (
-              <span title={document.note}>
-                <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              </span>
-            )}
+              <Badge
+                className={`text-sm border-0 px-3 py-1 ${typeStyle.badge}`}
+              >
+                {document.documentType}
+              </Badge>
+
+              {document.note && (
+                <span title={document.note}>
+                  <StickyNote className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
 
           <div className="grid grid-cols-2 gap-3">
@@ -428,9 +432,9 @@ window.location.href =
               <p className="text-xs">
                 {formattedIssueDate
                   ? format(
-                      new Date(formattedIssueDate),
-                      'yyyy.MM.dd'
-                    )
+                    new Date(formattedIssueDate),
+                    'yyyy.MM.dd'
+                  )
                   : '-'}
               </p>
             </div>
@@ -447,49 +451,49 @@ window.location.href =
 
           </div>
         </div>
-  
+
         {/* 버튼 */}
         <div className="flex gap-1.5 mt-3 pt-3 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity">
-  
+
           <Button
             variant="outline"
             size="sm"
             className="flex-1 h-8 text-sm"
             onClick={() => onPreview(document)}
           >
-            <Eye className="w-3 h-3 mr-1"/>
+            <Eye className="w-3 h-3 mr-1" />
             미리보기
           </Button>
-  
-  
+
+
           <Button
             variant="outline"
             size="icon"
             className="h-7 w-7"
             onClick={() => {
               window.location.href =
-              `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true`
+                `/api/file?path=${encodeURIComponent(document.storagePath)}&download=true&downloadName=${encodeURIComponent(getDownloadName(document))}`
             }}
           >
-            <Download className="w-3 h-3"/>
+            <Download className="w-3 h-3" />
           </Button>
-  
-  
+
+
           <Button
             variant="outline"
             size="icon"
             className="h-7 w-7 text-destructive"
             onClick={() => setDeleteOpen(true)}
           >
-            <Trash2 className="w-3 h-3"/>
+            <Trash2 className="w-3 h-3" />
           </Button>
-  
+
         </div>
-  
-  
+
+
       </div>
-  
-  
+
+
       <DeleteDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -497,7 +501,7 @@ window.location.href =
         deleting={deleting}
         filename={document.filename}
       />
-  
+
     </>
   )
 }
