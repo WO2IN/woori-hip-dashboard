@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DocumentMetadata } from '@/lib/types'
 import { useDataChanged } from '@/lib/data-events'
+import { normalizeIssueDate } from '@/lib/lot'
 import { toast } from 'sonner'
 
 function formatLot(doc: DocumentMetadata) {
@@ -17,6 +18,15 @@ function formatLot(doc: DocumentMetadata) {
 function formatQuantity(quantity: number | null | undefined, unit?: string) {
   if (quantity == null || Number.isNaN(Number(quantity))) return '-'
   return `${Number(quantity).toLocaleString()} ${unit || 'Kg'}`
+}
+
+function getIssueDateSortValue(value?: string) {
+  try {
+    const normalized = normalizeIssueDate(value)
+    return normalized ? normalized.replace(/-/g, '') : '00000000'
+  } catch {
+    return '00000000'
+  }
 }
 
 function formatDate(value: string) {
@@ -79,7 +89,7 @@ export function ShipmentView() {
         shipmentCategory: [a.shipmentCategory || '미분류', b.shipmentCategory || '미분류'],
         product: [a.product || '', b.product || ''],
         lot: [formatLot(a), formatLot(b)],
-        issueDate: [a.issueDate || '', b.issueDate || ''],
+        issueDate: [getIssueDateSortValue(a.issueDate), getIssueDateSortValue(b.issueDate)],
         quantity: [a.quantity ?? -Infinity, b.quantity ?? -Infinity],
       }[sortKey]
       const left = values[0]
@@ -185,7 +195,7 @@ export function ShipmentView() {
       URL.revokeObjectURL(url)
       toast.success('엑셀 파일을 다운로드했습니다.')
     } catch {
-      toast.error('엑셀 파일 생성에 실패했습니다.')
+      toast.error('엑셀 파일 생성에 ���패했습니다.')
     } finally {
       setDownloading(false)
     }

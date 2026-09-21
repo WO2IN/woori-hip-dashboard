@@ -64,8 +64,8 @@ function validateRows(rows: unknown): PlatingInfo[] {
 
 function writePlatingInfo(rows: PlatingInfo[]) {
   const csv = [
-    '업체명,품목,금도금,니켈도금,재질',
-    ...rows.map(row => [row.company, row.product, row.gold, row.nickel, row.material].map(escapeCsv).join(',')),
+    '업체명,품목,재질,금도금,니켈도금',
+    ...rows.map(row => [row.company, row.product, row.material, row.gold, row.nickel].map(escapeCsv).join(',')),
   ].join('\n') + '\n'
   const filePath = path.join(process.cwd(), 'data', 'plating-information.csv')
   writeFileSync(filePath, iconv.encode(csv, 'cp949'))
@@ -86,9 +86,9 @@ function readPlatingInfo(): PlatingInfo[] {
     .map(row => ({
       company: row[0],
       product: row[1],
-      gold: row[2],
-      nickel: row[3],
-      material: row[4],
+      material: row[2],
+      gold: row[3],
+      nickel: row[4],
     }))
 }
 
