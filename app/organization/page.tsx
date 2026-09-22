@@ -1,27 +1,96 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react"
+import { useAuth } from "@/components/auth/auth-context"
+import { buildAuthHeaders } from "@/lib/auth-client"
 
 type Person = { label: string; kind: "person" | "group" | "floor" }
 type Department = { name: string; color: "blue" | "orange"; people: Person[] }
+type Executive = { people: Person[] }
 
-const initialDepartments: Department[] = [
-  { name: "관리부", color: "blue", people: [{ label: "김민수", kind: "person" }, { label: "이서연", kind: "person" }, { label: "경영지원", kind: "group" }] },
-  { name: "생산부", color: "orange", people: [{ label: "박준혁", kind: "person" }, { label: "최유진", kind: "person" }, { label: "정우성", kind: "person" }, { label: "1층", kind: "floor" }] },
-  { name: "품질부", color: "blue", people: [{ label: "한지민", kind: "person" }, { label: "강도윤", kind: "person" }, { label: "수입검사", kind: "group" }, { label: "연구/개발팀", kind: "group" }] },
-  { name: "영업부", color: "orange", people: [{ label: "윤서준", kind: "person" }, { label: "김하늘", kind: "person" }] },
+const DEFAULT_EXECUTIVES: Person[] = [
+  { label: "회장 배준기", kind: "person" },
+  { label: "대표이사 홍성호", kind: "person" },
+  { label: "상무이사 임종배", kind: "person" },
 ]
 
 export default function OrganizationPage() {
-  const [departments, setDepartments] = useState(initialDepartments)
+  const { user } = useAuth()
+  const [executive, setExecutive] = useState<Executive>({ people: [] })
+  const [departments, setDepartments] = useState<Department[]>([])
   const [editMode, setEditMode] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [newMember, setNewMember] = useState<Record<number, string>>({})
   const [newGroup, setNewGroup] = useState<Record<number, string>>({})
+  const [newExecutive, setNewExecutive] = useState("")
   const [draggedItem, setDraggedItem] = useState<{ departmentIndex: number; personIndex: number } | null>(null)
 
+  useEffect(() => {
+    fetch('/api/organization', { cache: 'no-store' })
+      .then(response => response.json())
+      .then(result => {
+        const people = result.data?.executive?.people
+        setExecutive({
+          people: Array.isArray(people) && people.length === 3
+            ? people
+            : DEFAULT_EXECUTIVES,
+        })
+        setDepartments(Array.isArray(result.data?.departments) ? result.data.departments : [])
+      })
+      .catch(() => setDepartments([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const saveOrganization = async () => {
+    if (!user) {
+      window.alert('로그인 정보를 확인한 뒤 다시 시도해주세요.')
+      return
+    }
+    setSaving(true)
+    try {
+      const response = await fetch('/api/organization', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...buildAuthHeaders(user) },
+        body: JSON.stringify({ executive, departments }),
+      })
+      if (!response.ok) throw new Error('저장하지 못했습니다.')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : '조직도 저장에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const canEditOrganization = user?.role === "admin"
+
+  const toggleEditMode = async () => {
+    if (!canEditOrganization) return
+    if (editMode) await saveOrganization()
+    setEditMode(value => !value)
+  }
+
   const memberCount = (department: Department) => department.people.filter(person => person.kind === "person").length
-  const total = useMemo(() => departments.reduce((sum, department) => sum + memberCount(department), 0) + 3, [departments])
+  const updateExecutiveLabel = (personIndex: number, label: string) => {
+    setExecutive(current => ({
+      ...current,
+      people: current.people.map((person, index) => index === personIndex ? { ...person, label } : person),
+    }))
+  }
+
+  const addExecutive = () => {
+    const label = newExecutive.trim()
+    if (!label) return
+    setExecutive(current => ({ ...current, people: [...current.people, { label, kind: "person" }] }))
+    setNewExecutive("")
+  }
+
+  const removeExecutive = (personIndex: number) => {
+    setExecutive(current => ({ ...current, people: current.people.filter((_, index) => index !== personIndex) }))
+  }
+
+  const total = useMemo(() => executive.people.filter(person => person.kind === "person").length + departments.reduce((sum, department) => sum + memberCount(department), 0), [executive, departments])
 
   const updateDepartmentName = (departmentIndex: number, name: string) => {
     setDepartments(current => current.map((department, index) => index === departmentIndex ? { ...department, name } : department))
@@ -68,16 +137,16 @@ export default function OrganizationPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-[#e8faf5] px-3 py-1.5 text-xs font-semibold text-[#246455]">총원 {total}명</span>
-          <button onClick={() => setEditMode(value => !value)} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"><Pencil className="size-3.5" />{editMode ? "편집 완료" : "조직도 수정"}</button>
+          {canEditOrganization && <button onClick={toggleEditMode} disabled={loading || saving} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-50"><Pencil className="size-3.5" />{loading ? "불러오는 중" : saving ? "저장 중" : editMode ? "편집 완료" : "조직도 수정"}</button>}
         </div>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-100 bg-[#f8fafc] p-4 sm:p-7">
         <div className="mx-auto min-w-[920px] max-w-[1180px]">
-          <div className="mx-auto w-64 rounded-xl border border-[#9cb7e8] bg-[#eaf1ff] px-5 py-3 text-center shadow-sm"><p className="text-[11px] font-semibold tracking-[0.16em] text-[#5272a8]">EXECUTIVE</p><p className="mt-1 font-bold text-[#17243a]">회장 배준기</p><p className="mt-0.5 text-xs text-slate-500">대표이사 홍성호 · 상무이사 임종배</p></div>
+          <div className="mx-auto w-64 rounded-xl border border-[#9cb7e8] bg-[#eaf1ff] px-5 py-3 text-center shadow-sm"><p className="text-[11px] font-semibold tracking-[0.16em] text-[#5272a8]">EXECUTIVE</p>{editMode ? <div className="mt-2 space-y-2">{executive.people.map((person, personIndex) => <div key={personIndex} className="flex items-center gap-1.5"><GripVertical className="size-3.5 shrink-0 text-slate-400" /><input aria-label={`${person.label} 이름`} value={person.label} onChange={event => updateExecutiveLabel(personIndex, event.target.value)} className="min-w-0 flex-1 rounded-md border border-[#b8cbed] bg-white px-2 py-1 text-center text-xs font-semibold text-[#17243a] outline-none focus:ring-2 focus:ring-violet-200" /><button aria-label={`${person.label} 삭제`} onClick={() => removeExecutive(personIndex)} className="shrink-0 text-slate-400 hover:text-red-500"><Trash2 className="size-3.5" /></button></div>)}<div className="flex gap-1.5"><input aria-label="임원 이름 추가" value={newExecutive} onChange={event => setNewExecutive(event.target.value)} onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing && event.keyCode !== 229) addExecutive() }} placeholder="임원 이름" className="min-w-0 flex-1 rounded-md border border-[#b8cbed] bg-white px-2 py-1 text-center text-xs outline-none focus:ring-2 focus:ring-violet-200" /><button aria-label="임원 추가" onClick={addExecutive} className="rounded-md bg-[#278e78] px-2 text-white"><Plus className="size-3.5" /></button></div></div> : <div className="mt-1 space-y-0.5">{executive.people.map((person, personIndex) => <p key={personIndex} className={personIndex === 0 ? "font-bold text-[#17243a]" : "text-xs text-slate-500"}>{person.label}</p>)}</div>}</div>
           <div className="mx-auto h-8 w-px bg-[#9cb7e8]" />
           <div className="grid grid-cols-4 gap-4 border-t border-[#9cb7e8] pt-7">
-            {departments.map((department, departmentIndex) => (
+            {!loading && departments.map((department, departmentIndex) => (
               <div key={departmentIndex} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <p className="mb-1 text-center text-xs font-medium text-slate-500">{memberCount(department)}명</p>
                 {editMode ? <input aria-label={`${department.name} 부서명`} value={department.name} onChange={event => updateDepartmentName(departmentIndex, event.target.value)} className={`w-full rounded-lg border px-3 py-2 text-center font-bold outline-none focus:ring-2 focus:ring-violet-200 ${department.color === "blue" ? "border-[#b8cbed] bg-[#eaf1ff] text-[#2d5da8]" : "border-[#f0c5a8] bg-[#fff1e8] text-[#b85e27]"}`} /> : <div className={`rounded-lg px-3 py-2 text-center font-bold ${department.color === "blue" ? "bg-[#eaf1ff] text-[#2d5da8]" : "bg-[#fff1e8] text-[#b85e27]"}`}>{department.name}</div>}

@@ -1,0 +1,148 @@
+{
+  "executive": {
+    "people": [
+      {
+        "label": "회장 배춘기",
+        "kind": "person"
+      },
+      {
+        "label": "대표이사 홍성호",
+        "kind": "person"
+      },
+      {
+        "label": "상무이사 임종배",
+        "kind": "person"
+      }
+    ]
+  },
+  "departments": [
+    {
+      "name": "영업팀",
+      "color": "blue",
+      "people": [
+        {
+          "label": "차장 유기곤",
+          "kind": "person"
+        },
+        {
+          "label": "과장 양민호",
+          "kind": "person"
+        }
+      ]
+    },
+    {
+      "name": "관리팀",
+      "color": "orange",
+      "people": [
+        {
+          "label": "대리 정소라",
+          "kind": "person"
+        }
+      ]
+    },
+    {
+      "name": "생산팀",
+      "color": "blue",
+      "people": [
+        {
+          "label": "생산총괄",
+          "kind": "group"
+        },
+        {
+          "label": "부장 김영철",
+          "kind": "person"
+        },
+        {
+          "label": "1층",
+          "kind": "group"
+        },
+        {
+          "label": "부장 양해문",
+          "kind": "person"
+        },
+        {
+          "label": "차장 한광열",
+          "kind": "person"
+        },
+        {
+          "label": "차장 배충근",
+          "kind": "person"
+        },
+        {
+          "label": "2층",
+          "kind": "group"
+        },
+        {
+          "label": "차장 한진석",
+          "kind": "person"
+        },
+        {
+          "label": "대리 여용걸",
+          "kind": "person"
+        },
+        {
+          "label": "사원 최정임",
+          "kind": "person"
+        },
+        {
+          "label": "3층",
+          "kind": "group"
+        },
+        {
+          "label": "차장 문명선",
+          "kind": "person"
+        },
+        {
+          "label": "과장 우데스",
+          "kind": "person"
+        }
+      ]
+    },
+    {
+      "name": "품질관리부",
+      "color": "orange",
+      "people": [
+        {
+          "label": "부장 조승현",
+          "kind": "person"
+        },
+        {
+          "label": "차장 강희권",
+          "kind": "person"
+        },
+        {
+          "label": "주임 나우인",
+          "kind": "person"
+        },
+        {
+          "label": "연구 / 개발",
+          "kind": "group"
+        },
+        {
+          "label": "과장 김성환",
+          "kind": "person"
+        },
+        {
+          "label": "대리 김주호",
+          "kind": "person"
+        },
+        {
+          "label": "수입검사 / 신뢰성시험",
+          "kind": "group"
+        },
+        {
+          "label": "대리 현 미",
+          "kind": "person"
+        },
+        {
+          "label": "대리 심문경",
+          "kind": "person"
+        },
+        {
+          "label": "사원 고은채",
+          "kind": "person"
+        }
+      ]
+    }
+  ]
+}
