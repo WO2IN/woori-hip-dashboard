@@ -25,6 +25,7 @@ export interface DocumentMetadata {
   company: string
   documentType: string
   shipmentCategory?: '판재' | '커넥터' | '랙'
+  movementType?: '입고' | '출고'
   shipmentFloor?: 1 | 2 | 3
   floor?: 1 | 2 | 3
   lotStart: string

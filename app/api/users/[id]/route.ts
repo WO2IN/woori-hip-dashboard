@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readUsers, writeUsers, hashPassword, getUserFromHeaders, canManageUsers } from '@/lib/auth'
+import { appendAuditLog } from '@/lib/storage'
 
 export async function PATCH(
   req: NextRequest,
@@ -26,6 +27,7 @@ export async function PATCH(
   if (password) users[idx].passwordHash = await hashPassword(password)
 
   writeUsers(users)
+  appendAuditLog({ action: 'UPDATE', target: 'user', detail: `${users[idx].displayName} 계정 수정`, userId: requestUser.id, userName: requestUser.displayName })
 
   return NextResponse.json({
     success: true,
@@ -62,8 +64,10 @@ export async function DELETE(
     return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 })
   }
 
+  const removedUser = users[idx]
   users.splice(idx, 1)
   writeUsers(users)
+  appendAuditLog({ action: 'DELETE', target: 'user', detail: `${removedUser.displayName} 계정 삭제`, userId: requestUser.id, userName: requestUser.displayName })
 
   return NextResponse.json({ success: true })
 }

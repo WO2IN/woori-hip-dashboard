@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readMetadata, updateMetadata } from '@/lib/storage'
+import { readMetadata, updateMetadata, appendAuditLog } from '@/lib/storage'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
@@ -249,6 +249,16 @@ export async function PATCH(req: NextRequest) {
     updateMetadata(id, updates)
 
 
+
+  if (success) {
+    appendAuditLog({
+      action: 'UPDATE',
+      target: 'document',
+      detail: `문서 ID ${id} 수정 (${Object.keys(updates).filter(key => key !== 'updatedAt' && key !== 'updatedBy' && key !== 'updatedById').join(', ')})`,
+      userId: requestUser.id,
+      userName: requestUser.displayName,
+    })
+  }
 
   if(!success){
 

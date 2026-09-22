@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import {
   deleteMetadata,
+  appendAuditLog,
   getDocumentFilePath,
   readMetadata,
   readConfig,
@@ -78,6 +79,13 @@ export async function DELETE(
 
   // 사용하지 않는 설정값 자동 제거
   cleanupUnusedConfigValues()
+  appendAuditLog({
+    action: 'DELETE',
+    target: 'document',
+    detail: `${removed.originalName} (문서 ID ${removed.id})`,
+    userId: requestUser.id,
+    userName: requestUser.displayName,
+  })
 
   return NextResponse.json({
     success: true,

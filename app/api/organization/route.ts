@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { getUserFromHeaders } from '@/lib/auth'
+import { appendAuditLog } from '@/lib/storage'
 import type { UserRole } from '@/lib/types'
 
 const ORGANIZATION_FILE = path.join(process.cwd(), 'config', 'organization.json')
@@ -59,6 +60,7 @@ export async function PUT(request: NextRequest) {
 
   const data = { executive, departments: body.departments }
   fs.writeFileSync(ORGANIZATION_FILE, JSON.stringify(data, null, 2), 'utf-8')
+  appendAuditLog({ action: 'UPDATE', target: 'organization', detail: '조직도 수정', userId: user!.id, userName: user!.displayName })
   return NextResponse.json({ data })
 }
 

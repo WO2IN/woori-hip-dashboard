@@ -60,6 +60,7 @@ export function ShipmentView() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [floorFilter, setFloorFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [movementFilter, setMovementFilter] = useState<'all' | '입고' | '출고'>('all')
   const [query, setQuery] = useState('')
 
   const filteredDocuments = useMemo(() => {
@@ -67,6 +68,7 @@ export function ShipmentView() {
     return documents.filter(doc => {
       const floor = String(doc.floor ?? doc.shipmentFloor ?? '')
       const category = doc.shipmentCategory || '미분류'
+      const movement = doc.movementType || '출고'
       const searchableText = [
         doc.company,
         doc.product,
@@ -77,9 +79,10 @@ export function ShipmentView() {
       ].filter(Boolean).join(' ').toLocaleLowerCase('ko-KR')
       return (floorFilter === 'all' || floor === floorFilter)
         && (categoryFilter === 'all' || category === categoryFilter)
+        && (movementFilter === 'all' || movement === movementFilter)
         && (!normalizedQuery || searchableText.includes(normalizedQuery))
     })
-  }, [categoryFilter, documents, floorFilter, query])
+  }, [categoryFilter, documents, floorFilter, movementFilter, query])
 
   const sortedDocuments = useMemo(() => {
     return [...filteredDocuments].sort((a, b) => {
@@ -135,7 +138,7 @@ export function ShipmentView() {
     setDownloading(true)
     try {
       const workbook = new ExcelJS.Workbook()
-      const sheet = workbook.addWorksheet('출하관리')
+      const sheet = workbook.addWorksheet('입출고 관리')
       sheet.columns = [
         { header: '순번', key: 'number', width: 8 },
         { header: '업체명', key: 'company', width: 24 },
@@ -190,7 +193,7 @@ export function ShipmentView() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `출하관리_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.xlsx`
+      link.download = `입출고관리_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.xlsx`
       link.click()
       URL.revokeObjectURL(url)
       toast.success('엑셀 파일을 다운로드했습니다.')
@@ -209,8 +212,8 @@ export function ShipmentView() {
             <PackageCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">출하관리</h1>
-            <p className="text-sm text-muted-foreground">등록된 성적서의 출하 정보를 확인하고 엑셀로 저장합니다.</p>
+            <h1 className="text-xl font-bold text-foreground">입/출고 관리</h1>
+            <p className="text-sm text-muted-foreground">등록된 성적서의 입고·출고 정보를 한 곳에서 확인하고 엑셀로 저장합니다.</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -247,7 +250,23 @@ export function ShipmentView() {
             )}
           </label>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="space-y-1.5 text-sm font-medium">
+            <span className="block">구분</span>
+            <div className="flex h-10 gap-1 rounded-lg border border-input bg-background p-1">
+              {(['all', '입고', '출고'] as const).map(value => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setMovementFilter(value)}
+                  className={`flex-1 rounded-md px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${movementFilter === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                  aria-pressed={movementFilter === value}
+                >
+                  {value === 'all' ? '전체' : value}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className="space-y-1.5 text-sm font-medium">
             <span>층</span>
             <select value={floorFilter} onChange={event => setFloorFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -266,7 +285,7 @@ export function ShipmentView() {
 
       <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="font-semibold">출하 목록</h2>
+          <h2 className="font-semibold">입/출고 목록</h2>
           <span className="text-sm text-muted-foreground">총 {documents.length}건</span>
         </div>
         <div className="overflow-x-auto">

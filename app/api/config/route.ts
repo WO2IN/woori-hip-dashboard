@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readConfig, writeConfig } from '@/lib/storage'
+import { readConfig, writeConfig, appendAuditLog } from '@/lib/storage'
+import { getUserFromHeaders } from '@/lib/auth'
 import { readMetadata } from '@/lib/storage'
 
 const VALID_CONFIGS = ['companies', 'document-types', 'materials', 'specifications', 'products', 'shipment-categories']
@@ -52,6 +53,8 @@ export async function POST(req: NextRequest) {
   ]
 
   writeConfig(name, updated)
+  const user = getUserFromHeaders(req.headers)
+  if (user) appendAuditLog({ action: 'CREATE', target: 'config', detail: `${name}: ${trimmed}`, userId: user.id, userName: user.displayName })
 
   return NextResponse.json({ data: updated })
 }
@@ -99,5 +102,7 @@ export async function DELETE(req: NextRequest) {
   const data = readConfig(name)
   const updated = data.filter(v => v !== value)
   writeConfig(name, updated)
+  const user = getUserFromHeaders(req.headers)
+  if (user) appendAuditLog({ action: 'DELETE', target: 'config', detail: `${name}: ${value}`, userId: user.id, userName: user.displayName })
   return NextResponse.json({ data: updated })
 }

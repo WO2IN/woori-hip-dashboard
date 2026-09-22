@@ -1,0 +1,20 @@
+[
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "프로세스.pdf (문서 ID 248aaf13-baee-4f3e-b746-cc9807d58fc0)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790063616306-dexq8m",
+    "createdAt": "2026-09-22T07:53:36.306Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "프로세스.pdf (나담테크/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790063586762-w3yl3c",
+    "createdAt": "2026-09-22T07:53:06.763Z"
+  }
+]

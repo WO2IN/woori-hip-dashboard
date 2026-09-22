@@ -8,6 +8,17 @@ const ROOT = process.cwd()
 export const STORAGE_DIR = path.join(ROOT, 'public', 'storage')
 export const CONFIG_DIR = path.join(ROOT, 'config')
 export const METADATA_FILE = path.join(STORAGE_DIR, 'metadata.json')
+export const AUDIT_LOG_FILE = path.join(STORAGE_DIR, 'audit-log.json')
+
+export interface AuditLogEntry {
+  id: string
+  action: string
+  target: string
+  detail?: string
+  userId: string
+  userName: string
+  createdAt: string
+}
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
@@ -98,4 +109,25 @@ export function writeConfig(name: string, data: string[]) {
 
 export function getDocumentFilePath(relativePath: string) {
   return path.join(STORAGE_DIR, relativePath)
+}
+
+export function readAuditLogs(): AuditLogEntry[] {
+  ensureDir(STORAGE_DIR)
+  if (!fs.existsSync(AUDIT_LOG_FILE)) return []
+  try {
+    return JSON.parse(fs.readFileSync(AUDIT_LOG_FILE, 'utf-8')) as AuditLogEntry[]
+  } catch {
+    return []
+  }
+}
+
+export function appendAuditLog(entry: Omit<AuditLogEntry, 'id' | 'createdAt'>) {
+  const logs = readAuditLogs()
+  logs.unshift({
+    ...entry,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: new Date().toISOString(),
+  })
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(logs.slice(0, 5000), null, 2), 'utf-8')
 }

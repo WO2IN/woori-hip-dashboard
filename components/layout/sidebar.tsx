@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useDataChanged } from '@/lib/data-events'
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
-  Home, Upload, Settings, FolderOpen, Folder, ChevronRight,
-  ChevronDown, Building2, PanelLeftClose, PanelLeft, Users, PackageCheck, Network
+  Home, Upload, Settings, FolderOpen, PanelLeftClose, PanelLeft,
+  Users, PackageCheck, Network, Factory, ClipboardCheck, FileText,
+  ScrollText, ChevronDown, ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -27,44 +27,7 @@ interface SidebarProps {
 export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps) {
   const { user } = useAuth()
   const pathname = usePathname()
-  const router = useRouter()
-  const [companies, setCompanies] = useState<string[]>([])
-  const [expandedCompanies, setExpandedCompanies] = useState<Set<string>>(new Set())
-  const [companyTreeOpen, setCompanyTreeOpen] = useState(false)
-  const [docTypes, setDocTypes] = useState<string[]>([])
-  const [docCounts, setDocCounts] = useState<Record<string, Record<string, number>>>({})
-
-  const loadSidebarData = useCallback(async () => {
-    const [compRes, dtRes, docsRes] = await Promise.all([
-      fetch('/api/config?name=companies', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/config?name=document-types', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/documents', { cache: 'no-store' }).then(r => r.json()),
-    ])
-    setCompanies(compRes.data || [])
-    setDocTypes(dtRes.data || [])
-    const counts: Record<string, Record<string, number>> = {}
-    for (const doc of docsRes.data || []) {
-      if (!counts[doc.company]) counts[doc.company] = {}
-      counts[doc.company][doc.documentType] = (counts[doc.company][doc.documentType] || 0) + 1
-    }
-    setDocCounts(counts)
-  }, [])
-
-  useEffect(() => { 
-    loadSidebarData() 
-  }, [loadSidebarData])
-  
-  useDataChanged(() => { 
-    loadSidebarData() 
-  }, [loadSidebarData])
-  const toggleCompany = (name: string) => {
-    setExpandedCompanies(prev => {
-      const next = new Set(prev)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
-  }
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
 
   return (
     <>
@@ -130,159 +93,102 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
           )}
         </button>
         <ScrollArea className="flex-1 py-3 pt-14 lg:pt-3">
-          {/* Main nav */}
-          <nav className="px-3 space-y-0.5 mb-4">
-            {(
-              [
-                { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' },
-                { href: '/explorer', label: '문서 탐색기', icon: FolderOpen, minRole: 'viewer' },
-                { href: '/upload', label: '문서 등록', icon: Upload, minRole: 'editor' },
-                { href: '/shipment', label: '출하관리', icon: PackageCheck, minRole: 'viewer' },
-                { href: '/organization', label: '조직도', icon: Network, minRole: 'viewer' },
-                { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' },
-                { href: '/admin/users', label: '사용자 관리', icon: Users, minRole: 'admin' },
-              ] as const
-            )
-              .filter(item => {
-                if (!user) return item.minRole === 'viewer'
-                const LEVELS = { viewer: 1, editor: 2, admin: 3 }
-                return LEVELS[user.role] >= LEVELS[item.minRole]
-              })
-              .map(item => {
-                const Icon = item.icon
-                const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+          <nav className="px-3 space-y-1">
+            {[
+              { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' as const },
+              {
+                label: '업무관리', icon: PackageCheck, minRole: 'viewer' as const, children: [
+                  { href: '/shipment', label: '입/출고관리', icon: PackageCheck, minRole: 'viewer' as const },
+                  { href: '#', label: '생산관리', icon: Factory, minRole: 'viewer' as const },
+                  { href: '#', label: '품질관리', icon: ClipboardCheck, minRole: 'viewer' as const },
+                  { href: '#', label: '출하관리', icon: Upload, minRole: 'viewer' as const },
+                ],
+              },
+              {
+                label: '문서관리', icon: FileText, minRole: 'viewer' as const, children: [
+                  { href: '/explorer', label: '문서탐색기', icon: FolderOpen, minRole: 'viewer' as const },
+                  { href: '/upload', label: '문서등록', icon: Upload, minRole: 'editor' as const },
+                  { href: '#', label: '이력카드', icon: FileText, minRole: 'viewer' as const },
+                  { href: '#', label: '성적서', icon: ClipboardCheck, minRole: 'viewer' as const },
+                ],
+              },
+              {
+                label: '조직/사용자', icon: Users, minRole: 'viewer' as const, children: [
+                  { href: '/organization', label: '조직도', icon: Network, minRole: 'viewer' as const },
+                  { href: '/admin/users', label: '사용자 관리', icon: Users, minRole: 'admin' as const },
+                ],
+              },
+              {
+                label: '시스템관리', icon: Settings, minRole: 'viewer' as const, children: [
+                  { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' as const },
+                  { href: '/system-logs', label: '시스템 로그', icon: ScrollText, minRole: 'admin' as const },
+                ],
+              },
+            ].map((section) => {
+              const LEVELS = { viewer: 1, editor: 2, admin: 3 }
+              if (user && LEVELS[user.role] < LEVELS[section.minRole]) return null
+              const SectionIcon = section.icon
+              const isSectionActive = section.href
+                ? pathname === section.href
+                : section.children?.some(item => item.href !== '#' && (pathname === item.href || pathname.startsWith(item.href)))
+              const visibleChildren = section.children?.filter(item => !user || LEVELS[user.role] >= LEVELS[item.minRole])
+
+              if (!section.children) {
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      'flex items-center h-10 rounded-md text-sm transition-colors',
-                      collapsed ? 'justify-center px-0' : 'px-3',
-                      active
-                        ? 'bg-sidebar-accent text-sidebar-primary font-medium'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
-                    )}
-                  >
-                    <Icon className={cn(
-                      'w-4 h-4 flex-shrink-0',
-                      active ? 'text-sidebar-primary' : ''
-                    )} />
-                    <span
-                      className={cn(
-                        "overflow-hidden whitespace-nowrap transition-opacity duration-150",
-                        collapsed ? "opacity-0 w-0" : "opacity-100 ml-2"
-                      )}
-                    >
-                      {item.label}
+                  <Link key={section.label} href={section.href ?? '#'} onClick={onClose} className={cn(
+                    'flex items-center h-10 rounded-md px-3 text-sm transition-colors',
+                    isSectionActive ? 'bg-sidebar-accent text-sidebar-primary font-medium' : 'text-sidebar-foreground hover:bg-sidebar-accent/60',
+                    collapsed && 'justify-center px-0'
+                  )}>
+                    <SectionIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className={cn('overflow-hidden whitespace-nowrap transition-opacity duration-150', collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2 font-medium')}>
+                      {section.label}
                     </span>
                   </Link>
                 )
-              })}
-          </nav>
+              }
 
-          {/* Company tree */}
-          {companies.length > 0 && !collapsed && (
-            <div className="px-3">
-
-              <button
-                onClick={() => setCompanyTreeOpen(prev => !prev)}
-                className="w-full flex items-center justify-between px-3 py-2 mb-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider hover:bg-sidebar-accent/60 rounded-md"
-              >
-                <span>업체</span>
-
-                {companyTreeOpen ? (
-                  <ChevronDown className="w-3.5 h-3.5" />
-                ) : (
-                  <ChevronRight className="w-3.5 h-3.5" />
-                )}
-              </button>
-
-
-              {companyTreeOpen && (
-                <div className="space-y-0.5">
-
-                  {companies.map(company => {
-                    const expanded = expandedCompanies.has(company)
-                    const companyDocs = docCounts[company] || {}
-                    const total = Object.values(companyDocs)
-                      .reduce((a, b) => a + b, 0)
-
-                    return (
-                      <div key={company}>
-
-                        <button
-                          onClick={() => toggleCompany(company)}
-                          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
-                        >
-
-                          {expanded ? (
-                            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                          )}
-
-                          <Building2 className="w-4 h-4 text-sidebar-primary" />
-
-                          <span className="flex-1 text-left truncate">
-                            {company}
-                          </span>
-
-                          {total > 0 && (
-                            <span className="text-[10px] text-muted-foreground">
-                              {total}
-                            </span>
-                          )}
-
-                        </button>
-
-
-                        {expanded && (
-                          <div className="ml-6 mt-0.5 space-y-0.5">
-
-                            {docTypes.map(dt => {
-                              const count = companyDocs[dt] || 0
-
-                              return (
-                                <button
-                                  key={dt}
-                                  onClick={() => {
-                                    router.push(
-                                      `/explorer?company=${encodeURIComponent(company)}&docType=${encodeURIComponent(dt)}`
-                                    )
-                                    onClose()
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
-                                >
-
-                                  <Folder className="w-3.5 h-3.5 text-amber-500" />
-
-                                  <span className="flex-1 text-left truncate">
-                                    {dt}
-                                  </span>
-
-                                  {count > 0 && (
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {count}
-                                    </span>
-                                  )}
-
-                                </button>
-                              )
-                            })}
-
-                          </div>
-                        )}
-
-                      </div>
-                    )
-                  })}
-
+              const isOpen = openSections[section.label] ?? false
+              return (
+                <div key={section.label}>
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={`sidebar-section-${section.label}`}
+                    onClick={() => setOpenSections(prev => ({ ...prev, [section.label]: !isOpen }))}
+                    className={cn(
+                      'flex w-full items-center h-10 rounded-md text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent/60',
+                      collapsed ? 'justify-center px-0' : 'px-3',
+                      isSectionActive && 'bg-sidebar-accent/40'
+                    )}
+                  >
+                    <SectionIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className={cn('overflow-hidden whitespace-nowrap transition-opacity duration-150', collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2 font-medium')}>
+                      {section.label}
+                    </span>
+                    {!collapsed && (isOpen ? <ChevronDown className="ml-auto w-4 h-4" /> : <ChevronRight className="ml-auto w-4 h-4" />)}
+                  </button>
+                  {!collapsed && isOpen && visibleChildren && (
+                    <div id={`sidebar-section-${section.label}`} className="ml-5 pl-3 border-l border-sidebar-border space-y-0.5">
+                      {visibleChildren.map(item => {
+                        const ItemIcon = item.icon
+                        const active = item.href !== '#' && (pathname === item.href || pathname.startsWith(item.href))
+                        return (
+                          <Link key={item.label} href={item.href} onClick={onClose} className={cn(
+                            'flex items-center h-9 rounded-md px-3 text-sm transition-colors',
+                            active ? 'bg-sidebar-accent text-sidebar-primary font-medium' : 'text-sidebar-foreground hover:bg-sidebar-accent/60'
+                          )}>
+                            <ItemIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="ml-2 truncate">{item.label}</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-
-            </div>
-          )}
+              )
+            })}
+          </nav>
       </ScrollArea>
       {/* Bottom version info */}
       <div className="px-4 py-3 border-t border-sidebar-border">

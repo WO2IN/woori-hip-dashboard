@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { appendMetadata, STORAGE_DIR } from '@/lib/storage'
+import { appendMetadata, appendAuditLog, STORAGE_DIR } from '@/lib/storage'
 import { DocumentMetadata } from '@/lib/types'
 import { normalizeLot, normalizeRegisteredLot, buildLotEnd, normalizeIssueDate } from '@/lib/lot'
 import { format } from 'date-fns'
@@ -128,6 +128,13 @@ export async function POST(req: NextRequest) {
   }
 
   appendMetadata(doc)
+  appendAuditLog({
+    action: 'UPLOAD',
+    target: 'document',
+    detail: `${doc.originalName} (${doc.company}/${doc.documentType})`,
+    userId: requestUser.id,
+    userName: requestUser.displayName,
+  })
 
   return NextResponse.json({ success: true, data: doc })
 }
