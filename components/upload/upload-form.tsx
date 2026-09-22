@@ -770,7 +770,7 @@ options={shipmentCategories}
                   />
                 </div>
 
-                {/* ���고 */}
+                {/* 비고 */}
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label className="text-sm">비고</Label>
 

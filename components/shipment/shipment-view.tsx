@@ -195,7 +195,7 @@ export function ShipmentView() {
       URL.revokeObjectURL(url)
       toast.success('엑셀 파일을 다운로드했습니다.')
     } catch {
-      toast.error('엑셀 파일 생성에 ���패했습니다.')
+      toast.error('엑셀 파일 생성에 실패했습니다.')
     } finally {
       setDownloading(false)
     }
