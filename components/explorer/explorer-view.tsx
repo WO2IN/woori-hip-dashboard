@@ -565,6 +565,29 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
     query
    ])
 
+  const cascadingOptions = useMemo(() => {
+    const matches = (doc: DocumentMetadata, excluded: 'company' | 'documentType' | 'product' | 'material' | 'specification') => {
+      if (excluded !== 'company' && selectedCompanies.length > 0 && !selectedCompanies.includes(doc.company)) return false
+      if (excluded !== 'documentType' && selectedDocTypes.length > 0 && !selectedDocTypes.includes(doc.documentType)) return false
+      if (excluded !== 'product' && selectedProducts.length > 0 && !selectedProducts.includes(doc.product)) return false
+      if (excluded !== 'material' && selectedMaterials.length > 0 && !selectedMaterials.includes(doc.material)) return false
+      if (excluded !== 'specification' && selectedSpecifications.length > 0 && !selectedSpecifications.includes(doc.specification ?? '')) return false
+      return true
+    }
+
+    const values = (excluded: Parameters<typeof matches>[1], field: keyof DocumentMetadata) =>
+      [...new Set(allDocs.filter(doc => matches(doc, excluded)).map(doc => String(doc[field] ?? '')).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'ko-KR', { numeric: true }))
+
+    return {
+      companies: values('company', 'company'),
+      docTypes: values('documentType', 'documentType'),
+      products: values('product', 'product'),
+      materials: values('material', 'material'),
+      specifications: values('specification', 'specification'),
+    }
+  }, [allDocs, selectedCompanies, selectedDocTypes, selectedProducts, selectedMaterials, selectedSpecifications])
+
   const handleDeleteDoc = (id: string) => {
 
     setAllDocs(prev =>
@@ -973,7 +996,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
               <FilterField label="업체명">
                 <MultiSelect
-                  options={companies}
+                  options={cascadingOptions.companies}
                   value={selectedCompanies}
                   onChange={setSelectedCompanies}
                 />
@@ -982,7 +1005,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
               <FilterField label="문서유형">
                 <MultiSelect
-                  options={docTypes}
+                  options={cascadingOptions.docTypes}
                   value={selectedDocTypes}
                   onChange={setSelectedDocTypes}
                 />
@@ -991,7 +1014,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
               <FilterField label="품목">
                 <MultiSelect
-                  options={products}
+                  options={cascadingOptions.products}
                   value={selectedProducts}
                   onChange={setSelectedProducts}
                 />
@@ -1000,7 +1023,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
               <FilterField label="재질">
                 <MultiSelect
-                  options={materials}
+                  options={cascadingOptions.materials}
                   value={selectedMaterials}
                   onChange={setSelectedMaterials}
                 />
@@ -1009,7 +1032,7 @@ export function ExplorerView({ initialCompany, initialDocType }: ExplorerViewPro
 
               <FilterField label="규격">
                 <MultiSelect
-                  options={specifications}
+                  options={cascadingOptions.specifications}
                   value={selectedSpecifications}
                   onChange={setSelectedSpecifications}
                 />

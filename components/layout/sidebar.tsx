@@ -24,7 +24,7 @@ interface SidebarProps {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps) {
+export function Sidebar({ open, onClose, collapsed, setCollapsed, }: SidebarProps) {
   const { user } = useAuth()
   const pathname = usePathname()
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
@@ -38,17 +38,17 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
           onClick={onClose}
         />
       )}
-        <aside className={cn(
-          'fixed lg:static top-0 left-0 h-full bg-sidebar border-r border-sidebar-border z-[60]',
-          'flex flex-col overflow-visible transition-[width,transform] duration-300 ease-in-out',
-          collapsed ? 'w-20' : 'w-64',
-          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        )}>
+      <aside className={cn(
+        'fixed lg:static top-0 left-0 h-full bg-sidebar border-r border-sidebar-border z-[60]',
+        'flex flex-col overflow-visible transition-[width,transform] duration-300 ease-in-out',
+        collapsed ? 'w-20' : 'w-64',
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      )}>
 
-          {/* Mobile close button */}
-          <button
-            onClick={onClose}
-            className="
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="
               lg:hidden
               absolute
               top-4
@@ -62,12 +62,12 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
               rounded-md
               hover:bg-sidebar-accent
             "
-          >
-            <PanelLeftClose className="w-5 h-5" />
-          </button>
+        >
+          <PanelLeftClose className="w-5 h-5" />
+        </button>
 
-          <button
-            onClick={() => setCollapsed(prev => !prev)}
+        <button
+          onClick={() => setCollapsed(prev => !prev)}
           className="
             hidden
             lg:flex
@@ -98,18 +98,15 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
               { href: '/', label: '대시보드', icon: Home, minRole: 'viewer' as const },
               {
                 label: '업무관리', icon: PackageCheck, minRole: 'viewer' as const, children: [
-                  { href: '/shipment', label: '입/출고관리', icon: PackageCheck, minRole: 'viewer' as const },
-                  { href: '#', label: '생산관리', icon: Factory, minRole: 'viewer' as const },
-                  { href: '#', label: '품질관리', icon: ClipboardCheck, minRole: 'viewer' as const },
-                  { href: '#', label: '출하관리', icon: Upload, minRole: 'viewer' as const },
+                  { href: '/shipment', label: '입/출고 관리', icon: Upload, minRole: 'viewer' as const },
+                  { href: '/production', label: '생산관리', icon: Factory, minRole: 'viewer' as const },
+                  { href: '/quality', label: '품질관리', icon: ClipboardCheck, minRole: 'viewer' as const },
                 ],
               },
               {
                 label: '문서관리', icon: FileText, minRole: 'viewer' as const, children: [
                   { href: '/explorer', label: '문서탐색기', icon: FolderOpen, minRole: 'viewer' as const },
                   { href: '/upload', label: '문서등록', icon: Upload, minRole: 'editor' as const },
-                  { href: '#', label: '이력카드', icon: FileText, minRole: 'viewer' as const },
-                  { href: '#', label: '성적서', icon: ClipboardCheck, minRole: 'viewer' as const },
                 ],
               },
               {
@@ -119,7 +116,7 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
                 ],
               },
               {
-                label: '시스템관리', icon: Settings, minRole: 'viewer' as const, children: [
+                label: '시스템관리', icon: Settings, minRole: 'editor' as const, children: [
                   { href: '/settings', label: '설정', icon: Settings, minRole: 'editor' as const },
                   { href: '/system-logs', label: '시스템 로그', icon: ScrollText, minRole: 'admin' as const },
                 ],
@@ -189,28 +186,28 @@ export function Sidebar({open, onClose, collapsed, setCollapsed,}: SidebarProps)
               )
             })}
           </nav>
-      </ScrollArea>
-      {/* Bottom version info */}
-      <div className="px-4 py-3 border-t border-sidebar-border">
-        {!collapsed ? (
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
-              <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+        </ScrollArea>
+        {/* Bottom version info */}
+        <div className="px-4 py-3 border-t border-sidebar-border">
+          {!collapsed ? (
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground font-medium">
+                WOORI-HIP <span className="opacity-60">v1.1</span>
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground font-medium">
-              WOORI-HIP <span className="opacity-60">v1.1</span>
-            </p>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
-              <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+          ) : (
+            <div className="flex justify-center">
+              <div className="w-5 h-5 rounded-md bg-sidebar-primary/20 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-sidebar-primary">W</span>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
       </aside>
-      </>
-      )
+    </>
+  )
 }

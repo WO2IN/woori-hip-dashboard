@@ -21,13 +21,40 @@ export async function PATCH(
     return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 })
   }
 
-  if (displayName) users[idx].displayName = displayName
-  if (role && ['viewer', 'editor', 'admin'].includes(role)) users[idx].role = role
-  if (floor !== undefined && [1, 2, 3].includes(Number(floor))) users[idx].floor = Number(floor) as 1 | 2 | 3
-  if (password) users[idx].passwordHash = await hashPassword(password)
+  const targetUser = users[idx]
+  const previousDisplayName = targetUser.displayName
+  const previousRole = targetUser.role
+  const previousFloor = targetUser.floor
+  const changes: string[] = []
+  const roleLabels: Record<string, string> = { viewer: '뷰어', editor: '편집자', admin: '관리자' }
+
+  if (displayName && displayName !== targetUser.displayName) {
+    changes.push(`이름 ${targetUser.displayName} -> ${displayName}`)
+    targetUser.displayName = displayName
+  }
+  if (role && ['viewer', 'editor', 'admin'].includes(role) && role !== targetUser.role) {
+    changes.push(`권한 ${roleLabels[targetUser.role] ?? targetUser.role} -> ${roleLabels[role] ?? role}`)
+    targetUser.role = role
+  }
+  if (floor !== undefined && [1, 2, 3].includes(Number(floor)) && Number(floor) !== targetUser.floor) {
+    changes.push(`층 ${targetUser.floor}층 -> ${Number(floor)}층`)
+    targetUser.floor = Number(floor) as 1 | 2 | 3
+  }
+  if (password) {
+    targetUser.passwordHash = await hashPassword(password)
+    changes.push('비밀번호 변경')
+  }
 
   writeUsers(users)
-  appendAuditLog({ action: 'UPDATE', target: 'user', detail: `${users[idx].displayName} 계정 수정`, userId: requestUser.id, userName: requestUser.displayName })
+  appendAuditLog({
+    action: 'UPDATE',
+    target: 'user',
+    detail: changes.length > 0
+      ? `${previousDisplayName} 계정 수정: ${changes.join(', ')}`
+      : `${previousDisplayName} 계정 수정`,
+    userId: requestUser.id,
+    userName: requestUser.displayName,
+  })
 
   return NextResponse.json({
     success: true,
