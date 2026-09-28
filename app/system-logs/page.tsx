@@ -13,6 +13,28 @@ function formatDate(value: string) {
   }).format(new Date(value))
 }
 
+function getActionClass(action: string) {
+  const normalized = action.trim().toLowerCase()
+
+  if (normalized.includes('업로드') || normalized.includes('생성') || normalized.includes('등록') || normalized.includes('create') || normalized.includes('upload') || normalized.includes('insert')) {
+    return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+  }
+
+  if (normalized.includes('수정') || normalized.includes('업데이트') || normalized.includes('update') || normalized.includes('edit') || normalized.includes('patch')) {
+    return 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+  }
+
+  if (normalized.includes('삭제') || normalized.includes('delete') || normalized.includes('remove')) {
+    return 'bg-red-500/15 text-red-700 dark:text-red-300'
+  }
+
+  if (normalized.includes('로그인') || normalized.includes('조회') || normalized.includes('열람') || normalized.includes('login') || normalized.includes('read') || normalized.includes('view')) {
+    return 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+  }
+
+  return 'bg-primary/10 text-primary'
+}
+
 export default function SystemLogsPage() {
   const { user } = useAuth()
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
@@ -90,7 +112,7 @@ export default function SystemLogsPage() {
             <div><h2 className="font-semibold">활동 기록</h2><p className="mt-1 text-xs text-muted-foreground">최대 500개의 최근 기록을 표시합니다.</p></div>
             <div className="relative w-full sm:w-72"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="사용자, 작업, 대상 검색" className="h-9 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring" /></div>
           </div>
-          {error ? <div className="flex items-center gap-2 p-6 text-sm text-destructive"><AlertCircle className="h-4 w-4" /> {error}</div> : loading ? <div className="p-10 text-center text-sm text-muted-foreground">로그를 불러오는 중입니다.</div> : filteredLogs.length === 0 ? <div className="p-10 text-center text-sm text-muted-foreground">조건에 맞는 기록이 없습니다.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">일시</th><th className="px-4 py-3 font-medium">사용자</th><th className="px-4 py-3 font-medium">작업</th><th className="px-4 py-3 font-medium">대상</th><th className="px-4 py-3 font-medium">상세</th></tr></thead><tbody className="divide-y">{filteredLogs.map(log => <tr key={log.id} className="transition-colors hover:bg-muted/20"><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(log.createdAt)}</td><td className="px-4 py-3"><div className="font-medium">{log.userName}</div><div className="text-xs text-muted-foreground">{log.userId}</div></td><td className="px-4 py-3"><span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">{log.action}</span></td><td className="px-4 py-3 font-medium">{log.target}</td><td className="max-w-sm px-4 py-3 text-muted-foreground">{log.detail || '-'}</td></tr>)}</tbody></table></div>}
+          {error ? <div className="flex items-center gap-2 p-6 text-sm text-destructive"><AlertCircle className="h-4 w-4" /> {error}</div> : loading ? <div className="p-10 text-center text-sm text-muted-foreground">로그를 불러오는 중입니다.</div> : filteredLogs.length === 0 ? <div className="p-10 text-center text-sm text-muted-foreground">조건에 맞는 기록이 없습니다.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">일시</th><th className="px-4 py-3 font-medium">사용자</th><th className="px-4 py-3 font-medium">작업</th><th className="px-4 py-3 font-medium">대상</th><th className="px-4 py-3 font-medium">상세</th></tr></thead><tbody className="divide-y">{filteredLogs.map(log => <tr key={log.id} className="transition-colors hover:bg-muted/20"><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(log.createdAt)}</td><td className="px-4 py-3"><div className="font-medium">{log.userName}</div><div className="text-xs text-muted-foreground">{log.userId}</div></td><td className="px-4 py-3"><span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionClass(log.action)}`}>{log.action}</span></td><td className="px-4 py-3 font-medium">{log.target}</td><td className="max-w-sm px-4 py-3 text-muted-foreground">{log.detail || '-'}</td></tr>)}</tbody></table></div>}
         </section>
       </div>
     </div>
