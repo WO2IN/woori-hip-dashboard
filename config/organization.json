@@ -95,6 +95,10 @@
         {
           "label": "과장 우데스",
           "kind": "person"
+        },
+        {
+          "label": "주임 정종성",
+          "kind": "person"
         }
       ]
     },
@@ -131,15 +135,19 @@
           "kind": "group"
         },
         {
-          "label": "대리 현 미",
-          "kind": "person"
-        },
-        {
           "label": "대리 심문경",
           "kind": "person"
         },
         {
           "label": "사원 고은채",
+          "kind": "person"
+        },
+        {
+          "label": "공정 / 출하검사",
+          "kind": "group"
+        },
+        {
+          "label": "대리 현 미",
           "kind": "person"
         }
       ]

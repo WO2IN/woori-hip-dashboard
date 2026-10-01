@@ -1,5 +1,725 @@
 [
   {
+    "action": "DELETE",
+    "target": "config",
+    "detail": "materials: AL 1050 H14 2.0T",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790839948740-5y5ryq",
+    "createdAt": "2026-10-01T07:32:28.740Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0061.pdf (신흥 SEC/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790837017259-pmz2om",
+    "createdAt": "2026-10-01T06:43:37.259Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0060.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836997368-0ut7w7",
+    "createdAt": "2026-10-01T06:43:17.368Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0059.pdf (피티씨/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836976408-1ko6b5",
+    "createdAt": "2026-10-01T06:42:56.408Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0058.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836957020-9qu07e",
+    "createdAt": "2026-10-01T06:42:37.020Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0057.pdf (피티씨/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836937071-30pwwk",
+    "createdAt": "2026-10-01T06:42:17.071Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0056.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836914117-q5j59q",
+    "createdAt": "2026-10-01T06:41:54.117Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0055.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836895380-96jxfr",
+    "createdAt": "2026-10-01T06:41:35.380Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0054.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836873465-xsq4o8",
+    "createdAt": "2026-10-01T06:41:13.465Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0053.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836838512-z66jru",
+    "createdAt": "2026-10-01T06:40:38.512Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0052.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836799613-sigzav",
+    "createdAt": "2026-10-01T06:39:59.613Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0051.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836778510-zk4fdr",
+    "createdAt": "2026-10-01T06:39:38.510Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0050.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836756130-bqt4ge",
+    "createdAt": "2026-10-01T06:39:16.130Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0048.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836740152-czzou9",
+    "createdAt": "2026-10-01T06:39:00.152Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0047.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836724152-2fn9bf",
+    "createdAt": "2026-10-01T06:38:44.152Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0046.pdf (세종에이앤에스/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836708783-mhvglb",
+    "createdAt": "2026-10-01T06:38:28.783Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0045.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836678715-ju45ck",
+    "createdAt": "2026-10-01T06:37:58.715Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 3840cf4e-8dd0-4999-b535-3a0731cad805 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836624128-y6wtjc",
+    "createdAt": "2026-10-01T06:37:04.128Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 5e905697-7978-4364-894d-7fbcf722fe6d 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836613557-yqbata",
+    "createdAt": "2026-10-01T06:36:53.557Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID c716f013-f875-4e97-be2f-655d341f247f 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836609769-dku9ho",
+    "createdAt": "2026-10-01T06:36:49.769Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 082fd86a-75a2-4c73-80a3-badba5831dba 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836590580-fnm5f8",
+    "createdAt": "2026-10-01T06:36:30.580Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0044.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836574524-qomico",
+    "createdAt": "2026-10-01T06:36:14.525Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0043.pdf (유경하이테크/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836556119-16zslx",
+    "createdAt": "2026-10-01T06:35:56.119Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0042.pdf (유경하이테크/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836536935-b9ziul",
+    "createdAt": "2026-10-01T06:35:36.935Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0041.pdf (피티씨/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836518386-j7uq2a",
+    "createdAt": "2026-10-01T06:35:18.386Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0040.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836497853-tlpifv",
+    "createdAt": "2026-10-01T06:34:57.853Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 48ed7126-3dba-4e38-910e-6c67bdbbfdf6 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836441660-6375cd",
+    "createdAt": "2026-10-01T06:34:01.660Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0039.pdf (대산전자/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836416431-qvujzq",
+    "createdAt": "2026-10-01T06:33:36.431Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0038.pdf (유경하이테크/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836136920-82q3gl",
+    "createdAt": "2026-10-01T06:28:56.920Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0037.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836117330-sm36f8",
+    "createdAt": "2026-10-01T06:28:37.330Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0036.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836094895-g3russ",
+    "createdAt": "2026-10-01T06:28:14.896Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0035.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836077712-66foi3",
+    "createdAt": "2026-10-01T06:27:57.712Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0034.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836056102-zmrcm1",
+    "createdAt": "2026-10-01T06:27:36.102Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0033.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790836010915-0xl4eh",
+    "createdAt": "2026-10-01T06:26:50.915Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0032.pdf (우선기업/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835994726-5ngepb",
+    "createdAt": "2026-10-01T06:26:34.726Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0031.pdf (넵텍/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835977651-n6c7qu",
+    "createdAt": "2026-10-01T06:26:17.651Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0029.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835866140-0oi8dq",
+    "createdAt": "2026-10-01T06:24:26.141Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0028.pdf (우선기업/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835836593-gs0587",
+    "createdAt": "2026-10-01T06:23:56.593Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0027.pdf (우선기업/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835778975-qzfv9y",
+    "createdAt": "2026-10-01T06:22:58.975Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0026.pdf (우선기업/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835756131-h3lafh",
+    "createdAt": "2026-10-01T06:22:36.131Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0024.pdf (우선기업/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835720978-qq3tnw",
+    "createdAt": "2026-10-01T06:22:00.978Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0023.pdf (신흥 SEC/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835688770-rmklo6",
+    "createdAt": "2026-10-01T06:21:28.770Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0022.pdf (풍산/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835593962-uqz27t",
+    "createdAt": "2026-10-01T06:19:53.962Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0021.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835555562-hg63pn",
+    "createdAt": "2026-10-01T06:19:15.562Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID c8a872f1-ee61-4c2c-845f-13ff741119d3 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835497642-8m4act",
+    "createdAt": "2026-10-01T06:18:17.642Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0020.pdf (동일메탈/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835476834-8px1dc",
+    "createdAt": "2026-10-01T06:17:56.834Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0019.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835447885-7wzr1m",
+    "createdAt": "2026-10-01T06:17:27.886Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0018.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835357349-jv415b",
+    "createdAt": "2026-10-01T06:15:57.349Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0017.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835302215-w7wbyg",
+    "createdAt": "2026-10-01T06:15:02.215Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0016.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835280024-c21u89",
+    "createdAt": "2026-10-01T06:14:40.024Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0015.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835246697-6w5qrg",
+    "createdAt": "2026-10-01T06:14:06.697Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0014.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835211479-ppsb22",
+    "createdAt": "2026-10-01T06:13:31.479Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0013.pdf (신흥 SEC/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835181183-m5yzwh",
+    "createdAt": "2026-10-01T06:13:01.183Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0012.pdf (유스틸/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835153229-4licm2",
+    "createdAt": "2026-10-01T06:12:33.229Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0011.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835118222-u543q5",
+    "createdAt": "2026-10-01T06:11:58.222Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0010.pdf (호연이엔지/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835080715-m22jin",
+    "createdAt": "2026-10-01T06:11:20.715Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0009.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790835009174-mou18y",
+    "createdAt": "2026-10-01T06:10:09.174Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "shipment-categories: 미분류",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834962341-8sna0z",
+    "createdAt": "2026-10-01T06:09:22.341Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0008.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834935013-ttgaua",
+    "createdAt": "2026-10-01T06:08:55.013Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0007.pdf (신흥 SEC/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834896135-1gphvy",
+    "createdAt": "2026-10-01T06:08:16.136Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0006.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834873822-ehzd7a",
+    "createdAt": "2026-10-01T06:07:53.822Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0005.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834827735-cu1hmp",
+    "createdAt": "2026-10-01T06:07:07.735Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0004.pdf (써스파인/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834785286-8ee32e",
+    "createdAt": "2026-10-01T06:06:25.286Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0003.pdf (동일메탈/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834740879-4ncmhg",
+    "createdAt": "2026-10-01T06:05:40.879Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0002.pdf (한빛티앤아이/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790834671982-ckirvi",
+    "createdAt": "2026-10-01T06:04:31.982Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 654b118d-e73d-444e-88a5-64b269c85240 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790830673968-5s3d0h",
+    "createdAt": "2026-10-01T04:57:53.969Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "넥스플러스_20261001-1_BUSBAR_FUSE_성적서.pdf (넥스플러스/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790830637150-ht3dur",
+    "createdAt": "2026-10-01T04:57:17.150Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "지디에스_20260930-1_SAMPLE_성적서.pdf (지디에스/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790815555089-ekxocr",
+    "createdAt": "2026-10-01T00:45:55.089Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "지비에스_20260930-1_SAMPLE_성적서.pdf (문서 ID af36340c-1039-4955-803a-9d23fbc8df8c)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790812172167-nk7kul",
+    "createdAt": "2026-09-30T23:49:32.262Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "organization",
+    "detail": "조직도 수정",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790811760264-yhwkv8",
+    "createdAt": "2026-09-30T23:42:40.264Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "organization",
+    "detail": "조직도 수정",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790811719294-nrqxl4",
+    "createdAt": "2026-09-30T23:41:59.294Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "에스코넥_20260930-1_DUMMY-D9385924_성적서.pdf (에스코넥/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790809535326-xkd4af",
+    "createdAt": "2026-09-30T23:05:35.326Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "에스코넥_20260930-1_DUMMY-D9385783_성적서.pdf (에스코넥/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790809362249-txfys1",
+    "createdAt": "2026-09-30T23:02:42.249Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "지비에스_20260930-1_SAMPLE_성적서.pdf (지비에스/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790756856405-s9e4hw",
+    "createdAt": "2026-09-30T08:27:36.405Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "넥스플러스_20260930-1_BUSBAR_FUSE_성적서.pdf (문서 ID 49639acf-0420-411b-bba1-83987de521d0)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790743153539-4vms2q",
+    "createdAt": "2026-09-30T04:39:13.539Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "넥스플러스_20260930-1_BUSBAR_FUSE_성적서.pdf (넥스플러스/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790743142471-bfkfuf",
+    "createdAt": "2026-09-30T04:39:02.471Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 654b118d-e73d-444e-88a5-64b269c85240 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790743102532-swnfiv",
+    "createdAt": "2026-09-30T04:38:22.532Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "넥스플러스_20260930-1_BUSBAR_FUSE_성적서.pdf (넥스플러스/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790743069860-napgm5",
+    "createdAt": "2026-09-30T04:37:49.881Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "한중NCS_20260930-1_BUSBAR MTM(PER)E6S_성적서.pdf (한중NCS/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790665266784-j6s0xr",
+    "createdAt": "2026-09-29T07:01:06.784Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "user",
+    "detail": "강희권 계정 수정: 권한 뷰어 -> 관리자",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790575616980-fighk1",
+    "createdAt": "2026-09-28T06:06:56.980Z"
+  },
+  {
     "action": "UPLOAD",
     "target": "document",
     "detail": "나담테크_20260928-1_JF2 BUSBAR 01_성적서.pdf (나담테크/성적서)",

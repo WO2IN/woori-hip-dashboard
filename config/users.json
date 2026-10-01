@@ -41,5 +41,13 @@
     "role": "viewer",
     "createdAt": "2026-09-18T07:24:04.641Z",
     "floor": 1
+  },
+  {
+    "id": "1d1bed1b-595d-4e64-b919-b64bc35c3bd1",
+    "username": "lambkin1004",
+    "displayName": "강희권",
+    "passwordHash": "fb0f00302a826eaf8affc9b73587488bd48173d0f303d81ddf48035a42696f8f",
+    "role": "admin",
+    "createdAt": "2026-09-28T06:06:43.239Z"
   }
 ]
