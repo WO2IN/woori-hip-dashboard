@@ -13725,7 +13725,12 @@
     "storagePath": "지디에스/성적서/2026/20260930_SAMPLE_20260930-1_153727c8-0558-4149-ba72-bba51dff9784.pdf",
     "createdAt": "2026-10-01T00:45:54.581Z",
     "createdBy": "고은채",
-    "createdById": "d2964b88-f155-4d0f-b095-42b6bbfc324c"
+    "createdById": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "lotEnd": "",
+    "note": "",
+    "updatedAt": "2026-10-01T08:07:38.001Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "d3460ea7-0fd3-46a6-a097-3047d7ca0b6e",
@@ -13749,7 +13754,11 @@
     "storagePath": "넥스플러스/성적서/2026/20261001_BUSBAR FUSE_20261001-1_277730a7-ba93-4bd7-bbfa-b509f02ebd87.pdf",
     "createdAt": "2026-10-01T04:57:17.059Z",
     "createdBy": "고은채",
-    "createdById": "d2964b88-f155-4d0f-b095-42b6bbfc324c"
+    "createdById": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "lotEnd": "",
+    "updatedAt": "2026-10-01T23:41:42.543Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "b2868592-e6d9-46a1-8b13-0b2127c6c833",
@@ -13757,7 +13766,7 @@
     "originalName": "우리하이피0002.pdf",
     "company": "한빛티앤아이",
     "documentType": "성적서",
-    "shipmentCategory": "판재",
+    "shipmentCategory": "미지정",
     "shipmentFloor": 1,
     "floor": 1,
     "lotStart": "20260923-1",
@@ -13772,7 +13781,12 @@
     "storagePath": "한빛티앤아이/성적서/2026/20260923_Heat Spreader 18.6mm Body_20260923-1_c2574083-213a-44c1-bb89-3ad90359237b.pdf",
     "createdAt": "2026-10-01T06:04:31.919Z",
     "createdBy": "나우인",
-    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
+    "createdById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "lotEnd": "",
+    "note": "",
+    "updatedAt": "2026-10-01T08:11:28.257Z",
+    "updatedBy": "나우인",
+    "updatedById": "5dab2439-baeb-4ca6-8839-c24435cf6bfc"
   },
   {
     "id": "27357cc0-581b-4593-8f7f-b72cc1faf374",

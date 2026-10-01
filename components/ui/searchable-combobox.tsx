@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { chosungSearch } from '@/lib/korean'
 import { toast } from 'sonner'
 import { notifyDataChanged } from '@/lib/data-events'
+import { buildAuthHeaders, getSession } from '@/lib/auth-client'
 
 interface SearchableComboboxProps {
   configName: string
@@ -79,11 +80,35 @@ export function SearchableCombobox({
     setOpen(false)
   }
 
-  const handleCreate = () => {
-    if (!trimmed) return
-  
-    onChange(trimmed)
-    setOpen(false)
+  const handleCreate = async () => {
+    if (!trimmed || adding) return
+
+    setAdding(true)
+    try {
+      const response = await fetch('/api/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildAuthHeaders(getSession()!),
+        },
+        body: JSON.stringify({ name: configName, value: trimmed }),
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '항목 추가에 실패했습니다.')
+      }
+
+      onOptionsChange?.(data.data || [trimmed, ...options])
+      onChange(trimmed)
+      notifyDataChanged('config')
+      setOpen(false)
+      toast.success(`"${trimmed}"이(가) 추가되었습니다.`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '항목 추가에 실패했습니다.')
+    } finally {
+      setAdding(false)
+    }
   }
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

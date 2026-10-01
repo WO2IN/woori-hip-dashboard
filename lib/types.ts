@@ -24,7 +24,7 @@ export interface DocumentMetadata {
   originalName: string      // original upload name
   company: string
   documentType: string
-  shipmentCategory?: '판재' | '커넥터' | '랙'
+  shipmentCategory?: string
   movementType?: '입고' | '출고'
   shipmentFloor?: 1 | 2 | 3
   floor?: 1 | 2 | 3

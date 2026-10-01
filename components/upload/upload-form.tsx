@@ -713,6 +713,7 @@ options={shipmentCategories}
   recentOptions={shipmentCategories.slice(0, 5)}
                       value={shipmentCategory}
                       onChange={setShipmentCategory}
+                      onOptionsChange={setShipmentCategories}
                       placeholder="구분 선택"
                       clearable={!sessionUser?.floor}
                       className="h-10"

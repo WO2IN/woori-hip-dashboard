@@ -41,6 +41,7 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
   const [materials, setMaterials] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<string[]>([])
   const [products, setProducts] = useState<string[]>([])
+  const [shipmentCategories, setShipmentCategories] = useState<string[]>([])
   const [recentCompanies, setRecentCompanies] = useState<string[]>([])
   const [recentDocTypes, setRecentDocTypes] = useState<string[]>([])
   const [recentMaterials, setRecentMaterials] = useState<string[]>([])
@@ -50,7 +51,23 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
   
   useEffect(() => {
     if (!open) return
-  
+
+    setForm({
+      company: document.company,
+      documentType: document.documentType,
+      lotStart: document.lotStart,
+      lotEnd: document.lotEnd || '',
+      product: document.product,
+      material: document.material,
+      specification: document.specification || '',
+      shipmentCategory: document.shipmentCategory || '',
+      floor: document.floor ? `${document.floor}층` : '',
+      quantity: document.quantity?.toString() || '',
+      quantityUnit: document.quantityUnit || 'Kg',
+      issueDate: document.issueDate,
+      note: document.note || '',
+    })
+
     const session = getSession()
     const headers = session ? buildAuthHeaders(session) : {}
   
@@ -60,12 +77,17 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
       fetch('/api/config?name=materials', { headers }).then(r => r.json()),
       fetch('/api/config?name=specifications', { headers }).then(r => r.json()),
       fetch('/api/config?name=products', { headers }).then(r => r.json()),
-    ]).then(([c, dt, m, s, p]) => {
+      fetch('/api/config?name=shipment-categories', { headers }).then(r => r.json()),
+    ]).then(([c, dt, m, s, p, sc]) => {
       setCompanies(c.data || [])
       setDocTypes(dt.data || [])
       setMaterials(m.data || [])
       setSpecifications(s.data || [])
       setProducts(p.data || [])
+      const savedCategories = Array.isArray(sc.data) ? sc.data : []
+      setShipmentCategories(form.shipmentCategory && !savedCategories.includes(form.shipmentCategory)
+        ? [form.shipmentCategory, ...savedCategories]
+        : savedCategories)
     
       // 최근 사용 5개
       setRecentCompanies((c.data || []).slice(0, 5))
@@ -206,8 +228,9 @@ export function EditDocumentDialog({ document, open, onClose, onUpdate }: EditDo
               <Label className="text-sm">도금 종류</Label>
               <SearchableCombobox
                 configName="shipment-categories"
-                options={['판재', '커넥터', '랙']}
-                recentOptions={['판재', '커넥터', '랙']}
+                options={shipmentCategories}
+                recentOptions={shipmentCategories.slice(0, 5)}
+                onOptionsChange={setShipmentCategories}
                 value={form.shipmentCategory}
                 onChange={set('shipmentCategory')}
                 placeholder="도금 종류 선택..."

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, AlertCircle, CheckCircle2, Clock3, RefreshCw, Search, ShieldAlert } from 'lucide-react'
+import { Activity, AlertCircle, CheckCircle2, Clock3, RefreshCw, Search, ShieldAlert, Trash2 } from 'lucide-react'
 import { useAuth } from '@/components/auth/auth-context'
 import { getSession, buildAuthHeaders } from '@/lib/auth-client'
 import { AuditLogEntry } from '@/lib/storage'
@@ -11,6 +11,59 @@ function formatDate(value: string) {
     dateStyle: 'medium',
     timeStyle: 'medium',
   }).format(new Date(value))
+}
+
+function getActionLabel(action: string) {
+  const labels: Record<string, string> = {
+    CREATE: '등록',
+    UPLOAD: '문서 등록',
+    UPDATE: '수정',
+    DELETE: '삭제',
+    LOGIN: '로그인',
+    READ: '조회',
+  }
+  return labels[action.trim().toUpperCase()] ?? action
+}
+
+function getTargetLabel(target: string) {
+  const labels: Record<string, string> = {
+    document: '문서',
+    config: '기초정보',
+    user: '사용자 계정',
+    organization: '조직도',
+  }
+  return labels[target] ?? target
+}
+
+function getDetailLabel(log: AuditLogEntry) {
+  const detail = log.detail?.trim()
+  if (!detail) return '변경 내용이 기록되지 않았습니다.'
+  if (log.target === 'config') {
+    const [name, value] = detail.split(': ')
+    const names: Record<string, string> = {
+      companies: '업체',
+      'document-types': '문서 종류',
+      materials: '재질',
+      specifications: '규격',
+      products: '제품',
+      'shipment-categories': '출하 구분',
+    }
+    return value ? `${names[name] ?? name} ${value}` : detail
+  }
+  return detail
+}
+
+async function deleteLog(id: string) {
+  const session = getSession()
+  const response = await fetch('/api/audit-logs', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...(session ? buildAuthHeaders(session) : {}) },
+    body: JSON.stringify({ id }),
+  })
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}))
+    throw new Error(result.error ?? '로그를 삭제하지 못했습니다.')
+  }
 }
 
 function getActionClass(action: string) {
@@ -41,6 +94,21 @@ export default function SystemLogsPage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('이 시스템 로그를 삭제하시겠습니까? 삭제한 기록은 복구할 수 없습니다.')) return
+    setDeletingId(id)
+    setError('')
+    try {
+      await deleteLog(id)
+      setLogs(current => current.filter(log => log.id !== id))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '로그를 삭제하지 못했습니다.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   async function loadLogs() {
     setLoading(true)
@@ -112,7 +180,7 @@ export default function SystemLogsPage() {
             <div><h2 className="font-semibold">활동 기록</h2><p className="mt-1 text-xs text-muted-foreground">최대 500개의 최근 기록을 표시합니다.</p></div>
             <div className="relative w-full sm:w-72"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="사용자, 작업, 대상 검색" className="h-9 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring" /></div>
           </div>
-          {error ? <div className="flex items-center gap-2 p-6 text-sm text-destructive"><AlertCircle className="h-4 w-4" /> {error}</div> : loading ? <div className="p-10 text-center text-sm text-muted-foreground">로그를 불러오는 중입니다.</div> : filteredLogs.length === 0 ? <div className="p-10 text-center text-sm text-muted-foreground">조건에 맞는 기록이 없습니다.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">일시</th><th className="px-4 py-3 font-medium">사용자</th><th className="px-4 py-3 font-medium">작업</th><th className="px-4 py-3 font-medium">대상</th><th className="px-4 py-3 font-medium">상세</th></tr></thead><tbody className="divide-y">{filteredLogs.map(log => <tr key={log.id} className="transition-colors hover:bg-muted/20"><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(log.createdAt)}</td><td className="px-4 py-3"><div className="font-medium">{log.userName}</div><div className="text-xs text-muted-foreground">{log.userId}</div></td><td className="px-4 py-3"><span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionClass(log.action)}`}>{log.action}</span></td><td className="px-4 py-3 font-medium">{log.target}</td><td className="max-w-sm px-4 py-3 text-muted-foreground">{log.detail || '-'}</td></tr>)}</tbody></table></div>}
+          {error ? <div className="flex items-center gap-2 p-6 text-sm text-destructive"><AlertCircle className="h-4 w-4" /> {error}</div> : loading ? <div className="p-10 text-center text-sm text-muted-foreground">로그를 불러오는 중입니다.</div> : filteredLogs.length === 0 ? <div className="p-10 text-center text-sm text-muted-foreground">조건에 맞는 기록이 없습니다.</div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead className="bg-muted/40 text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">일시</th><th className="px-4 py-3 font-medium">사용자</th><th className="px-4 py-3 font-medium">작업</th><th className="px-4 py-3 font-medium">대상</th><th className="px-4 py-3 font-medium">상세 내용</th><th className="px-4 py-3 text-right font-medium">관리</th></tr></thead><tbody className="divide-y">{filteredLogs.map(log => <tr key={log.id} className="transition-colors hover:bg-muted/20"><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatDate(log.createdAt)}</td><td className="px-4 py-3"><div className="font-medium">{log.userName}</div><div className="text-xs text-muted-foreground">{log.userId}</div></td><td className="px-4 py-3"><span className={`rounded-full px-2 py-1 text-xs font-medium ${getActionClass(log.action)}`}>{getActionLabel(log.action)}</span></td><td className="px-4 py-3 font-medium">{getTargetLabel(log.target)}</td><td className="max-w-sm px-4 py-3 text-muted-foreground"><div className="whitespace-pre-wrap">{getDetailLabel(log)}</div></td><td className="px-4 py-3 text-right"><button type="button" onClick={() => handleDelete(log.id)} disabled={deletingId === log.id} className="inline-flex h-8 items-center gap-1 rounded-md border border-red-200 px-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950/40" aria-label="로그 삭제"><Trash2 className="h-3.5 w-3.5" /> 삭제</button></td></tr>)}</tbody></table></div>}
         </section>
       </div>
     </div>

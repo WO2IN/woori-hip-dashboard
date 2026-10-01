@@ -120,7 +120,7 @@ export function SettingsView() {
       {/* Management Dialog */}
       <Dialog open={!!activeDialog} onOpenChange={v => !v && setActiveDialog(null)}>
         <DialogContent className={cn(
-          'max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] overflow-hidden',
+          'z-[70] max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] overflow-hidden',
           active?.key === 'plating-info'
             ? 'w-[calc(100vw-2rem)] sm:w-[1100px] sm:max-w-[1100px]'
             : 'w-full sm:max-w-md'

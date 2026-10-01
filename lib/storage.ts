@@ -131,3 +131,12 @@ export function appendAuditLog(entry: Omit<AuditLogEntry, 'id' | 'createdAt'>) {
   ensureDir(STORAGE_DIR)
   fs.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(logs.slice(0, 5000), null, 2), 'utf-8')
 }
+
+export function deleteAuditLog(id: string) {
+  const logs = readAuditLogs()
+  const nextLogs = logs.filter(log => log.id !== id)
+  if (nextLogs.length === logs.length) return false
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(nextLogs, null, 2), 'utf-8')
+  return true
+}

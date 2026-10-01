@@ -186,6 +186,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json()
 
   const { id, ...updates } = body
+  const currentDocument = readMetadata().find(document => document.id === id)
 
   Object.keys(updates).forEach(key => {
     if (typeof updates[key] === 'string') {
@@ -251,10 +252,44 @@ export async function PATCH(req: NextRequest) {
 
 
   if (success) {
+    const fieldLabels: Record<string, string> = {
+      company: '업체명',
+      documentType: '문서 유형',
+      lotStart: 'LOT 시작번호',
+      lotEnd: 'LOT 종료번호',
+      product: '품목',
+      material: '재질',
+      specification: '규격',
+      shipmentCategory: '도금 종류',
+      floor: '층',
+      quantity: '수량',
+      quantityUnit: '수량 단위',
+      issueDate: '발행일',
+      note: '비고',
+    }
+    const changedFields = Object.keys(updates)
+      .filter(key => !['updatedAt', 'updatedBy', 'updatedById'].includes(key))
+      .filter(key => {
+        const previous = currentDocument?.[key as keyof typeof currentDocument]
+        const next = updates[key]
+        return String(previous ?? '') !== String(next ?? '')
+      })
+      .map(key => {
+        const label = fieldLabels[key] ?? key
+        const value = updates[key] === undefined || updates[key] === '' ? '미지정' : String(updates[key])
+        const previous = currentDocument?.[key as keyof typeof currentDocument]
+        const previousValue = previous === undefined || previous === '' ? '미지정' : String(previous)
+        return `${label}: ${previousValue} → ${value}`
+      })
+
+    if (changedFields.length === 0) {
+      return NextResponse.json({ success: true, message: '변경된 내용이 없습니다.' })
+    }
+
     appendAuditLog({
       action: 'UPDATE',
       target: 'document',
-      detail: `문서 ID ${id} 수정 (${Object.keys(updates).filter(key => key !== 'updatedAt' && key !== 'updatedBy' && key !== 'updatedById').join(', ')})`,
+      detail: `문서 수정 (ID: ${id})\n${changedFields.join('\n')}`,
       userId: requestUser.id,
       userName: requestUser.displayName,
     })

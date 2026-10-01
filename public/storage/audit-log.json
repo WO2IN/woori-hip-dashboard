@@ -1,5 +1,194 @@
 [
   {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 수정 (ID: d3460ea7-0fd3-46a6-a097-3047d7ca0b6e)\n비고: 양품: 3,750EA / 점박이 457EAz → 양품: 3,750EA / 점박이 457EA",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790898102574-8ufjx5",
+    "createdAt": "2026-10-01T23:41:42.574Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 수정 (ID: d3460ea7-0fd3-46a6-a097-3047d7ca0b6e)\n비고: 양품: 3,750EA / 점박이 457EA → 양품: 3,750EA / 점박이 457EAz",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790898093774-yej6xr",
+    "createdAt": "2026-10-01T23:41:33.775Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842955887-rmf9bi",
+    "createdAt": "2026-10-01T08:22:35.887Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842950365-rqkows",
+    "createdAt": "2026-10-01T08:22:30.365Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842945218-pe9iv7",
+    "createdAt": "2026-10-01T08:22:25.218Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842931288-5aquok",
+    "createdAt": "2026-10-01T08:22:11.288Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842928467-uy8cop",
+    "createdAt": "2026-10-01T08:22:08.467Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID d3460ea7-0fd3-46a6-a097-3047d7ca0b6e 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842924269-nogy9z",
+    "createdAt": "2026-10-01T08:22:04.269Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "config",
+    "detail": "shipment-categories: 미지정",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842443957-m0y9iq",
+    "createdAt": "2026-10-01T08:14:03.957Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "우리하이피0009.pdf (문서 ID aa1e4a17-8819-4ab6-b73e-f8bdbb22db2f)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842437693-t78t92",
+    "createdAt": "2026-10-01T08:13:57.693Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "우리하이피0009.pdf (문서 ID 70885cd2-3bef-4be4-983b-a8feb26908a2)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842437666-djr1t2",
+    "createdAt": "2026-10-01T08:13:57.666Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0009.pdf (지디에스/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842430136-q1vfan",
+    "createdAt": "2026-10-01T08:13:50.136Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 70885cd2-3bef-4be4-983b-a8feb26908a2 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842419342-w3dciu",
+    "createdAt": "2026-10-01T08:13:39.342Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0009.pdf (지디에스/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842338049-q7ef9j",
+    "createdAt": "2026-10-01T08:12:18.049Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID b2868592-e6d9-46a1-8b13-0b2127c6c833 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842288265-74gohx",
+    "createdAt": "2026-10-01T08:11:28.265Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "shipment-categories: 미지정",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842286136-tab8z6",
+    "createdAt": "2026-10-01T08:11:26.136Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 332ba584-86bf-4463-8622-8c6f1c5b34ec 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842058007-ygbtuf",
+    "createdAt": "2026-10-01T08:07:38.007Z"
+  },
+  {
+    "action": "UPDATE",
+    "target": "document",
+    "detail": "문서 ID 332ba584-86bf-4463-8622-8c6f1c5b34ec 수정 (company, documentType, lotStart, lotEnd, product, material, specification, shipmentCategory, floor, quantity, quantityUnit, issueDate, note)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842054043-foo7tv",
+    "createdAt": "2026-10-01T08:07:34.043Z"
+  },
+  {
+    "action": "DELETE",
+    "target": "document",
+    "detail": "우리하이피0011.pdf (문서 ID 1703b76d-3af4-415e-a842-66d60728cbbb)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842039019-ixfmbk",
+    "createdAt": "2026-10-01T08:07:19.019Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "우리하이피0011.pdf (지디에스/성적서)",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842026958-11tkx0",
+    "createdAt": "2026-10-01T08:07:06.958Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "shipment-categories: 미분류",
+    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
+    "userName": "나우인",
+    "id": "1790842011444-k7wq49",
+    "createdAt": "2026-10-01T08:06:51.444Z"
+  },
+  {
     "action": "DELETE",
     "target": "config",
     "detail": "materials: AL 1050 H14 2.0T",

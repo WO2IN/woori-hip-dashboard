@@ -36,15 +36,8 @@ export async function POST(req: NextRequest) {
       : undefined
   )
   const shipmentFloor = effectiveFloor
-  const shipmentCategory = effectiveFloor === 1
-    ? '판재'
-    : effectiveFloor === 2
-      ? '커넥터'
-      : effectiveFloor === 3
-        ? '랙'
-        : ['판재', '커넥터', '랙'].includes(shipmentCategoryRaw)
-          ? shipmentCategoryRaw as DocumentMetadata['shipmentCategory']
-          : undefined
+  // 층은 기본값을 정하는 데만 사용하고, 사용자가 선택한 신규 분류를 덮어쓰지 않습니다.
+  const shipmentCategory = shipmentCategoryRaw || undefined
   const lotStart = normalizeRegisteredLot(normalizeLot(formData.get('lotStart') as string))
   const lotEndRaw = normalizeLot(formData.get('lotEnd') as string)
   const lotEnd = lotEndRaw.includes('-')
