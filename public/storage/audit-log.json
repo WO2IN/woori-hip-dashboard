@@ -1,50 +1,5 @@
 [
   {
-    "action": "UPLOAD",
-    "target": "document",
-    "detail": "우리하이피0009.pdf (지디에스/성적서)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790842430136-q1vfan",
-    "createdAt": "2026-10-01T08:13:50.136Z"
-  },
-  {
-    "action": "UPLOAD",
-    "target": "document",
-    "detail": "우리하이피0009.pdf (지디에스/성적서)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790842338049-q7ef9j",
-    "createdAt": "2026-10-01T08:12:18.049Z"
-  },
-  {
-    "action": "CREATE",
-    "target": "config",
-    "detail": "shipment-categories: 미지정",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790842286136-tab8z6",
-    "createdAt": "2026-10-01T08:11:26.136Z"
-  },
-  {
-    "action": "UPLOAD",
-    "target": "document",
-    "detail": "우리하이피0011.pdf (지디에스/성적서)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790842026958-11tkx0",
-    "createdAt": "2026-10-01T08:07:06.958Z"
-  },
-  {
-    "action": "CREATE",
-    "target": "config",
-    "detail": "shipment-categories: 미분류",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790842011444-k7wq49",
-    "createdAt": "2026-10-01T08:06:51.444Z"
-  },
-  {
     "action": "DELETE",
     "target": "config",
     "detail": "materials: AL 1050 H14 2.0T",

@@ -9,6 +9,7 @@ import { DocumentMetadata } from '@/lib/types'
 import { useDataChanged } from '@/lib/data-events'
 import { normalizeIssueDate } from '@/lib/lot'
 import { toast } from 'sonner'
+import { ProductionView } from '@/components/production/production-view'
 
 function formatLot(doc: DocumentMetadata) {
   if (doc.lotEnd && doc.lotEnd !== doc.lotStart) return `${doc.lotStart} ~ ${doc.lotEnd}`
@@ -61,6 +62,10 @@ export function ShipmentView() {
   const [floorFilter, setFloorFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [movementFilter, setMovementFilter] = useState<'all' | '입고' | '출고'>('all')
+  const [companyFilter, setCompanyFilter] = useState('all')
+  const [productFilter, setProductFilter] = useState('all')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [query, setQuery] = useState('')
 
   const filteredDocuments = useMemo(() => {
@@ -77,12 +82,17 @@ export function ShipmentView() {
         category,
         floor,
       ].filter(Boolean).join(' ').toLocaleLowerCase('ko-KR')
+      const issueDate = getIssueDateSortValue(doc.issueDate)
       return (floorFilter === 'all' || floor === floorFilter)
         && (categoryFilter === 'all' || category === categoryFilter)
         && (movementFilter === 'all' || movement === movementFilter)
+        && (companyFilter === 'all' || doc.company === companyFilter)
+        && (productFilter === 'all' || doc.product === productFilter)
+        && (!startDate || issueDate >= startDate.replace(/-/g, ''))
+        && (!endDate || issueDate <= endDate.replace(/-/g, ''))
         && (!normalizedQuery || searchableText.includes(normalizedQuery))
     })
-  }, [categoryFilter, documents, floorFilter, movementFilter, query])
+  }, [categoryFilter, documents, floorFilter, movementFilter, query, companyFilter, productFilter, startDate, endDate])
 
   const sortedDocuments = useMemo(() => {
     return [...filteredDocuments].sort((a, b) => {
@@ -250,40 +260,16 @@ export function ShipmentView() {
             )}
           </label>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="space-y-1.5 text-sm font-medium">
-            <span className="block">구분</span>
-            <div className="flex h-10 gap-1 rounded-lg border border-input bg-background p-1">
-              {(['all', '입고', '출고'] as const).map(value => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setMovementFilter(value)}
-                  className={`flex-1 rounded-md px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${movementFilter === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                  aria-pressed={movementFilter === value}
-                >
-                  {value === 'all' ? '전체' : value}
-                </button>
-              ))}
-            </div>
-          </div>
-          <label className="space-y-1.5 text-sm font-medium">
-            <span>층</span>
-            <select value={floorFilter} onChange={event => setFloorFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <option value="all">전체 층</option><option value="1">1층</option><option value="2">2층</option><option value="3">3층</option>
-            </select>
-          </label>
-          <label className="space-y-1.5 text-sm font-medium">
-            <span>도금 종류</span>
-            <select value={categoryFilter} onChange={event => setCategoryFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <option value="all">전체 종류</option><option value="판재">판재</option><option value="커넥터">커넥터</option><option value="랙">랙</option>
-            </select>
-          </label>
-          <div className="flex items-end justify-end text-right text-sm text-muted-foreground sm:col-span-2 lg:col-span-2">필터 결과 <strong className="ml-1 text-foreground">{filteredDocuments.length}건</strong></div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <label className="space-y-1.5 text-sm font-medium"><span>업체명</span><select value={companyFilter} onChange={event => setCompanyFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"><option value="all">전체 업체</option>{Array.from(new Set(documents.map(doc => doc.company).filter(Boolean))).map(company => <option key={company} value={company}>{company}</option>)}</select></label>
+          <label className="space-y-1.5 text-sm font-medium"><span>품명</span><select value={productFilter} onChange={event => setProductFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"><option value="all">전체 품목</option>{Array.from(new Set(documents.filter(doc => companyFilter === 'all' || doc.company === companyFilter).map(doc => doc.product).filter(Boolean))).map(product => <option key={product} value={product}>{product}</option>)}</select></label>
+          <label className="space-y-1.5 text-sm font-medium"><span>층</span><select value={floorFilter} onChange={event => setFloorFilter(event.target.value)} className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"><option value="all">전체 층</option><option value="1">1층</option><option value="2">2층</option><option value="3">3층</option></select></label>
+          <label className="space-y-1.5 text-sm font-medium lg:col-span-2"><span>날짜 범위</span><div className="flex items-center gap-2"><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} className="h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-2 text-sm" /><span className="text-muted-foreground">~</span><input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} className="h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-2 text-sm" /></div></label>
+          <div className="flex items-end justify-end text-right text-sm text-muted-foreground">필터 결과 <strong className="ml-1 text-foreground">{filteredDocuments.length}건</strong></div>
         </div>
       </section>
 
-  <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+  {movementFilter === 'all' ? <ProductionView documents={filteredDocuments} loading={loading} isEmbedded={true} /> : <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
 
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <h2 className="font-semibold">입/출고 목록</h2>
@@ -301,7 +287,7 @@ export function ShipmentView() {
             </tbody>
           </table>
         </div>
-    </section>
+    </section>}
       </main>
 
   )
