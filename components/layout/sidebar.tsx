@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, Upload, Settings, FolderOpen, PanelLeftClose, PanelLeft,
-  Users, PackageCheck, Network, Factory, ClipboardCheck, FileText,
+  Users, PackageCheck, Network, FileText,
   ScrollText, ChevronDown, ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -99,8 +99,6 @@ export function Sidebar({ open, onClose, collapsed, setCollapsed, }: SidebarProp
               {
                 label: '업무관리', icon: PackageCheck, minRole: 'viewer' as const, children: [
                   { href: '/shipment', label: '입/출고 관리', icon: Upload, minRole: 'viewer' as const },
-                  { href: '/production', label: '생산관리', icon: Factory, minRole: 'viewer' as const },
-                  { href: '/quality', label: '품질관리', icon: ClipboardCheck, minRole: 'viewer' as const },
                 ],
               },
               {

@@ -283,9 +283,10 @@ export function ShipmentView() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="font-semibold">입/출고 목록</h2>
+  <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <h2 className="font-semibold">입/출고 목록</h2>
           <span className="text-sm text-muted-foreground">총 {documents.length}건</span>
         </div>
         <div className="overflow-x-auto">
@@ -300,8 +301,9 @@ export function ShipmentView() {
             </tbody>
           </table>
         </div>
-      </section>
-    </main>
+    </section>
+      </main>
+
   )
 }
 
