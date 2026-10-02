@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readMetadata, updateMetadata, appendAuditLog } from '@/lib/storage'
+import { readMetadata, updateMetadata, appendMetadata, appendAuditLog } from '@/lib/storage'
 import { normalizeLot, buildLotEnd } from '@/lib/lot'
 import { getUserFromHeaders, canEdit } from '@/lib/auth'
 
@@ -314,4 +314,50 @@ export async function PATCH(req: NextRequest) {
     success:true
   })
 
+}
+
+
+export async function POST(req: NextRequest) {
+  const requestUser = getUserFromHeaders(req.headers);
+  if (!requestUser || !canEdit(requestUser.role)) {
+    return NextResponse.json({ error: '등록 권한이 없습니다.' }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  const newDoc = {
+    id,
+    filename: '수기입력',
+    originalName: '수기입력 (파일없음)',
+    company: body.company || '',
+    documentType: body.documentType || '명세표',
+    movementType: body.movementType || '입고',
+    floor: Number(body.floor) || 1,
+    product: body.product || '',
+    quantity: Number(body.quantity) || 0,
+    quantityUnit: body.quantityUnit || 'EA',
+    issueDate: body.issueDate || now.slice(0, 10),
+    lotStart: body.lotStart || '',
+    material: body.material || '-',
+    fileSize: 0,
+    year: (body.issueDate || now).slice(0, 4),
+    storagePath: 'MANUAL',
+    createdAt: now,
+    createdBy: requestUser.displayName,
+    createdById: requestUser.id,
+  };
+
+  appendAuditLog({
+    action: 'CREATE',
+    target: 'document',
+    detail: `입고 내역 수기 등록 (ID: ${id})`,
+    userId: requestUser.id,
+    userName: requestUser.displayName,
+  });
+
+  appendMetadata(newDoc);
+
+  return NextResponse.json({ success: true, data: newDoc });
 }

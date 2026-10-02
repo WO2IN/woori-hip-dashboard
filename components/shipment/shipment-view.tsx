@@ -13,6 +13,18 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
+import { Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocumentMetadata } from "@/lib/types";
 import { useDataChanged } from "@/lib/data-events";
@@ -86,6 +98,93 @@ export function ShipmentView() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [query, setQuery] = useState("");
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addForm, setAddForm] = useState({
+    issueDate: new Date().toISOString().slice(0, 10),
+    company: "",
+    product: "",
+    floor: "1",
+    quantity: "",
+    quantityUnit: "EA",
+    lotStart: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const modalAvailableCompanies = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          documents
+            .filter(
+              (doc) => !addForm.product || doc.product === addForm.product,
+            )
+            .map((doc) => doc.company)
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [documents, addForm.product],
+  );
+
+  const modalAvailableProducts = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          documents
+            .filter(
+              (doc) => !addForm.company || doc.company === addForm.company,
+            )
+            .map((doc) => doc.product)
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [documents, addForm.company],
+  );
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    if (!addForm.company || !addForm.product || !addForm.quantity) {
+      toast.error("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        documentType: "명세표",
+        movementType: "입고",
+        issueDate: addForm.issueDate.replace(/-/g, "."),
+        company: addForm.company,
+        product: addForm.product,
+        floor: Number(addForm.floor),
+        quantity: Number(addForm.quantity),
+        quantityUnit: addForm.quantityUnit,
+        lotStart: addForm.lotStart,
+      };
+
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("등록 실패");
+
+      toast.success("입고 내역이 등록되었습니다.");
+      setIsAddModalOpen(false);
+      setAddForm({
+        ...addForm,
+        company: "",
+        product: "",
+        quantity: "",
+        lotStart: "",
+      });
+      loadDocuments(true);
+    } catch (error) {
+      toast.error("입고 등록에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const availableCompanies = useMemo(
     () =>
@@ -371,6 +470,12 @@ export function ShipmentView() {
         </div>
         <div className="flex gap-2">
           <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            <Plus className="mr-2 h-4 w-4" /> 입고 등록
+          </Button>
+          <Button
             variant="outline"
             onClick={() => loadDocuments(true)}
             disabled={refreshing}
@@ -586,6 +691,154 @@ export function ShipmentView() {
           </div>
         </section>
       )}
+
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>입고 내역 등록</DialogTitle>
+            <DialogDescription>
+              거래명세표 등을 참고하여 입고 내역을 수기로 등록합니다.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddSubmit} className="space-y-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">입고일자</label>
+              <Input
+                type="date"
+                value={addForm.issueDate}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, issueDate: e.target.value })
+                }
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">업체명</label>
+              <SearchableCombobox
+                configName="companies"
+                options={modalAvailableCompanies}
+                recentOptions={modalAvailableCompanies}
+                value={addForm.company}
+                onChange={(val) => {
+                  let nextProduct = addForm.product;
+                  if (val && !addForm.product) {
+                    const prods = Array.from(
+                      new Set(
+                        documents
+                          .filter((d) => d.company === val)
+                          .map((d) => d.product)
+                          .filter(Boolean),
+                      ),
+                    );
+                    if (prods.length === 1) nextProduct = prods[0];
+                  }
+                  setAddForm({
+                    ...addForm,
+                    company: val,
+                    product: nextProduct,
+                  });
+                }}
+                placeholder="업체 검색 또는 입력..."
+                className="col-span-3 h-10"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">품명</label>
+              <SearchableCombobox
+                configName="products"
+                options={modalAvailableProducts}
+                recentOptions={modalAvailableProducts}
+                value={addForm.product}
+                onChange={(val) => {
+                  let nextCompany = addForm.company;
+                  if (val && !addForm.company) {
+                    const comps = Array.from(
+                      new Set(
+                        documents
+                          .filter((d) => d.product === val)
+                          .map((d) => d.company)
+                          .filter(Boolean),
+                      ),
+                    );
+                    if (comps.length === 1) nextCompany = comps[0];
+                  }
+                  setAddForm({
+                    ...addForm,
+                    product: val,
+                    company: nextCompany,
+                  });
+                }}
+                placeholder="품명 검색 또는 입력..."
+                className="col-span-3 h-10"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">층</label>
+              <select
+                value={addForm.floor}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, floor: e.target.value })
+                }
+                className="col-span-3 flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="1">1층</option>
+                <option value="2">2층</option>
+                <option value="3">3층</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">로트번호</label>
+              <Input
+                placeholder="(선택 사항)"
+                value={addForm.lotStart}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, lotStart: e.target.value })
+                }
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right text-sm font-medium">수량</label>
+              <div className="col-span-3 flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={addForm.quantity}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, quantity: e.target.value })
+                  }
+                  className="flex-1"
+                  required
+                />
+                <select
+                  value={addForm.quantityUnit}
+                  onChange={(e) =>
+                    setAddForm({ ...addForm, quantityUnit: e.target.value })
+                  }
+                  className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="EA">EA</option>
+                  <option value="Kg">Kg</option>
+                  <option value="R">R</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddModalOpen(false)}
+              >
+                취소
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "등록 중..." : "등록하기"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
