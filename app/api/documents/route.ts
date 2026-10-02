@@ -334,7 +334,7 @@ export async function POST(req: NextRequest) {
     company: body.company || '',
     documentType: body.documentType || '명세표',
     movementType: body.movementType || '입고',
-    floor: Number(body.floor) || 1,
+    floor: Math.min(3, Math.max(1, Number(body.floor) || 1)) as 1 | 2 | 3,
     product: body.product || '',
     quantity: Number(body.quantity) || 0,
     quantityUnit: body.quantityUnit || 'EA',

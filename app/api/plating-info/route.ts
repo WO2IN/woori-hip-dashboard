@@ -110,7 +110,11 @@ export async function GET(request: NextRequest) {
     const product = searchParams.get('product')?.trim()
 
     if (!company || !product) {
-      return NextResponse.json({ rows: readPlatingInfo() })
+      const rows = readPlatingInfo().map(item => ({
+        ...item,
+        specification: [item.gold, item.nickel].filter(Boolean).join(' / '),
+      }))
+      return NextResponse.json({ rows })
     }
 
     const matches = readPlatingInfo().filter(

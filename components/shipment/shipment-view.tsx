@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Package,
   TriangleAlert,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchableCombobox } from "@/components/ui/searchable-combobox";
@@ -30,6 +31,7 @@ import { DocumentMetadata } from "@/lib/types";
 import { useDataChanged } from "@/lib/data-events";
 import { normalizeIssueDate } from "@/lib/lot";
 import { toast } from "sonner";
+import { buildAuthHeaders, getSession } from "@/lib/auth-client";
 
 function formatLot(doc: DocumentMetadata) {
   if (doc.lotEnd && doc.lotEnd !== doc.lotStart)
@@ -40,6 +42,10 @@ function formatLot(doc: DocumentMetadata) {
 function formatQuantity(quantity: number | null | undefined, unit?: string) {
   if (quantity == null || Number.isNaN(Number(quantity))) return "-";
   return `${Number(quantity).toLocaleString()} ${unit || "Kg"}`;
+}
+
+function isInventoryRecord(doc: DocumentMetadata) {
+  return doc.movementType === "입고" || doc.storagePath === "INVENTORY";
 }
 
 function getIssueDateSortValue(value?: string) {
@@ -141,7 +147,7 @@ export function ShipmentView() {
     [documents, addForm.company],
   );
 
-  const handleAddSubmit = async (e) => {
+  const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!addForm.company || !addForm.product || !addForm.quantity) {
       toast.error("필수 항목을 모두 입력해주세요.");
@@ -150,7 +156,6 @@ export function ShipmentView() {
     setIsSubmitting(true);
     try {
       const payload = {
-        documentType: "명세표",
         movementType: "입고",
         issueDate: addForm.issueDate.replace(/-/g, "."),
         company: addForm.company,
@@ -161,13 +166,20 @@ export function ShipmentView() {
         lotStart: addForm.lotStart,
       };
 
-      const response = await fetch("/api/documents", {
+      const session = getSession();
+      const response = await fetch("/api/inventory", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? buildAuthHeaders(session) : {}),
+        },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error("등록 실패");
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || `등록 실패 (${response.status})`);
+      }
 
       toast.success("입고 내역이 등록되었습니다.");
       setIsAddModalOpen(false);
@@ -180,10 +192,43 @@ export function ShipmentView() {
       });
       loadDocuments(true);
     } catch (error) {
-      toast.error("입고 등록에 실패했습니다.");
+      toast.error(
+        error instanceof Error ? error.message : "입고 등록에 실패했습니다.",
+      );
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDeleteInventory = async (id: string) => {
+    if (!window.confirm("이 입고 내역을 삭제하시겠습니까?")) return;
+
+    try {
+      const session = getSession();
+      const response = await fetch("/api/inventory", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? buildAuthHeaders(session) : {}),
+        },
+        body: JSON.stringify({ id }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "입고 삭제에 실패했습니다.");
+      toast.success("입고 내역이 삭제되었습니다.");
+      loadDocuments(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "입고 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteInventoryForDate = async (date: string) => {
+    const ids = documents
+      .filter((doc) => isInventoryRecord(doc) && dateKey(doc.issueDate) === dateKey(date))
+      .map((doc) => doc.id);
+    if (!ids.length) return;
+    if (!window.confirm(`${formatProductionDate(date)} 입고 내역 ${ids.length}건을 삭제하시겠습니까?`)) return;
+    for (const id of ids) await handleDeleteInventory(id);
   };
 
   const availableCompanies = useMemo(
@@ -336,13 +381,25 @@ export function ShipmentView() {
     if (manual) setRefreshing(true);
     else setLoading(true);
     try {
-      const response = await fetch("/api/documents", { cache: "no-store" });
+      const session = getSession();
+      const response = await fetch("/api/documents", {
+        cache: "no-store",
+        headers: session ? buildAuthHeaders(session) : {},
+      });
       if (!response.ok) throw new Error("문서 목록을 불러오지 못했습니다.");
       const result = await response.json();
+      const inventoryResponse = await fetch("/api/inventory", {
+        cache: "no-store",
+        headers: session ? buildAuthHeaders(session) : {},
+      });
+      if (!inventoryResponse.ok) throw new Error("입고 목록을 불러오지 못했습니다.");
+      const inventoryResult = await inventoryResponse.json();
       const shipmentDocuments = (result.data || []).filter(
-        (doc: DocumentMetadata) => doc.documentType === "성적서",
+        (doc: DocumentMetadata) =>
+          doc.documentType === "성적서" &&
+          !(doc.movementType === "입고" && doc.filename === "수기입력"),
       );
-      setDocuments(shipmentDocuments);
+      setDocuments([...shipmentDocuments, ...(inventoryResult.data || [])]);
     } catch {
       toast.error("문서 목록을 불러오지 못했습니다.");
     } finally {
@@ -368,7 +425,7 @@ export function ShipmentView() {
         { header: "구분", key: "category", width: 14 },
         { header: "품목", key: "product", width: 24 },
         { header: "로트번호", key: "lot", width: 28 },
-        { header: "발행일", key: "issueDate", width: 16 },
+        { header: "발��일", key: "issueDate", width: 16 },
         { header: "수량", key: "quantity", width: 14 },
       ];
       sheet.addRows(
@@ -461,7 +518,7 @@ export function ShipmentView() {
             <PackageCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">입/출고 관리</h1>
+            <h1 className="text-xl font-bold text-foreground">��/출고 관리</h1>
             <p className="text-sm text-muted-foreground">
               등록된 성적서의 입고·출고 정보를 한 곳에서 확인하고 엑셀로
               저장합니다.
@@ -598,8 +655,9 @@ export function ShipmentView() {
         <ProductionView
           documents={filteredDocuments}
           loading={loading}
-          isEmbedded={true}
-        />
+  isEmbedded={true}
+  onDeleteInventoryForDate={handleDeleteInventoryForDate}
+  />
       ) : (
         <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -641,6 +699,7 @@ export function ShipmentView() {
                       </button>
                     </th>
                   ))}
+                  <th className="px-5 py-3">관리</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -674,12 +733,29 @@ export function ShipmentView() {
                       <td className="px-5 py-4">
                         {formatQuantity(doc.quantity, doc.quantityUnit)}
                       </td>
+                      <td className="sticky right-0 bg-card px-5 py-4 shadow-[-8px_0_12px_-12px_hsl(var(--border))]">
+                        {isInventoryRecord(doc) ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => handleDeleteInventory(doc.id)}
+                            aria-label={`${doc.company || "입고"} ${doc.product || "내역"} 삭제`}
+                          >
+                            <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                            삭제
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-5 py-16 text-center text-muted-foreground"
                     >
                       등록된 성적서가 없습니다.
@@ -865,12 +941,14 @@ type ProductionViewProps = {
   documents?: DocumentMetadata[];
   loading?: boolean;
   isEmbedded?: boolean;
+  onDeleteInventoryForDate?: (date: string) => void;
 };
 
 function ProductionView({
   documents = [],
   loading = false,
   isEmbedded = false,
+  onDeleteInventoryForDate,
 }: ProductionViewProps) {
   const [visibleCount, setVisibleCount] = useState(20);
 
@@ -883,18 +961,23 @@ function ProductionView({
 
   const rows = useMemo(() => {
     const filtered = documents;
-    const grouped = new Map<string, number>();
-    filtered.forEach((doc) =>
-      grouped.set(
-        dateKey(doc.issueDate),
-        (grouped.get(dateKey(doc.issueDate)) ?? 0) + Number(doc.quantity ?? 0),
-      ),
-    );
+    const grouped = new Map<string, { incoming: number; outgoing: number; inventoryIds: string[] }>();
+    filtered.forEach((doc) => {
+      const key = dateKey(doc.issueDate);
+      const current = grouped.get(key) ?? { incoming: 0, outgoing: 0, inventoryIds: [] };
+      const quantity = Number(doc.quantity ?? 0);
+      if (doc.movementType === "입고") {
+        current.incoming += quantity;
+        current.inventoryIds.push(doc.id);
+      } else current.outgoing += quantity;
+      grouped.set(key, current);
+    });
     let inventory = 0;
     return [...grouped.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, outgoing]) => {
-        const incoming = 0;
+      .map(([key, values]) => {
+        const incoming = values.incoming;
+        const outgoing = values.outgoing;
         const defect = 0;
         const difference = incoming - outgoing - defect;
         inventory += difference;
@@ -906,6 +989,7 @@ function ProductionView({
           defect,
           difference,
           inventory,
+          inventoryIds: values.inventoryIds,
         };
       });
   }, [documents]);
@@ -974,6 +1058,7 @@ function ProductionView({
                     {head}
                   </th>
                 ))}
+                <th className="border-b px-4 py-3 text-center">관리</th>
               </tr>
             </thead>
             <tbody>
@@ -1011,6 +1096,22 @@ function ProductionView({
                     </td>
                     <td className="bg-yellow-50/70 px-4 py-3 text-right font-bold tabular-nums dark:bg-yellow-950/20">
                       {number(row.inventory)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {row.inventoryIds.length > 0 && onDeleteInventoryForDate ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => onDeleteInventoryForDate(row.key)}
+                        >
+                          <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                          삭제
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </td>
                   </tr>
                 ))

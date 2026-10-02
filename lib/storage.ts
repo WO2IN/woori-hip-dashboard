@@ -9,6 +9,12 @@ export const STORAGE_DIR = path.join(ROOT, 'public', 'storage')
 export const CONFIG_DIR = path.join(ROOT, 'config')
 export const METADATA_FILE = path.join(STORAGE_DIR, 'metadata.json')
 export const AUDIT_LOG_FILE = path.join(STORAGE_DIR, 'audit-log.json')
+export const INVENTORY_FILE = path.join(STORAGE_DIR, 'inventory.json')
+
+export type InventoryRecord = Pick<DocumentMetadata, 'id' | 'company' | 'product' | 'floor' | 'quantity' | 'quantityUnit' | 'issueDate' | 'lotStart' | 'createdAt' | 'createdBy' | 'createdById'> & {
+  movementType: '입고'
+  storagePath: 'INVENTORY'
+}
 
 export interface AuditLogEntry {
   id: string
@@ -25,6 +31,34 @@ function ensureDir(dir: string) {
 }
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
+
+export function readInventory(): InventoryRecord[] {
+  ensureDir(STORAGE_DIR)
+  if (!fs.existsSync(INVENTORY_FILE)) return []
+  try {
+    return JSON.parse(fs.readFileSync(INVENTORY_FILE, 'utf-8')) as InventoryRecord[]
+  } catch {
+    return []
+  }
+}
+
+export function appendInventory(record: InventoryRecord) {
+  const all = readInventory()
+  all.push(record)
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(INVENTORY_FILE, JSON.stringify(all, null, 2), 'utf-8')
+}
+
+export function deleteInventory(id: string): InventoryRecord | null {
+  const all = readInventory()
+  const index = all.findIndex(record => record.id === id)
+  if (index === -1) return null
+
+  const [removed] = all.splice(index, 1)
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(INVENTORY_FILE, JSON.stringify(all, null, 2), 'utf-8')
+  return removed
+}
 
 export function readMetadata(): DocumentMetadata[] {
   ensureDir(STORAGE_DIR)

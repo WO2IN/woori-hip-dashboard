@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Upload, X, CheckCircle, CloudUpload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -115,6 +115,7 @@ export function UploadForm() {
   const [material, setMaterial] = useState('')
   const [specification, setSpecification] = useState('')
   const [platingMatches, setPlatingMatches] = useState<Array<{ material: string; specification: string }>>([])
+  const [platingRows, setPlatingRows] = useState<Array<{ company: string; product: string; material: string; specification: string }>>([])
   const [quantity, setQuantity] = useState('')
   const [quantityUnit, setQuantityUnit] = useState<'Kg' | 'EA' | 'R'>('Kg')
   const [issueDate, setIssueDate] = useState('')
@@ -211,7 +212,38 @@ export function UploadForm() {
   useEffect(() => {
     loadConfig()
     loadRecentValues()
+    fetch('/api/plating-info', { cache: 'no-store' })
+      .then(response => response.json())
+      .then(({ rows = [] }) => setPlatingRows(rows))
+      .catch(error => console.error('[v0] 연관 도금 정보 로드 실패:', error))
   }, [loadConfig, loadRecentValues])
+
+  const relatedOptions = useMemo(() => {
+    const values = (field: 'company' | 'product' | 'material' | 'specification') => {
+      const rows = platingRows.filter(row =>
+        (!company || field === 'company' || row.company === company) &&
+        (!product || field === 'product' || row.product === product) &&
+        (!material || field === 'material' || row.material === material) &&
+        (!specification || field === 'specification' || row.specification === specification)
+      )
+      return [...new Set(rows.map(row => row[field]).filter(Boolean))]
+    }
+
+    return {
+      companies: values('company'),
+      products: values('product'),
+      materials: values('material'),
+      specifications: values('specification'),
+    }
+  }, [platingRows, company, product, material, specification])
+
+  useEffect(() => {
+    if (platingRows.length === 0) return
+    if (company && !relatedOptions.companies.includes(company)) setCompany('')
+    if (product && !relatedOptions.products.includes(product)) setProduct('')
+    if (material && !relatedOptions.materials.includes(material)) setMaterial('')
+    if (specification && !relatedOptions.specifications.includes(specification)) setSpecification('')
+  }, [platingRows.length, relatedOptions, company, product, material, specification])
 
   useEffect(() => {
     setPlatingMatches([])
@@ -590,8 +622,8 @@ export function UploadForm() {
 
                   <SearchableCombobox
                     configName="companies"
-                    options={companies}
-                    recentOptions={recentCompanies}
+                    options={platingRows.length ? relatedOptions.companies : companies}
+                    recentOptions={platingRows.length ? relatedOptions.companies.slice(0, 5) : recentCompanies}
                     value={company}
                     onChange={setCompany}
                     onOptionsChange={setCompanies}
@@ -658,8 +690,8 @@ export function UploadForm() {
 
                   <SearchableCombobox
                     configName="products"
-                    options={products}
-                    recentOptions={recentProducts}
+                    options={platingRows.length ? relatedOptions.products : products}
+                    recentOptions={platingRows.length ? relatedOptions.products.slice(0, 5) : recentProducts}
                     value={product}
                     onChange={setProduct}
                     onOptionsChange={setProducts}
@@ -673,8 +705,8 @@ export function UploadForm() {
 
                   <SearchableCombobox
                     configName="materials"
-                    options={materials}
-                    recentOptions={recentMaterials}
+                    options={platingRows.length ? relatedOptions.materials : materials}
+                    recentOptions={platingRows.length ? relatedOptions.materials.slice(0, 5) : recentMaterials}
                     value={material}
                     onChange={setMaterial}
                     onOptionsChange={setMaterials}
@@ -688,8 +720,8 @@ export function UploadForm() {
 
                   <SearchableCombobox
                     configName="specifications"
-                    options={specifications}
-                    recentOptions={recentSpecifications}
+                    options={platingRows.length ? relatedOptions.specifications : specifications}
+                    recentOptions={platingRows.length ? relatedOptions.specifications.slice(0, 5) : recentSpecifications}
                     value={specification}
                     onChange={setSpecification}
                     onOptionsChange={setSpecifications}
