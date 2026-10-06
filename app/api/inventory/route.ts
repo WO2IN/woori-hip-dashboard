@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { appendAuditLog, appendInventory, deleteInventory, readInventory } from '@/lib/storage'
+import { appendAuditLog, appendInventory, deleteInventory, readInventory, updateInventory } from '@/lib/storage'
 import { canEdit, getUserFromHeaders } from '@/lib/auth'
 
 export async function GET() {
@@ -31,6 +31,37 @@ export async function DELETE(req: NextRequest) {
   })
 
   return NextResponse.json({ success: true, data: removed })
+}
+
+export async function PATCH(req: NextRequest) {
+  const requestUser = getUserFromHeaders(req.headers)
+  if (!requestUser || !canEdit(requestUser.role)) {
+    return NextResponse.json({ error: '입고 수정 권한이 없습니다.' }, { status: 403 })
+  }
+
+  const body = await req.json().catch(() => ({}))
+  if (!body.id || typeof body.id !== 'string') {
+    return NextResponse.json({ error: '수정할 입고 ID가 필요합니다.' }, { status: 400 })
+  }
+  const quantity = Number(body.quantity)
+  if (!Number.isFinite(quantity) || quantity < 0) {
+    return NextResponse.json({ error: '수량은 0 이상이어야 합니다.' }, { status: 400 })
+  }
+  const updated = updateInventory(body.id, {
+    quantity,
+    quantityUnit: body.quantityUnit || 'EA',
+    issueDate: String(body.issueDate || '').trim(),
+  })
+  if (!updated) return NextResponse.json({ error: '입고 내역을 찾을 수 없습니다.' }, { status: 404 })
+
+  appendAuditLog({
+    action: 'UPDATE',
+    target: 'inventory',
+    detail: `입고 수량 수정 (ID: ${body.id})`,
+    userId: requestUser.id,
+    userName: requestUser.displayName,
+  })
+  return NextResponse.json({ success: true, data: updated })
 }
 
 export async function POST(req: NextRequest) {

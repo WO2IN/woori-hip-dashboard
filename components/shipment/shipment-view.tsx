@@ -657,6 +657,7 @@ export function ShipmentView() {
           loading={loading}
   isEmbedded={true}
   onDeleteInventoryForDate={handleDeleteInventoryForDate}
+  onReload={() => loadDocuments(true)}
   />
       ) : (
         <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
@@ -942,6 +943,7 @@ type ProductionViewProps = {
   loading?: boolean;
   isEmbedded?: boolean;
   onDeleteInventoryForDate?: (date: string) => void;
+  onReload?: () => void;
 };
 
 function ProductionView({
@@ -949,8 +951,28 @@ function ProductionView({
   loading = false,
   isEmbedded = false,
   onDeleteInventoryForDate,
+  onReload,
 }: ProductionViewProps) {
   const [visibleCount, setVisibleCount] = useState(20);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSavingEdits, setIsSavingEdits] = useState(false);
+  const [isOutgoingWarningOpen, setIsOutgoingWarningOpen] = useState(false);
+  const [editedRows, setEditedRows] = useState<Record<string, { incoming: number; outgoing: number; defect: number }>>({});
+  const [selectedGroup, setSelectedGroup] = useState<{
+    company: string;
+    product: string;
+    rows: Array<{
+      key: string;
+      date: string;
+      incoming: number;
+      outgoing: number;
+      defect: number;
+      difference: number;
+      inventory: number;
+      inventoryIds: string[];
+      outgoingIds: string[];
+    }>;
+  } | null>(null);
 
   const unit = useMemo(() => {
     const units = documents
@@ -960,36 +982,62 @@ function ProductionView({
   }, [documents]);
 
   const rows = useMemo(() => {
-    const filtered = documents;
-    const grouped = new Map<string, { incoming: number; outgoing: number; inventoryIds: string[] }>();
-    filtered.forEach((doc) => {
-      const key = dateKey(doc.issueDate);
-      const current = grouped.get(key) ?? { incoming: 0, outgoing: 0, inventoryIds: [] };
+    const grouped = new Map<string, Map<string, {
+      incoming: number;
+      outgoing: number;
+      inventoryIds: string[];
+      outgoingIds: string[];
+    }>>();
+
+    documents.forEach((doc) => {
+      const company = doc.company?.trim() || "-";
+      const product = doc.product?.trim() || "-";
+      const date = dateKey(doc.issueDate);
+      const groupKey = `${company}\u0000${product}`;
+      const dates = grouped.get(groupKey) ?? new Map();
+      const current = dates.get(date) ?? { incoming: 0, outgoing: 0, inventoryIds: [], outgoingIds: [] };
       const quantity = Number(doc.quantity ?? 0);
       if (doc.movementType === "입고") {
         current.incoming += quantity;
         current.inventoryIds.push(doc.id);
-      } else current.outgoing += quantity;
-      grouped.set(key, current);
+      } else {
+        current.outgoing += quantity;
+        current.outgoingIds.push(doc.id);
+      }
+      dates.set(date, current);
+      grouped.set(groupKey, dates);
     });
-    let inventory = 0;
+
     return [...grouped.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, values]) => {
-        const incoming = values.incoming;
-        const outgoing = values.outgoing;
-        const defect = 0;
-        const difference = incoming - outgoing - defect;
-        inventory += difference;
+      .sort(([a], [b]) => a.localeCompare(b, "ko"))
+      .map(([groupKey, dates]) => {
+        const [company, product] = groupKey.split("\u0000");
+        let inventory = 0;
+        const detailRows = [...dates.entries()]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([date, values]) => {
+            const difference = values.incoming - values.outgoing;
+            inventory += difference;
+            return {
+              key: `${groupKey}\u0000${date}`,
+              date: formatProductionDate(date),
+              incoming: values.incoming,
+              outgoing: values.outgoing,
+              defect: 0,
+              difference,
+              inventory,
+              inventoryIds: values.inventoryIds,
+              outgoingIds: values.outgoingIds,
+            };
+          });
         return {
-          key,
-          date: formatProductionDate(key),
-          incoming,
-          outgoing,
-          defect,
-          difference,
-          inventory,
-          inventoryIds: values.inventoryIds,
+          key: groupKey,
+          company,
+          product,
+          incoming: detailRows.reduce((sum, row) => sum + row.incoming, 0),
+          outgoing: detailRows.reduce((sum, row) => sum + row.outgoing, 0),
+          inventory: detailRows.at(-1)?.inventory ?? 0,
+          rows: detailRows,
         };
       });
   }, [documents]);
@@ -999,6 +1047,51 @@ function ProductionView({
   }, [documents]);
 
   const visibleRows = rows.slice(0, visibleCount);
+
+  const saveEditedRows = async (confirmed = false) => {
+    if (!selectedGroup) return;
+    const outgoingChanged = selectedGroup.rows.some((row) => {
+      const edited = editedRows[row.key];
+      return edited && edited.outgoing !== row.outgoing;
+    });
+    if (outgoingChanged && !confirmed) {
+      setIsOutgoingWarningOpen(true);
+      return;
+    }
+    setIsSavingEdits(true);
+    try {
+      const session = getSession();
+      for (const row of selectedGroup.rows) {
+        const edited = editedRows[row.key];
+        if (!edited) continue;
+        for (const id of row.inventoryIds) {
+          const response = await fetch('/api/inventory', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...(session ? buildAuthHeaders(session) : {}) },
+            body: JSON.stringify({ id, quantity: edited.incoming, issueDate: row.date.replace(/\\./g, '-') }),
+          });
+          if (!response.ok) throw new Error('입고 수량 수정에 실패했습니다.');
+        }
+        for (const id of row.outgoingIds) {
+          const response = await fetch('/api/documents', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...(session ? buildAuthHeaders(session) : {}) },
+            body: JSON.stringify({ id, quantity: edited.outgoing }),
+          });
+          if (!response.ok) throw new Error('출고 수량 수정에 실패했습니다.');
+        }
+      }
+      toast.success('수정사항을 저장했습니다.');
+      setIsEditMode(false);
+      setEditedRows({});
+      setSelectedGroup(null);
+      onReload?.();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '수정사항 저장에 실패했습니다.');
+    } finally {
+      setIsSavingEdits(false);
+    }
+  };
 
   const summary = [
     {
@@ -1013,7 +1106,7 @@ function ProductionView({
     },
     {
       label: "불량 합계",
-      value: rows.reduce((sum, row) => sum + row.defect, 0),
+      value: 0,
       tone: "rose",
     },
     { label: "현재 재고", value: rows.at(-1)?.inventory ?? 0, tone: "yellow" },
@@ -1053,6 +1146,8 @@ function ProductionView({
                 <th className="sticky left-0 z-10 border-b border-r bg-muted/90 px-4 py-3 text-left">
                   날짜
                 </th>
+                <th className="border-b px-4 py-3 text-left">업체명</th>
+                <th className="border-b px-4 py-3 text-left">품명</th>
                 {["입고", "출고", "불량", "차이수량", "재고"].map((head) => (
                   <th key={head} className="border-b px-4 py-3 text-right">
                     {head}
@@ -1065,7 +1160,7 @@ function ProductionView({
               {loading ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={9}
                     className="p-10 text-center text-muted-foreground"
                   >
                     데이터를 불러오는 중입니다.
@@ -1075,43 +1170,33 @@ function ProductionView({
                 visibleRows.map((row) => (
                   <tr
                     key={row.key}
-                    className="border-b last:border-0 hover:bg-muted/40"
+                    className="cursor-pointer border-b last:border-0 hover:bg-muted/40"
+                    onClick={() => {
+                      setSelectedGroup(row);
+                      setIsEditMode(false);
+                      setEditedRows({});
+                    }}
                   >
                     <td className="sticky left-0 z-10 border-r bg-card px-4 py-3 font-medium">
-                      {row.date}
+                      {row.rows.at(-1)?.date || "-"}
                     </td>
+                    <td className="px-4 py-3 font-medium">{row.company}</td>
+                    <td className="px-4 py-3">{row.product}</td>
                     <td className="px-4 py-3 text-right tabular-nums">
                       {number(row.incoming)}
                     </td>
                     <td className="px-4 py-3 text-right font-medium tabular-nums text-orange-600">
                       {number(row.outgoing)}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
-                      {number(row.defect)}
-                    </td>
-                    <td
-                      className={`px-4 py-3 text-right font-medium tabular-nums ${row.difference < 0 ? "text-rose-600" : ""}`}
-                    >
-                      {number(row.difference)}
+                    <td className="px-4 py-3 text-right tabular-nums">—</td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {number(row.incoming - row.outgoing)}
                     </td>
                     <td className="bg-yellow-50/70 px-4 py-3 text-right font-bold tabular-nums dark:bg-yellow-950/20">
                       {number(row.inventory)}
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      {row.inventoryIds.length > 0 && onDeleteInventoryForDate ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => onDeleteInventoryForDate(row.key)}
-                        >
-                          <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                          삭제
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                    <td className="px-4 py-3 text-center text-xs text-muted-foreground">
+                      상세보기
                     </td>
                   </tr>
                 ))
@@ -1145,14 +1230,175 @@ function ProductionView({
     </>
   );
 
+  const detailModal = (
+    <Dialog
+      open={Boolean(selectedGroup)}
+      onOpenChange={(open) => {
+        if (!open) {
+          setSelectedGroup(null);
+          setIsEditMode(false);
+          setEditedRows({});
+          setIsOutgoingWarningOpen(false);
+        }
+      }}
+    >
+      <DialogContent className="!w-[min(96vw,1100px)] !max-w-[1100px] sm:!max-w-[1100px]">
+        <DialogHeader className="gap-3 pr-10 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="min-w-0">
+            <DialogTitle className="truncate">
+              {selectedGroup?.company} · {selectedGroup?.product}
+            </DialogTitle>
+            <DialogDescription>업체와 품목별 날짜 상세 내역</DialogDescription>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {isEditMode ? (
+              <>
+                <Button
+                  type="button"
+                  size="default"
+                  variant="outline"
+                  className="min-w-20"
+                  onClick={() => {
+                    setIsEditMode(false);
+                    setEditedRows({});
+                  }}
+                  disabled={isSavingEdits}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="button"
+                  size="default"
+                  className="min-w-20"
+                  onClick={() => void saveEditedRows()}
+                  disabled={isSavingEdits}
+                >
+                  {isSavingEdits ? '저장 중...' : '저장'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                size="default"
+                variant="outline"
+                className="min-w-24 border-primary/40 font-semibold text-primary hover:bg-primary/10"
+                onClick={() => setIsEditMode(true)}
+              >
+                편집
+              </Button>
+            )}
+          </div>
+        </DialogHeader>
+        <div className="max-h-[60vh] overflow-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-muted/90 text-xs text-muted-foreground">
+              <tr>
+                {['날짜', '입고', '출고', '차이수량', '재고', '관리'].map((head) => (
+                  <th key={head} className={`border-b px-4 py-3 ${head === '날짜' || head === '관리' ? 'text-left' : 'text-right'}`}>
+                    {head}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {selectedGroup?.rows.map((row) => (
+                <tr key={row.key} className="border-b last:border-0">
+                  <td className="px-4 py-3 font-medium">{row.date}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">
+                    {isEditMode ? (
+                      <Input
+                        type="number"
+                        min="0"
+                        className="ml-auto h-8 w-28 text-right"
+                        value={editedRows[row.key]?.incoming ?? row.incoming}
+                        onChange={(event) => setEditedRows((current) => ({ ...current, [row.key]: { incoming: Number(event.target.value), outgoing: current[row.key]?.outgoing ?? row.outgoing, defect: current[row.key]?.defect ?? row.defect } }))}
+                      />
+                    ) : number(row.incoming)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-medium tabular-nums text-orange-600">
+                    {isEditMode ? (
+                      <Input
+                        type="number"
+                        min="0"
+                        className="ml-auto h-8 w-28 text-right"
+                        value={editedRows[row.key]?.outgoing ?? row.outgoing}
+                        onChange={(event) => setEditedRows((current) => ({ ...current, [row.key]: { incoming: current[row.key]?.incoming ?? row.incoming, outgoing: Number(event.target.value), defect: current[row.key]?.defect ?? row.defect } }))}
+                      />
+                    ) : number(row.outgoing)}
+                  </td>
+                  <td className="px-4 py-3 text-right tabular-nums">{number(row.difference)}</td>
+                  <td className="px-4 py-3 text-right font-bold tabular-nums">{number(row.inventory)}</td>
+                  <td className="px-4 py-3 text-left">
+                    {row.inventoryIds.length > 0 && onDeleteInventoryForDate ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => onDeleteInventoryForDate(row.date)}
+                      >
+                        <Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" /> 삭제
+                      </Button>
+                    ) : <span className="text-muted-foreground">-</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  const outgoingWarningModal = (
+    <Dialog open={isOutgoingWarningOpen} onOpenChange={setIsOutgoingWarningOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <TriangleAlert className="h-5 w-5 text-amber-500" aria-hidden="true" />
+            출고 수량을 수정하시겠습니까?
+          </DialogTitle>
+          <DialogDescription className="pt-2 leading-6">
+            출고값은 성적서와 연동된 값입니다. 수정하면 연결된 성적서 개수도 함께 변경됩니다.
+            그래도 저장하시겠습니까?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsOutgoingWarningOpen(false)}
+            disabled={isSavingEdits}
+          >
+            취소
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              setIsOutgoingWarningOpen(false);
+              void saveEditedRows(true);
+            }}
+            disabled={isSavingEdits}
+          >
+            확인하고 저장
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (isEmbedded) {
-    return <div className="space-y-5">{content}</div>;
+    return <div className="space-y-5">{content}{detailModal}{outgoingWarningModal}</div>;
   }
 
   return (
-    <main className="min-h-full bg-muted/20 p-4 md:p-6">
-      <div className="mx-auto max-w-[1600px] space-y-5">{content}</div>
-    </main>
+    <>
+      <main className="min-h-full bg-muted/20 p-4 md:p-6">
+        <div className="mx-auto max-w-[1600px] space-y-5">{content}</div>
+      </main>
+      {detailModal}
+      {outgoingWarningModal}
+    </>
   );
 }
 

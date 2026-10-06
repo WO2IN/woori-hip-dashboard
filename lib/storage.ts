@@ -49,6 +49,16 @@ export function appendInventory(record: InventoryRecord) {
   fs.writeFileSync(INVENTORY_FILE, JSON.stringify(all, null, 2), 'utf-8')
 }
 
+export function updateInventory(id: string, updates: Partial<InventoryRecord>): InventoryRecord | null {
+  const all = readInventory()
+  const index = all.findIndex(record => record.id === id)
+  if (index === -1) return null
+  all[index] = { ...all[index], ...updates }
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(INVENTORY_FILE, JSON.stringify(all, null, 2), 'utf-8')
+  return all[index]
+}
+
 export function deleteInventory(id: string): InventoryRecord | null {
   const all = readInventory()
   const index = all.findIndex(record => record.id === id)
