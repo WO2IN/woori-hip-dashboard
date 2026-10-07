@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { DocumentMetadata } from './types'
+import { ProcessCheckRecord } from './process-checklist'
 
 const ROOT = process.cwd()
 
@@ -10,6 +11,7 @@ export const CONFIG_DIR = path.join(ROOT, 'config')
 export const METADATA_FILE = path.join(STORAGE_DIR, 'metadata.json')
 export const AUDIT_LOG_FILE = path.join(STORAGE_DIR, 'audit-log.json')
 export const INVENTORY_FILE = path.join(STORAGE_DIR, 'inventory.json')
+export const PROCESS_CHECK_FILE = path.join(STORAGE_DIR, 'process-checks.json')
 
 export type InventoryRecord = Pick<DocumentMetadata, 'id' | 'company' | 'product' | 'floor' | 'quantity' | 'quantityUnit' | 'issueDate' | 'lotStart' | 'createdAt' | 'createdBy' | 'createdById'> & {
   movementType: '입고'
@@ -67,6 +69,48 @@ export function deleteInventory(id: string): InventoryRecord | null {
   const [removed] = all.splice(index, 1)
   ensureDir(STORAGE_DIR)
   fs.writeFileSync(INVENTORY_FILE, JSON.stringify(all, null, 2), 'utf-8')
+  return removed
+}
+
+export function readProcessChecks(): ProcessCheckRecord[] {
+  ensureDir(STORAGE_DIR)
+  if (!fs.existsSync(PROCESS_CHECK_FILE)) return []
+  try {
+    return JSON.parse(fs.readFileSync(PROCESS_CHECK_FILE, 'utf-8')) as ProcessCheckRecord[]
+  } catch {
+    return []
+  }
+}
+
+export function writeProcessChecks(records: ProcessCheckRecord[]) {
+  ensureDir(STORAGE_DIR)
+  fs.writeFileSync(PROCESS_CHECK_FILE, JSON.stringify(records, null, 2), 'utf-8')
+}
+
+export function appendProcessCheck(record: ProcessCheckRecord) {
+  const all = readProcessChecks()
+  all.unshift(record)
+  writeProcessChecks(all)
+}
+
+export function updateProcessCheck(
+  id: string,
+  updates: Partial<ProcessCheckRecord>,
+): ProcessCheckRecord | null {
+  const all = readProcessChecks()
+  const index = all.findIndex(record => record.id === id)
+  if (index === -1) return null
+  all[index] = { ...all[index], ...updates, id }
+  writeProcessChecks(all)
+  return all[index]
+}
+
+export function deleteProcessCheck(id: string): ProcessCheckRecord | null {
+  const all = readProcessChecks()
+  const index = all.findIndex(record => record.id === id)
+  if (index === -1) return null
+  const [removed] = all.splice(index, 1)
+  writeProcessChecks(all)
   return removed
 }
 

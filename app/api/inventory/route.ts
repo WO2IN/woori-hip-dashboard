@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { appendAuditLog, appendInventory, deleteInventory, readInventory, updateInventory } from '@/lib/storage'
 import { canEdit, getUserFromHeaders } from '@/lib/auth'
+import { normalizeIssueDate } from '@/lib/lot'
+
+function parseIssueDate(value: unknown) {
+  if (value == null || String(value).trim() === '') return ''
+  try {
+    return normalizeIssueDate(String(value))
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : '입고일자가 올바르지 않습니다.')
+  }
+}
 
 export async function GET() {
   return NextResponse.json({ data: readInventory() })
@@ -47,10 +57,21 @@ export async function PATCH(req: NextRequest) {
   if (!Number.isFinite(quantity) || quantity < 0) {
     return NextResponse.json({ error: '수량은 0 이상이어야 합니다.' }, { status: 400 })
   }
+  let issueDate: string | undefined
+  try {
+    issueDate = parseIssueDate(body.issueDate) || undefined
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : '입고일자가 올바르지 않습니다.' }, { status: 400 })
+  }
+  const floor = body.floor == null ? undefined : Math.min(3, Math.max(1, Number(body.floor) || 1)) as 1 | 2 | 3
   const updated = updateInventory(body.id, {
     quantity,
     quantityUnit: body.quantityUnit || 'EA',
-    issueDate: String(body.issueDate || '').trim(),
+    ...(issueDate ? { issueDate } : {}),
+    ...(body.company != null ? { company: String(body.company).trim() } : {}),
+    ...(body.product != null ? { product: String(body.product).trim() } : {}),
+    ...(floor != null ? { floor } : {}),
+    ...(body.lotStart != null ? { lotStart: String(body.lotStart).trim() } : {}),
   })
   if (!updated) return NextResponse.json({ error: '입고 내역을 찾을 수 없습니다.' }, { status: 404 })
 
@@ -76,6 +97,12 @@ export async function POST(req: NextRequest) {
   }
 
   const now = new Date().toISOString()
+  let issueDate = now.slice(0, 10)
+  try {
+    issueDate = parseIssueDate(body.issueDate) || issueDate
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : '입고일자가 올바르지 않습니다.' }, { status: 400 })
+  }
   const record = {
     id: crypto.randomUUID(),
     company: String(body.company).trim(),
@@ -83,7 +110,7 @@ export async function POST(req: NextRequest) {
     floor: Math.min(3, Math.max(1, Number(body.floor) || 1)) as 1 | 2 | 3,
     quantity: Number(body.quantity),
     quantityUnit: body.quantityUnit || 'EA',
-    issueDate: body.issueDate || now.slice(0, 10),
+    issueDate,
     lotStart: body.lotStart || '',
     movementType: '입고' as const,
     storagePath: 'INVENTORY' as const,

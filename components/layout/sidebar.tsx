@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   Home, Upload, Settings, FolderOpen, PanelLeftClose, PanelLeft,
   Users, PackageCheck, Network, FileText,
-  ScrollText, ChevronDown, ChevronRight
+  ScrollText, ChevronDown, ChevronRight, ClipboardCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -99,6 +99,7 @@ export function Sidebar({ open, onClose, collapsed, setCollapsed, }: SidebarProp
               {
                 label: '업무관리', icon: PackageCheck, minRole: 'viewer' as const, children: [
                   { href: '/shipment', label: '입/출고 관리', icon: Upload, minRole: 'viewer' as const },
+                  { href: '/process-check', label: '공정 점검', icon: ClipboardCheck, minRole: 'viewer' as const },
                 ],
               },
               {
@@ -167,7 +168,7 @@ export function Sidebar({ open, onClose, collapsed, setCollapsed, }: SidebarProp
                     <div id={`sidebar-section-${section.label}`} className="ml-5 pl-3 border-l border-sidebar-border space-y-0.5">
                       {visibleChildren.map(item => {
                         const ItemIcon = item.icon
-                        const active = item.href !== '#' && (pathname === item.href || pathname.startsWith(item.href))
+                        const active = item.href !== '#' && (pathname === item.href || pathname.startsWith(`${item.href}/`))
                         return (
                           <Link key={item.label} href={item.href} onClick={onClose} className={cn(
                             'flex items-center h-9 rounded-md px-3 text-sm transition-colors',

@@ -1,111 +1,120 @@
 [
   {
-    "action": "UPDATE",
+    "action": "UPLOAD",
     "target": "document",
-    "detail": "문서 수정 (ID: d3460ea7-0fd3-46a6-a097-3047d7ca0b6e)\n수량: 4206 → 4207",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1791250736854-houqdw",
-    "createdAt": "2026-10-06T01:38:56.854Z"
-  },
-  {
-    "action": "UPDATE",
-    "target": "document",
-    "detail": "문서 수정 (ID: d3460ea7-0fd3-46a6-a097-3047d7ca0b6e)\n수량: 4207 → 4206",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1791250699567-i0dapu",
-    "createdAt": "2026-10-06T01:38:19.567Z"
-  },
-  {
-    "action": "DELETE",
-    "target": "inventory",
-    "detail": "입고 내역 삭제 (ID: f691bfbf-c70b-4285-86d0-e6fcc6c9a468)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1791250669904-x2axfa",
-    "createdAt": "2026-10-06T01:37:49.904Z"
-  },
-  {
-    "action": "CREATE",
-    "target": "inventory",
-    "detail": "입고 내역 등록 (ID: f691bfbf-c70b-4285-86d0-e6fcc6c9a468)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1791249879208-j74viw",
-    "createdAt": "2026-10-06T01:24:39.208Z"
-  },
-  {
-    "action": "DELETE",
-    "target": "document",
-    "detail": "우리하이피0002.pdf (문서 ID 229c196f-b98b-408b-8cf1-a80c93a33fa7)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928927135-ji46dp",
-    "createdAt": "2026-10-02T08:15:27.135Z"
-  },
-  {
-    "action": "DELETE",
-    "target": "inventory",
-    "detail": "입고 내역 삭제 (ID: 480cb88f-4fd6-49e3-b955-eb7512f7a5dd)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928918831-q0q1dx",
-    "createdAt": "2026-10-02T08:15:18.831Z"
+    "detail": "에스코넥_20261006-1_DUMMY-D938468_성적서.pdf (에스코넥/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791328727030-fynjrj",
+    "createdAt": "2026-10-06T23:18:47.030Z"
   },
   {
     "action": "UPLOAD",
     "target": "document",
-    "detail": "우리하이피0002.pdf (넥스플러스/성적서)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928903174-p8i6vm",
-    "createdAt": "2026-10-02T08:15:03.174Z"
+    "detail": "에스코넥_20261002-1_DUMMY-D9787447_성적서.pdf (에스코넥/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791243233859-2yned8",
+    "createdAt": "2026-10-05T23:33:53.859Z"
   },
   {
-    "action": "CREATE",
-    "target": "inventory",
-    "detail": "입고 내역 등록 (ID: 480cb88f-4fd6-49e3-b955-eb7512f7a5dd)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928883875-olz9tm",
-    "createdAt": "2026-10-02T08:14:43.875Z"
-  },
-  {
-    "action": "DELETE",
-    "target": "inventory",
-    "detail": "입고 내역 삭제 (ID: 70afbedf-c7b1-4acd-a2d6-15b932f5cf26)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928868982-ozspew",
-    "createdAt": "2026-10-02T08:14:28.982Z"
-  },
-  {
-    "action": "CREATE",
-    "target": "inventory",
-    "detail": "입고 내역 등록 (ID: 70afbedf-c7b1-4acd-a2d6-15b932f5cf26)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928852775-tqe6ne",
-    "createdAt": "2026-10-02T08:14:12.775Z"
-  },
-  {
-    "action": "DELETE",
-    "target": "inventory",
-    "detail": "입고 내역 삭제 (ID: 6d8ddd45-28e9-4941-95ef-8a4a171adf4e)",
-    "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
-    "userName": "나우인",
-    "id": "1790928842380-nijjzk",
-    "createdAt": "2026-10-02T08:14:02.380Z"
-  },
-  {
-    "action": "DELETE",
+    "action": "UPLOAD",
     "target": "document",
-    "detail": "수기입력 (파일없음) (문서 ID cf0443a2-d2b2-43f6-a674-aae93345a9c9)",
+    "detail": "에스코넥_20261002-1_DUMMY-D9257325_성적서.pdf (에스코넥/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791242966253-ixav0b",
+    "createdAt": "2026-10-05T23:29:26.253Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "호연이엔지_20261003-1~48_HOLD DOWN PIN_성적서.pdf (호연이엔지/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791242660630-sw9q4y",
+    "createdAt": "2026-10-05T23:24:20.630Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "나담테크_20261002-1_대창 BUSBAR 02_성적서.pdf (나담테크/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791242247390-x70pcl",
+    "createdAt": "2026-10-05T23:17:27.390Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "나담테크_20261002-1_대창 BUSBAR 01_성적서.pdf (나담테크/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1791242200848-lgks98",
+    "createdAt": "2026-10-05T23:16:40.848Z"
+  },
+  {
+    "action": "UPLOAD",
+    "target": "document",
+    "detail": "캠아이티_20261002-1_BP CONNECTOR CONTACT(4mm)_성적서.pdf (캠아이티/성적서)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926696482-p8ykcd",
+    "createdAt": "2026-10-02T07:38:16.482Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "specifications: Au: 0.1㎛~ / Nip: 2.5~4.5㎛",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926687071-vojyo6",
+    "createdAt": "2026-10-02T07:38:07.071Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "products: BP CONNECTOR CONTACT(4mm)",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926654258-5g4z9d",
+    "createdAt": "2026-10-02T07:37:34.258Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "materials: Bronze",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926608858-pcnj2e",
+    "createdAt": "2026-10-02T07:36:48.858Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "products: Au: 0.1㎛~ / Nip: 2.5~4.5㎛",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926595090-dapew6",
+    "createdAt": "2026-10-02T07:36:35.090Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "companies: 캠아이티",
+    "userId": "d2964b88-f155-4d0f-b095-42b6bbfc324c",
+    "userName": "고은채",
+    "id": "1790926535406-z48166",
+    "createdAt": "2026-10-02T07:35:35.406Z"
+  },
+  {
+    "action": "CREATE",
+    "target": "config",
+    "detail": "shipment-categories: 방열판",
     "userId": "5dab2439-baeb-4ca6-8839-c24435cf6bfc",
     "userName": "나우인",
-    "id": "1790922169256-q144a2",
-    "createdAt": "2026-10-02T06:22:49.256Z"
+    "id": "1790911436987-ctvamt",
+    "createdAt": "2026-10-02T03:23:56.987Z"
   },
   {
     "action": "DELETE",
